@@ -1,0 +1,41 @@
+@layer components {
+  .card {
+    @apply bg-neutral-200 dark:bg-neutral-700 p-2 rounded-lg;
+  }
+
+  .card-container {
+    @apply relative rounded-md overflow-hidden;
+  }
+
+  .card-container img {
+    @apply rounded-md;
+  }
+
+  .card-container h4 {
+    @apply absolute z-2 left-2 bottom-2 text-lg font-semibold text-neutral-50 transition-all duration-400;
+  }
+
+  .card:hover .card-container h4 {
+    @apply bottom-4;
+  }
+
+  .card-container::before {
+    @apply absolute z-2 left-2 bottom-2 h-1 w-0 bg-neutral-50 rounded-md transition-all duration-400;
+    content: "";
+  }
+
+  .card:hover .card-container::before {
+    @apply w-24;
+  }
+
+  .card-container::after {
+    @apply absolute bottom-0 left-0 w-full h-12 z-1 blur-sm;
+    content: "";
+    background: linear-gradient(
+      10deg,
+      var(--color-neutral-950) 0%,
+      transparent 60%,
+      transparent 100%
+    );
+  }
+}
