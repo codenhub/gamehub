@@ -1,14 +1,18 @@
 @layer components {
   .card {
-    @apply bg-neutral-200 dark:bg-neutral-700 p-2 rounded-lg;
+    @apply bg-neutral-300 dark:bg-neutral-700 p-1 rounded-lg;
   }
 
   .card-container {
-    @apply relative rounded-md overflow-hidden;
+    @apply relative rounded-md h-48 overflow-hidden;
   }
 
   .card-container img {
-    @apply rounded-md;
+    @apply rounded-md object-cover transition duration-800;
+  }
+
+  .card:hover .card-container img {
+    @apply scale-110 duration-400;
   }
 
   .card-container h4 {
@@ -29,12 +33,12 @@
   }
 
   .card-container::after {
-    @apply absolute bottom-0 left-0 w-full h-12 z-1 blur-sm;
+    @apply absolute bottom-0 left-0 w-full h-16 z-1 blur-xs;
     content: "";
     background: linear-gradient(
       10deg,
       var(--color-neutral-950) 0%,
-      transparent 60%,
+      transparent 80%,
       transparent 100%
     );
   }
