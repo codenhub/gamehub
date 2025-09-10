@@ -18,6 +18,6 @@
   }
 
   button {
-    @apply cursor-pointer outline-none;
+    @apply [&:not(:disabled)]:cursor-pointer;
   }
 }

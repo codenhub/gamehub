@@ -2,6 +2,8 @@
   "name": "gamehub",
   "version": "1.0.0",
   "description": "",
+  "author": "Coden Agency",
+  "license": "ISC",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -9,8 +11,6 @@
     "lint:check": "prettier --check .",
     "lint:fix": "prettier --write ."
   },
-  "author": "Coden Agency",
-  "license": "ISC",
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "prettier": "^3.6.2",

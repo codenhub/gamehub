@@ -66,11 +66,14 @@ function playerReset() {
   player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
   player.pos.y = 0;
   player.pos.x = ((COLS / 2) | 0) - ((player.matrix[0].length / 2) | 0);
+  // record spawn time to avoid accidental immediate input (touch/click) moving the piece
+  player.spawnTime =
+    typeof performance !== "undefined" ? performance.now() : Date.now();
   if (collide(arena, player)) {
+    // when spawn collides, clear arena and reset score/lines but keep game running (infinite)
     arena.forEach((row) => row.fill(0));
     score = 0;
     lines = 0;
-    level = 0;
     updateUI();
   }
 }
@@ -126,7 +129,6 @@ let lastTime = 0;
 
 let score = 0;
 let lines = 0;
-let level = 0;
 
 function arenaSweep() {
   let rowCount = 1;
@@ -137,12 +139,16 @@ function arenaSweep() {
     const row = arena.splice(y, 1)[0].fill(0);
     arena.unshift(row);
     y++;
-    score += 10 * rowCount;
+    // increase points exponentially for multiple clears
+    const pointsGained = 50 * rowCount;
+    score += pointsGained;
     lines += 1;
     rowCount *= 2;
+    // gradually increase speed every X lines cleared
+    if (lines % 5 === 0) {
+      dropInterval = Math.max(80, dropInterval - 80);
+    }
   }
-  level = Math.floor(lines / 10);
-  dropInterval = Math.max(100, 1000 - level * 100);
 }
 
 function drawMatrix(matrix, offset) {
@@ -170,7 +176,6 @@ function draw() {
 function updateUI() {
   document.getElementById("score").textContent = score;
   document.getElementById("lines").textContent = lines;
-  document.getElementById("level").textContent = level;
 }
 
 function playerDrop() {
@@ -224,9 +229,10 @@ let paused = false;
 
 function start() {
   if (requestId) cancelAnimationFrame(requestId);
-  lastTime = 0;
+  // resume the loop without resetting dynamic speed; set lastTime to now to avoid huge delta
+  lastTime =
+    typeof performance !== "undefined" ? performance.now() : Date.now();
   dropCounter = 0;
-  dropInterval = 1000;
   paused = false;
   requestId = requestAnimationFrame(update);
 }
@@ -235,13 +241,18 @@ function restart() {
   for (let y = 0; y < arena.length; y++) arena[y].fill(0);
   score = 0;
   lines = 0;
-  level = 0;
   updateUI();
   playerReset();
+  // reset to base speed and start
+  dropInterval = 1000;
   start();
 }
 
 document.addEventListener("keydown", (event) => {
+  // ignore accidental inputs immediately after spawn (mobile taps that target other controls)
+  const now =
+    typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (player.spawnTime && now - player.spawnTime < 120) return;
   if (event.code === "ArrowLeft") playerMove(-1);
   else if (event.code === "ArrowRight") playerMove(1);
   else if (event.code === "ArrowDown") playerDrop();
@@ -264,7 +275,70 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// Wire buttons for mobile/touch
+document.getElementById("btn-left").addEventListener("click", () => {
+  const now =
+    typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (player.spawnTime && now - player.spawnTime < 120) return;
+  playerMove(-1);
+});
+document.getElementById("btn-right").addEventListener("click", () => {
+  const now =
+    typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (player.spawnTime && now - player.spawnTime < 120) return;
+  playerMove(1);
+});
+document.getElementById("btn-rotate").addEventListener("click", () => {
+  const now =
+    typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (player.spawnTime && now - player.spawnTime < 120) return;
+  playerRotate(1);
+});
+document.getElementById("btn-down").addEventListener("click", () => {
+  playerDrop();
+});
+document.getElementById("btn-drop").addEventListener("click", () => {
+  while (!collide(arena, player)) player.pos.y++;
+  player.pos.y--;
+  merge(arena, player);
+  playerReset();
+  arenaSweep();
+  updateUI();
+});
+document.getElementById("btn-pause").addEventListener("click", () => {
+  if (paused) start();
+  else {
+    paused = true;
+    cancelAnimationFrame(requestId);
+    requestId = null;
+  }
+});
+
 document.getElementById("startBtn").addEventListener("click", start);
 document.getElementById("restartBtn").addEventListener("click", restart);
+
+// touch support for mobile swipes (simple)
+let touchStartX = null;
+let touchStartY = null;
+canvas.addEventListener("touchstart", (e) => {
+  const t = e.touches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+});
+canvas.addEventListener("touchend", (e) => {
+  if (touchStartX === null) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 20) playerMove(1);
+    else if (dx < -20) playerMove(-1);
+  } else {
+    if (dy > 30) playerDrop();
+    else if (dy < -30) playerRotate(1);
+  }
+  touchStartX = null;
+  touchStartY = null;
+});
 
 updateUI();

@@ -1,15 +1,10 @@
 // DEFAULT THEME
 const theme = localStorage.getItem("theme");
-if (theme === "dark") {
-  document.documentElement.classList.toggle("dark", true);
-} else {
-  document.documentElement.classList.toggle("dark", false);
-}
+document.documentElement.classList.toggle("dark", theme === "dark");
 
-// THEME TOGGLE
 document.addEventListener("DOMContentLoaded", () => {
+  // THEME TOGGLE
   const themeToggle = document.getElementById("theme-toggle");
-
   themeToggle?.addEventListener("click", () => {
     document.documentElement.classList.toggle("dark");
     localStorage.setItem(
@@ -17,4 +12,5 @@ document.addEventListener("DOMContentLoaded", () => {
       document.documentElement.classList.contains("dark") ? "dark" : "light",
     );
   });
+  // END THEME TOGGLE
 });

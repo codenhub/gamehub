@@ -1,2 +1,5 @@
-# Modules and dependencies
+# Libraries and dependencies
 node_modules/
+
+# Build output
+dist/

@@ -7,44 +7,69 @@
 
 .game-wrapper {
   display: flex;
-  gap: 24px;
+  flex: 1;
+  height: 100%;
+  gap: 16px;
   align-items: flex-start;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .game-canvas {
+  display: flex;
   background: linear-gradient(180deg, #071021 0%, #081428 100%);
-  padding: 12px;
+  padding: 8px;
   border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.7);
 }
 
 canvas#tetris {
-  display: block;
+  display: flex;
+  flex: 1;
   background: #06111b;
   image-rendering: pixelated;
   border-radius: 4px;
+  width: 100%;
 }
 
 .game-panel {
   background: var(--panel);
-  padding: 16px;
+  padding: 12px;
   border-radius: 8px;
-  min-width: 200px;
+  min-width: 180px;
+  box-sizing: border-box;
 }
 
 .game-panel h2 {
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
+  font-size: 18px;
 }
 .stats {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--muted);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .controls {
   font-size: 13px;
   color: var(--muted);
   margin-bottom: 12px;
+}
+.controls-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.controls-grid button {
+  flex: 1 1 30%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 0;
+  background: #0ea5e9;
+  color: #04202a;
+  font-size: 16px;
+}
+
+.game-panel .stats div {
+  margin-bottom: 6px;
 }
 .controls ul {
   padding-left: 18px;
@@ -97,4 +122,40 @@ canvas#tetris {
 
 .empty {
   background: transparent;
+}
+
+/* Responsive rules */
+
+@media (max-width: 900px) {
+  .game-wrapper {
+    gap: 12px;
+  }
+  .game-canvas {
+    flex: 0 1 260px;
+  }
+  .game-panel {
+    flex: 1 1 180px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .game-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .game-canvas {
+    order: 1;
+  }
+  .game-panel {
+    order: 2;
+  }
+  .controls-grid button {
+    flex: 1 1 30%;
+    padding: 10px;
+    font-size: 14px;
+  }
+  .buttons button {
+    padding: 8px;
+  }
 }
