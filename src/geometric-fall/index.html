@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,38 +8,107 @@
     <title>Geometric fall | GameHub</title>
   </head>
   <body>
-    <gamehub-header></gamehub-header>
     <!-- HEADER -->
+    <gamehub-header title="Geometric fall"></gamehub-header>
 
-    <main class="flex w-full justify-center p-4">
+    <main class="flex flex-1 size-full justify-center p-4">
       <!-- GAME CONTAINER -->
-      <section class="max-w-7xl w-full h-full">
-        <div class="game-wrapper">
-          <div class="game-canvas">
-            <canvas id="tetris" width="300" height="600"></canvas>
+      <section
+        class="flex flex-1 max-w-7xl w-full h-auto gap-4 max-sm:flex-col max-sm:items-center"
+      >
+        <div class="game-container sm:max-w-lg h-full">
+          <div
+            class="absolute top-0 inset-x-0 flex items-center justify-between p-2"
+          >
+            <div class="flex gap-2">
+              <gamehub-button id="play" icon="play"></gamehub-button>
+              <gamehub-button
+                id="pause"
+                icon="pause"
+                class="hidden"
+              ></gamehub-button>
+              <gamehub-button
+                id="stop"
+                icon="stop"
+                class="hidden"
+              ></gamehub-button>
+              <!-- <gamehub-button id="settings" icon="settings"></gamehub-button> -->
+            </div>
+            <p>Score: 894</p>
           </div>
-          <aside class="game-panel">
-            <h2>Geometric Fall</h2>
-            <div class="stats">
-              <div>Score: <span id="score">0</span></div>
-              <div>Lines: <span id="lines">0</span></div>
-            </div>
-            <div class="controls">
-              <h3>Controls</h3>
-              <div class="controls-grid">
-                <button id="btn-left" aria-label="left">◀</button>
-                <button id="btn-rotate" aria-label="rotate">⤴</button>
-                <button id="btn-right" aria-label="right">▶</button>
-                <button id="btn-down" aria-label="down">▼</button>
-                <button id="btn-drop" aria-label="drop">⭳</button>
-                <button id="btn-pause" aria-label="pause">II</button>
-              </div>
-            </div>
-            <div class="buttons">
-              <button id="startBtn">Start</button>
-              <button id="restartBtn">Restart</button>
-            </div>
-          </aside>
+          <canvas id="game" class="flex size-full"></canvas>
+        </div>
+
+        <!-- DESKTOP CONTROLS -->
+        <div class="hidden flex-col gap-4 sm:flex">
+          <div class="flex gap-4">
+            <gamehub-button
+              class="dropBtn"
+              icon="arrowDrop"
+              size="lg"
+            ></gamehub-button>
+            <gamehub-button
+              class="rotateRightBtn"
+              icon="rotateRight"
+              size="lg"
+            ></gamehub-button>
+            <gamehub-button
+              class="rotateLeftBtn"
+              icon="rotateLeft"
+              size="lg"
+            ></gamehub-button>
+          </div>
+          <div class="flex gap-4">
+            <gamehub-button
+              class="downBtn"
+              icon="arrowDown"
+              size="lg"
+            ></gamehub-button>
+            <gamehub-button
+              class="leftBtn"
+              icon="arrowLeft"
+              size="lg"
+            ></gamehub-button>
+            <gamehub-button
+              class="rightBtn"
+              icon="arrowRight"
+              size="lg"
+            ></gamehub-button>
+          </div>
+        </div>
+
+        <!-- MOBILE CONTROLS -->
+        <div class="flex w-full justify-center gap-4 sm:hidden">
+          <gamehub-button
+            class="dropBtn flex-1 w-full"
+            icon="arrowDrop"
+            size="md"
+          ></gamehub-button>
+          <gamehub-button
+            class="rotateRightBtn flex-1 w-full"
+            icon="rotateRight"
+            size="md"
+          ></gamehub-button>
+          <gamehub-button
+            class="rotateLeftBtn flex-1 w-full"
+            icon="rotateLeft"
+            size="md"
+          ></gamehub-button>
+          <gamehub-button
+            class="downBtn flex-1 w-full"
+            icon="arrowDown"
+            size="md"
+          ></gamehub-button>
+          <gamehub-button
+            class="leftBtn flex-1 w-full"
+            icon="arrowLeft"
+            size="md"
+          ></gamehub-button>
+          <gamehub-button
+            class="flex-1 w-full"
+            icon="rightBtn arrowRight"
+            size="md"
+          ></gamehub-button>
         </div>
       </section>
     </main>
@@ -48,7 +117,6 @@
     <script src="../_ui/components/index.js" type="module"></script>
 
     <!-- SCRIPTS -->
-    <link rel="stylesheet" href="./index.css" />
     <script src="./index.js" type="module"></script>
   </body>
 </html>

@@ -1,0 +1,47 @@
+@reference "./_ui/main.css";
+
+@layer components {
+  .card {
+    @apply bg-neutral-300 dark:bg-neutral-700 p-1 rounded-lg;
+  }
+
+  .card-container {
+    @apply relative rounded-md h-48 overflow-hidden;
+  }
+
+  .card-container img {
+    @apply rounded-md object-cover transition duration-800;
+  }
+
+  .card:hover .card-container img {
+    @apply scale-110 duration-400;
+  }
+
+  .card-container h4 {
+    @apply absolute z-2 left-2 bottom-2 text-lg font-semibold text-neutral-50 transition-all duration-400;
+  }
+
+  .card:hover .card-container h4 {
+    @apply bottom-4;
+  }
+
+  .card-container::before {
+    @apply absolute z-2 left-2 bottom-2 h-1 w-0 bg-neutral-50 rounded-md transition-all duration-400;
+    content: "";
+  }
+
+  .card:hover .card-container::before {
+    @apply w-24;
+  }
+
+  .card-container::after {
+    @apply absolute bottom-0 left-0 w-full h-16 z-1 blur-xs;
+    content: "";
+    background: linear-gradient(
+      10deg,
+      var(--color-neutral-950) 0%,
+      transparent 80%,
+      transparent 100%
+    );
+  }
+}
