@@ -44,34 +44,59 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // GAME CONTROLS
-  const moveDownBtn = document.querySelector(".downBtn");
-  const moveLeftBtn = document.querySelector(".leftBtn");
-  const moveRightBtn = document.querySelector(".rightBtn");
-  const rotateLeftBtn = document.querySelector(".rotateLeftBtn");
-  const rotateRightBtn = document.querySelector(".rotateRightBtn");
-  const dropPieceBtn = document.querySelector(".dropBtn");
+  const moveDownBtns = document.querySelectorAll(".downBtn");
+  const moveLeftBtns = document.querySelectorAll(".leftBtn");
+  const moveRightBtns = document.querySelectorAll(".rightBtn");
+  const rotateLeftBtns = document.querySelectorAll(".rotateLeftBtn");
+  const rotateRightBtns = document.querySelectorAll(".rotateRightBtn");
+  const dropPieceBtns = document.querySelectorAll(".dropBtn");
 
-  moveDownBtn.addEventListener("click", () => {
-    if (state === "playing") moveDown();
+  moveDownBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (state === "playing") moveDown();
+    });
+  });
+  moveLeftBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (state === "playing") moveLeft();
+    });
+  });
+  moveRightBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (state === "playing") moveRight();
+    });
+  });
+  rotateLeftBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (state === "playing") rotateLeft();
+    });
+  });
+  rotateRightBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (state === "playing") rotateRight();
+    });
+  });
+  dropPieceBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (state === "playing") dropPiece();
+    });
   });
 
-  moveLeftBtn.addEventListener("click", () => {
-    if (state === "playing") moveLeft();
-  });
-
-  moveRightBtn.addEventListener("click", () => {
-    if (state === "playing") moveRight();
-  });
-
-  rotateLeftBtn.addEventListener("click", () => {
-    if (state === "playing") rotateLeft();
-  });
-
-  rotateRightBtn.addEventListener("click", () => {
-    if (state === "playing") rotateRight();
-  });
-
-  dropPieceBtn.addEventListener("click", () => {
-    if (state === "playing") dropPiece();
+  // KEYBOARD CONTROLS
+  document.addEventListener("keydown", (e) => {
+    const keyMap = {
+      ArrowUp: rotateRight,
+      ArrowDown: moveDown,
+      ArrowLeft: moveLeft,
+      ArrowRight: moveRight,
+      KeyZ: rotateLeft,
+      KeyX: rotateRight,
+      Space: dropPiece,
+    };
+    const action = keyMap[e.code];
+    if (action) {
+      e.preventDefault();
+      if (state === "playing") action();
+    }
   });
 });
