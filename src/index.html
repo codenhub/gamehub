@@ -1,34 +1,32 @@
 <!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./_ui/main.css" />
+    <link rel="stylesheet" href="./index.css" />
+    <script type="module" src="./_ui/main.ts"></script>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <title>GameHub</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="./_ui/main.css" />
-  <link rel="stylesheet" href="./index.css" />
-  <script type="module" src="./_ui/main.js"></script>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-  <title>GameHub</title>
-</head>
+  <body>
+    <gamehub-header></gamehub-header>
 
-<body>
-  <gamehub-header></gamehub-header>
+    <main class="flex w-full justify-center p-4">
+      <section class="max-w-7xl w-full gap-4 grid grid-cols-4 mt-8">
+        <a href="/geometric-fall/" class="card">
+          <div class="card-container">
+            <img src="/assets/games/geometric-fall.webp" alt="Game picture" />
+            <h4>Geometric fall</h4>
+          </div>
+        </a>
+      </section>
+    </main>
 
-  <main class="flex w-full justify-center p-4">
-    <section class="max-w-7xl w-full gap-4 grid grid-cols-4 mt-8">
-      <a href="/geometric-fall/" class="card">
-        <div class="card-container">
-          <img src="/assets/games/geometric-fall.webp" alt="Game picture" />
-          <h4>Geometric fall</h4>
-        </div>
-      </a>
-    </section>
-  </main>
+    <gamehub-watermark></gamehub-watermark>
 
-  <gamehub-watermark></gamehub-watermark>
-
-  <!-- COMPONENTS -->
-  <script src="./_ui/components/index.js" type="module"></script>
-</body>
-
+    <!-- COMPONENTS -->
+    <script src="./_ui/components/index.ts" type="module"></script>
+  </body>
 </html>

@@ -1,4 +1,19 @@
-const icons = {
+// Tipos para ícones e tamanhos
+type IconName =
+  | "settings"
+  | "play"
+  | "pause"
+  | "stop"
+  | "rotateLeft"
+  | "rotateRight"
+  | "arrowLeft"
+  | "arrowRight"
+  | "arrowDown"
+  | "arrowDrop";
+
+type SizeName = "sm" | "md" | "lg";
+
+const icons: Record<IconName, string> = {
   settings: `<svg viewBox="0 0 800 800" fill="currentColor">
     <path d="m690 300.6l-14-32.3c46.5-105.3 43.5-108.4 34.4-117.6l-58.7-58.3-5.9-4.9h-6.9c-3.6 0-13.9 0-105 41l-33.2-14c-43.5-106-48-106-60.6-106h-83.9c-12.6 0-17.5 0-57.3 107.1l-33.1 14q-92.3-39.4-107-39.4h-7.8l-64.1 62.7c-9.8 9.1-13.1 12.3 36.1 116.1l-14 32.1c-108.9 42-108.9 46.2-108.9 59.2v82.3c0 12.9 0 17.5 109.3 56l14 32c-46.5 105.3-43.5 108.5-34.4 117.6l59.3 59.4 5.9 5.2h7c3.5 0 14 0 104.8-42l33.3 14c43.4 106.7 47.7 106.7 60.4 106.7h83.9c12.9 0 17.5 0 57.5-107.1l33.4-14c61.1 25.9 96.9 39 106.4 39h8l64.6-63.2c9.2-9.2 12.4-12.4-36.7-115.8l14-32.1c109.2-42 109.2-46.6 109.2-59.2v-82c-0.6-13-0.6-17.5-110-56.5zm-290 236.4c-55.2-1.1-104.3-35.2-124.6-86.5-20.3-51.3-7.9-109.7 31.5-148.3 39.4-38.6 98.1-49.9 148.9-28.5 50.9 21.4 84 71.1 84 126.3-0.2 18.2-4 36.1-11.1 52.8-7.1 16.8-17.5 31.9-30.5 44.6-12.9 12.7-28.3 22.8-45.2 29.6-16.8 6.8-34.8 10.2-53 10z"/>
   </svg>`,
@@ -37,24 +52,30 @@ const icons = {
     <path d="m13 133.7c-17.3 17.3-17.3 45.3 0 62.6l294.5 294.6c52 51.9 136.1 51.9 188.1 0l291.5-291.2c17.3-17.3 17.3-45.4 0-62.7-17.4-17.3-45.4-17.3-62.7 0l-291.4 291.3c-17.3 17.3-45.4 17.3-62.7 0l-294.6-294.6c-17.3-17.4-45.4-17.4-62.7 0z"/>
   </svg>`,
 };
-const sizes = {
+const sizes: Record<SizeName, string> = {
   sm: "p-2 h-8 min-w-8 gap-1",
   md: "p-2 h-10 min-w-10 gap-2",
   lg: "p-3 h-12 min-w-12 gap-2",
 };
 
 class IconButton extends HTMLElement {
-  connectedCallback() {
-    const icon = icons[this.getAttribute("icon")] || "";
-    const size = sizes[this.getAttribute("size")] || sizes["sm"];
-    const content = this.innerHTML.trim();
-    const classList = this.getAttribute("class")?.trim() || "";
-    const id = this.getAttribute("id")?.trim() || "";
+  connectedCallback(): void {
+    const iconName = this.getAttribute("icon") as IconName | null;
+    const sizeName = this.getAttribute("size") as SizeName | null;
 
-    this.outerHTML = `<button id="${id}" class="flex items-center justify-center rounded-sm ${size} bg-neutral-200 dark:bg-neutral-700 ${classList}">
-      <div class="flex h-full aspect-quare">${icon}</div>
-      ${content}
-    </button>`;
+    const icon = (iconName && icons[iconName]) || "";
+    const size = (sizeName && sizes[sizeName]) || sizes.sm;
+
+    const content = this.innerHTML.trim();
+    const classList = this.getAttribute("class")?.trim() ?? "";
+    const id = this.getAttribute("id")?.trim() ?? "";
+
+    this.outerHTML = `
+      <button id="${id}"
+        class="flex items-center justify-center rounded-sm ${size} bg-neutral-200 dark:bg-neutral-700 ${classList}">
+        <div class="flex h-full aspect-square">${icon}</div>
+        ${content}
+      </button>`;
   }
 }
 
