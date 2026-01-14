@@ -1,3 +1,3 @@
+import "./footer.ts";
 import "./header.ts";
-import "./watermark.ts";
 import "./button.ts";

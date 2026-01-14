@@ -1,19 +1,14 @@
 @layer base {
-  * {
-    @apply text-neutral-950 dark:text-neutral-50;
-    scroll-behavior: smooth;
-  }
-
   html,
   body {
-    @apply flex flex-col min-h-screen w-full overflow-x-hidden;
-  }
-
-  body {
-    @apply bg-neutral-50 dark:bg-neutral-950;
+    @apply flex flex-col min-h-screen overflow-x-hidden bg-background;
   }
 
   button {
-    @apply [&:not(:disabled)]:cursor-pointer;
+    @apply not-disabled:cursor-pointer;
+  }
+
+  img {
+    user-select: none;
   }
 }

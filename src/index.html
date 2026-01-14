@@ -3,15 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>GameHub</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="./_ui/main.css" />
     <link rel="stylesheet" href="./index.css" />
-    <script type="module" src="./_ui/main.ts"></script>
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-    <title>GameHub</title>
+    <script src="./_ui/main.ts"></script>
+    <script src="./_ui/components/index.ts" type="module" defer></script>
   </head>
 
   <body>
-    <gamehub-header></gamehub-header>
+    <gh-header></gh-header>
 
     <main class="flex w-full justify-center p-4">
       <section class="max-w-7xl w-full gap-4 grid grid-cols-4 mt-8">
@@ -24,9 +26,6 @@
       </section>
     </main>
 
-    <gamehub-watermark></gamehub-watermark>
-
-    <!-- COMPONENTS -->
-    <script src="./_ui/components/index.ts" type="module"></script>
+    <gh-footer></gh-footer>
   </body>
 </html>
