@@ -22,8 +22,8 @@
     calc(--value(integer) * 1px) calc(--value(integer) * 2px),
     calc(--value(integer) * 1px) calc(--value(integer) * 1px),
     calc(--value(integer) * 2px) calc(--value(integer) * 1px),
-    calc(--value(integer) * 2px) 0,
-    calc(100% - calc(--value(integer) * 2px)) 0,
+    calc(--value(integer) * 2px) 0%,
+    calc(100% - calc(--value(integer) * 2px)) 0%,
     calc(100% - calc(--value(integer) * 2px)) calc(--value(integer) * 1px),
     calc(100% - calc(--value(integer) * 1px)) calc(--value(integer) * 1px),
     calc(100% - calc(--value(integer) * 1px)) calc(--value(integer) * 2px),
@@ -44,15 +44,45 @@
   );
 }
 
+@utility pixel-corner-xl-* {
+  clip-path: polygon(
+    0% calc(--value(integer) * 4px),
+    calc(--value(integer) * 1px) calc(--value(integer) * 4px),
+    calc(--value(integer) * 1px) calc(--value(integer) * 2px),
+    calc(--value(integer) * 2px) calc(--value(integer) * 2px),
+    calc(--value(integer) * 2px) calc(--value(integer) * 1px),
+    calc(--value(integer) * 4px) calc(--value(integer) * 1px),
+    calc(--value(integer) * 4px) 0%,
+    calc(100% - calc(--value(integer) * 4px)) 0%,
+    calc(100% - calc(--value(integer) * 4px)) calc(--value(integer) * 1px),
+    calc(100% - calc(--value(integer) * 2px)) calc(--value(integer) * 1px),
+    calc(100% - calc(--value(integer) * 2px)) calc(--value(integer) * 2px),
+    calc(100% - calc(--value(integer) * 1px)) calc(--value(integer) * 2px),
+    calc(100% - calc(--value(integer) * 1px)) calc(--value(integer) * 4px),
+    100% calc(--value(integer) * 4px),
+    100% calc(100% - calc(--value(integer) * 4px)),
+    calc(100% - calc(--value(integer) * 1px))
+      calc(100% - calc(--value(integer) * 4px)),
+    calc(100% - calc(--value(integer) * 1px))
+      calc(100% - calc(--value(integer) * 2px)),
+    calc(100% - calc(--value(integer) * 2px))
+      calc(100% - calc(--value(integer) * 2px)),
+    calc(100% - calc(--value(integer) * 2px))
+      calc(100% - calc(--value(integer) * 1px)),
+    calc(100% - calc(--value(integer) * 4px))
+      calc(100% - calc(--value(integer) * 1px)),
+    calc(100% - calc(--value(integer) * 4px)) 100%,
+    calc(--value(integer) * 4px) 100%,
+    calc(--value(integer) * 4px) calc(100% - calc(--value(integer) * 1px)),
+    calc(--value(integer) * 2px) calc(100% - calc(--value(integer) * 1px)),
+    calc(--value(integer) * 2px) calc(100% - calc(--value(integer) * 2px)),
+    calc(--value(integer) * 1px) calc(100% - calc(--value(integer) * 2px)),
+    calc(--value(integer) * 1px) calc(100% - calc(--value(integer) * 4px)),
+    0% calc(100% - calc(--value(integer) * 4px))
+  );
+}
+
 @layer components {
-  .border-card {
-    @apply bg-border relative pixel-corner-lg-6 w-48 h-64 p-4 z-0 before:absolute before:inset-1.5 before:pixel-corner-lg-6 before:bg-primary before:z-0;
-
-    & * {
-      @apply relative z-1;
-    }
-  }
-
   .primary-btn {
     @apply bg-primary py-2 px-6 pixel-corner-4 text-primary-contrast text-xl leading-none font-default;
   }
