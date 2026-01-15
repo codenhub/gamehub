@@ -21,7 +21,7 @@
       }
 
       &::after {
-        @apply absolute bottom-0 left-0 w-full h-16 z-1 blur-xs;
+        @apply absolute -bottom-2 -left-2 w-full h-20 z-1 blur-xs;
         content: "";
         background: linear-gradient(
           10deg,
