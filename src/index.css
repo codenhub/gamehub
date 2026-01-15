@@ -12,11 +12,11 @@
       }
 
       & h4 {
-        @apply absolute z-2 left-4 bottom-2 text-text transition-all duration-400;
+        @apply absolute z-2 left-4 bottom-2 text-neutral-50 transition-all duration-400;
       }
 
       &::before {
-        @apply absolute z-2 left-4 bottom-4 h-1 w-0 bg-text transition-all duration-400;
+        @apply absolute z-2 left-4 bottom-4 h-1 w-0 bg-neutral-50 transition-all duration-400;
         content: "";
       }
 
