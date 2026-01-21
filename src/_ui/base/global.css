@@ -1,10 +1,19 @@
+@utility cursor {
+  cursor:
+    url(/assets/cursor.png) 0 0,
+    auto;
+}
+
+@utility cursor-pointer {
+  cursor:
+    url(/assets/cursor-pointer.png) 0 0,
+    auto;
+}
+
 @layer base {
   html,
   body {
-    @apply flex flex-col min-h-screen overflow-x-hidden bg-background;
-    cursor:
-      url(/logo.webp) 0 0,
-      auto;
+    @apply flex flex-col min-h-screen overflow-x-hidden bg-background cursor;
   }
 
   button {
