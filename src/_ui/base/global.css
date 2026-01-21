@@ -1,10 +1,10 @@
-@utility cursor {
+@utility cur-default {
   cursor:
     url(/assets/cursor.png) 0 0,
     auto;
 }
 
-@utility cursor-pointer {
+@utility cur-pointer {
   cursor:
     url(/assets/cursor-pointer.png) 0 0,
     auto;
@@ -13,11 +13,11 @@
 @layer base {
   html,
   body {
-    @apply flex flex-col min-h-screen overflow-x-hidden bg-background cursor;
+    @apply flex flex-col min-h-screen overflow-x-hidden bg-background cur-default;
   }
 
   button {
-    @apply not-disabled:cursor-pointer;
+    @apply not-disabled:cur-pointer;
   }
 
   img {

@@ -56,7 +56,7 @@ export class Header extends HTMLElement {
         class="flex w-full justify-center p-4 border-b-2 border-border"
       >
         <div class="flex max-w-7xl w-full justify-between">
-          <h2 class="font-contrast">${backBtn ? `<a href="/" class="mr-6 cursor-pointer"><</a>` : ""}${title}</h2>
+          <h2 class="font-contrast">${backBtn ? `<a href="/" class="mr-6 cur-pointer"><</a>` : ""}${title}</h2>
           <button id="theme-toggle" class="flex items-center">
             <img
               class="dark:hidden size-6 object-contain text-text"

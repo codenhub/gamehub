@@ -2,7 +2,7 @@
 
 @layer components {
   .card {
-    @apply bg-border pixel-corner-xl-6 p-1 rounded-lg cursor-pointer;
+    @apply bg-border pixel-corner-xl-6 p-1 rounded-lg cur-pointer;
 
     & .card-container {
       @apply relative pixel-corner-xl-6 rounded-md h-48 overflow-hidden;
