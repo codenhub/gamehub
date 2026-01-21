@@ -23,18 +23,25 @@
             class="absolute top-0 inset-x-0 flex items-center justify-between p-2"
           >
             <div class="flex gap-2">
-              <gamehub-button id="play" icon="play"></gamehub-button>
-              <gamehub-button
-                id="pause"
-                icon="pause"
-                class="hidden"
-              ></gamehub-button>
-              <gamehub-button
-                id="stop"
-                icon="stop"
-                class="hidden"
-              ></gamehub-button>
-              <!-- <gamehub-button id="settings" icon="settings"></gamehub-button> -->
+              <button id="play" class="icon-btn">
+                <img
+                  src="/assets/icons/play.webp"
+                  alt="Play icon"
+                  class="size-4"
+                />
+              </button>
+              <button id="pause" class="icon-btn hidden">
+                <div class="flex gap-1">
+                  <div class="bg-accent-contrast h-4 w-1.5"></div>
+                  <div class="bg-accent-contrast h-4 w-1.5"></div>
+                </div>
+              </button>
+              <button id="stop" class="icon-btn hidden">
+                <div
+                  class="bg-accent-contrast size-4"
+                  aria-label="Stop icon"
+                ></div>
+              </button>
             </div>
             <p>Score: 0</p>
           </div>
