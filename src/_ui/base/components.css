@@ -84,10 +84,14 @@
 
 @layer components {
   .primary-btn {
-    @apply bg-primary py-2 px-6 pixel-corner-4 text-primary-contrast text-xl leading-none font-default;
+    @apply bg-primary py-2 px-6 pixel-corner-xl-2 text-primary-contrast text-xl leading-none font-default;
+  }
+
+  .icon-btn {
+    @apply flex bg-accent text-accent-contrast size-8 items-center justify-center aspect-square pixel-corner-3;
   }
 
   .game-container {
-    @apply relative bg-background rounded-sm border-4 border-border;
+    @apply relative bg-background pixel-corner-4 border-4 border-border;
   }
 }
