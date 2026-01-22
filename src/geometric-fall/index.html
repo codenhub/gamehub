@@ -18,9 +18,15 @@
       <section
         class="flex flex-1 max-w-7xl w-full h-auto gap-4 max-sm:flex-col max-sm:items-center"
       >
-        <div class="game-container sm:max-w-lg h-full">
+        <div
+          class="relative bg-border pixel-corner-lg-4 p-1 sm:max-w-lg h-full"
+        >
+          <canvas
+            id="game"
+            class="flex size-full pixel-corner-lg-4 bg-foreground"
+          ></canvas>
           <div
-            class="absolute top-0 inset-x-0 flex items-center justify-between p-2"
+            class="absolute top-0 inset-x-0 flex items-center justify-between p-4"
           >
             <div class="flex gap-2">
               <button id="play" class="icon-btn">
@@ -45,44 +51,55 @@
             </div>
             <p>Score: 0</p>
           </div>
-          <canvas id="game" class="flex size-full"></canvas>
         </div>
 
         <!-- DESKTOP CONTROLS -->
         <div class="hidden flex-col gap-4 sm:flex">
           <div class="flex gap-4">
-            <gamehub-button
-              class="dropBtn"
-              icon="arrowDrop"
-              size="lg"
-            ></gamehub-button>
-            <gamehub-button
-              class="rotateRightBtn"
-              icon="rotateRight"
-              size="lg"
-            ></gamehub-button>
-            <gamehub-button
-              class="rotateLeftBtn"
-              icon="rotateLeft"
-              size="lg"
-            ></gamehub-button>
+            <button class="icon-btn size-12 dropBtn">
+              <img
+                src="/assets/icons/chevron-drop.webp"
+                alt="Drop down icon"
+                class="size-8"
+              />
+            </button>
+            <button class="icon-btn size-12 rotateLeftBtn">
+              <img
+                src="/assets/icons/rotate.webp"
+                alt="Rotate clockwise icon"
+                class="size-8"
+              />
+            </button>
+            <button class="icon-btn size-12 rotateRightBtn">
+              <img
+                src="/assets/icons/rotate-counter.webp"
+                alt="Rotate counter-clockwise icon"
+                class="size-8"
+              />
+            </button>
           </div>
           <div class="flex gap-4">
-            <gamehub-button
-              class="downBtn"
-              icon="arrowDown"
-              size="lg"
-            ></gamehub-button>
-            <gamehub-button
-              class="leftBtn"
-              icon="arrowLeft"
-              size="lg"
-            ></gamehub-button>
-            <gamehub-button
-              class="rightBtn"
-              icon="arrowRight"
-              size="lg"
-            ></gamehub-button>
+            <button class="icon-btn size-12 downBtn">
+              <img
+                src="/assets/icons/chevron-down.webp"
+                alt="Move down icon"
+                class="size-8"
+              />
+            </button>
+            <button class="icon-btn size-12 leftBtn">
+              <img
+                src="/assets/icons/chevron-left.webp"
+                alt="Move left icon"
+                class="size-8"
+              />
+            </button>
+            <button class="icon-btn size-12 rightBtn">
+              <img
+                src="/assets/icons/chevron-right.webp"
+                alt="Move right icon"
+                class="size-8"
+              />
+            </button>
           </div>
         </div>
 
