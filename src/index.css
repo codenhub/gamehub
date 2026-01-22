@@ -8,7 +8,7 @@
       @apply relative pixel-corner-xl-6 rounded-md h-48 overflow-hidden;
 
       & img {
-        @apply rounded-md object-cover transition duration-800;
+        @apply rounded-md object-cover size-full transition duration-800;
       }
 
       & h4 {

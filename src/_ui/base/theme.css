@@ -10,6 +10,8 @@
   --color-foreground: var(--color-neutral-100);
   --color-text: var(--color-neutral-950);
   --color-text-secondary: var(--color-neutral-700);
+
+  --breakpoint-xs: 30rem;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
