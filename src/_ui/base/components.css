@@ -84,7 +84,12 @@
 
 @layer components {
   .primary-btn {
-    @apply bg-primary py-2 px-6 pixel-corner-xl-2 text-primary-contrast text-xl leading-none font-default cur-pointer;
+    @apply relative bg-border py-2 px-6 pixel-corner-xl-2 text-primary-contrast text-xl leading-none font-default cur-pointer;
+
+    &:before {
+      @apply absolute inset-0.5 bg-primary pixel-corner-xl-2 -z-1;
+      content: "";
+    }
   }
 
   .icon-btn {

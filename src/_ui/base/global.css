@@ -16,7 +16,8 @@
     @apply flex flex-col min-h-screen overflow-x-hidden bg-background cur-default;
   }
 
-  button {
+  button,
+  a {
     @apply not-disabled:cur-pointer;
   }
 
