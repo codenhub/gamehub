@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Testing | GameHub</title>
+    <link rel="stylesheet" href="../_ui/main.css" />
+    <script type="module" src="../_ui/main.js"></script>
+    <script src="../_ui/components/index.js" type="module" defer></script>
+    <script src="./index.ts" type="module" defer></script>
+  </head>
+  <body>
+    <gh-header title="Testing" backBtn></gh-header>
+
+    <main class="flex flex-1 size-full justify-center p-4">
+      <section
+        class="flex flex-1 max-w-7xl w-full h-auto gap-4 max-sm:flex-col max-sm:items-center"
+      >
+        <button id="btn" class="primary-btn size-fit">Show alert</button>
+      </section>
+    </main>
+
+    <gh-footer></gh-footer>
+  </body>
+</html>
