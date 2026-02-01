@@ -1,12 +1,10 @@
-import { showAlert } from "../_core/utils/alerts";
+import AudioManager from "../_core/audio";
 
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn");
+  AudioManager.loadSFX("collect");
 
   btn?.addEventListener("click", () => {
-    showAlert({
-      message: "Hello World",
-      type: "success",
-    });
+    AudioManager.playSFX("collect");
   });
 });

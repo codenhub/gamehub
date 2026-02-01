@@ -1,32 +1,10 @@
-import { SFX, SFXId } from "./types";
+export const SFXList = {
+  bonus: "/assets/audios/bonus.ogg",
+  "coin-collect": "/assets/audios/coin-collect.ogg",
+  collect: "/assets/audios/collect.ogg",
+  complete: "/assets/audios/complete.ogg",
+  fail: "/assets/audios/fail.ogg",
+  unlock: "/assets/audios/fail.ogg",
+} as const;
 
-const sfxs: SFX[] = [
-  {
-    id: "bonus",
-    path: "/assets/audios/bonus.ogg",
-  },
-  {
-    id: "coin-collect",
-    path: "/assets/audios/coin-collect.ogg",
-  },
-  {
-    id: "collect",
-    path: "/assets/audios/collect.ogg",
-  },
-  {
-    id: "complete",
-    path: "/assets/audios/complete.ogg",
-  },
-  {
-    id: "fail",
-    path: "/assets/audios/fail.ogg",
-  },
-  {
-    id: "unlock",
-    path: "/assets/audios/fail.ogg",
-  },
-];
-
-const sfxMap = new Map<SFXId, SFX>(sfxs.map((sfx) => [sfx.id, sfx]));
-
-export const getSFX = (id: SFXId) => sfxMap.get(id);
+export type SFXId = keyof typeof SFXList;

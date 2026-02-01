@@ -1,40 +1,58 @@
-import { MusicId, SFXId } from "./types";
+import { MusicId } from "./music";
+import { SFXId } from "./sfx";
+import { MusicContext, SFXContext } from "./context";
 
 class AudioManager {
-  private musicVolume: number = 0;
-  private sfxVolume: number = 0;
-  private currentMusic = null;
-  private currentSFX = [];
-  private playingMusic: boolean = false;
-  private playingSFX: boolean = false;
+  private musicCtx = new MusicContext();
+  private sfxCtx = new SFXContext();
 
-  public setMusicVolume(volume: number) {
-    this.musicVolume = volume;
+  constructor() {
+    this.musicCtx.load("main-soundtrack");
   }
 
-  public setSFXVolume(volume: number) {
-    this.sfxVolume = volume;
+  public async playMusic(musicId: MusicId = "main-soundtrack") {
+    this.musicCtx.play(musicId);
+  }
+
+  public async pauseMusic() {
+    this.musicCtx.pause();
+  }
+
+  public async resumeMusic() {
+    this.musicCtx.resume();
+  }
+
+  public async changeMusic(musicId: MusicId) {
+    this.musicCtx.changeTrack(musicId);
   }
 
   public getMusicVolume() {
-    return this.musicVolume;
+    return this.musicCtx.getVolume();
+  }
+
+  public setMusicVolume(volume: number, ease: boolean = true) {
+    this.musicCtx.setVolume(volume, ease);
+  }
+
+  public async playSFX(sfxId: SFXId) {
+    this.sfxCtx.play(sfxId);
+  }
+
+  public async loadSFX(sfxId: SFXId) {
+    this.sfxCtx.load(sfxId);
+  }
+
+  public async loadMultipleSFX(sfxIds: SFXId[]) {
+    this.sfxCtx.loadMultiple(sfxIds);
   }
 
   public getSFXVolume() {
-    return this.sfxVolume;
+    return this.sfxCtx.getVolume();
   }
 
-  public setMusic(musicId: MusicId, ease: boolean = true) {}
-
-  public playMusic() {}
-
-  public stopMusic() {}
-
-  public playSFX() {}
-
-  public stopSFX() {}
-
-  public stopAllSFX() {}
+  public setSFXVolume(volume: number, ease: boolean = true) {
+    this.sfxCtx.setVolume(volume, ease);
+  }
 }
 
 export default new AudioManager();
