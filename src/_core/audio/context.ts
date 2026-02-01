@@ -16,6 +16,9 @@ export class MusicContext {
   private ctx = new AudioContext();
   private gain = this.ctx.createGain();
   private volume: number = 0.5;
+  private currentTrack: MusicId = "main-soundtrack";
+  private source = this.ctx.createBufferSource();
+  private playing: boolean = false;
 
   private loadedBuffers: LoadedMusicBuffer[] = [];
 
@@ -53,27 +56,40 @@ export class MusicContext {
     await Promise.all(promises);
   }
 
-  public async play(id: MusicId) {
-    const buffer = this.getBuffer(id) || (await this.load(id));
+  public async play(ease: boolean = true) {
+    if (this.playing) throw new Error("Music is already playing");
+    const buffer =
+      this.getBuffer(this.currentTrack) || (await this.load(this.currentTrack));
     if (!buffer) return;
 
-    const source = this.ctx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(this.gain);
-    source.start();
+    this.gain.gain.value = 0;
+    this.source.buffer = buffer;
+    this.source.connect(this.gain);
+    this.source.loop = true;
+    this.source.start();
+    if (ease) {
+      gsap.to(this.gain.gain, { value: this.volume, duration: 1 });
+    } else {
+      this.gain.gain.value = this.volume;
+    }
+    this.playing = true;
   }
 
   public pause() {
     this.ctx.suspend();
+    this.playing = false;
   }
 
   public resume() {
     this.ctx.resume();
+    this.playing = true;
   }
 
-  public changeTrack(id: MusicId) {
+  public changeTrack(id: MusicId, ease: boolean = true) {
     this.pause();
-    this.play(id);
+    this.source.disconnect();
+    this.currentTrack = id;
+    this.play();
     this.resume();
   }
 }

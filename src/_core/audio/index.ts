@@ -11,7 +11,7 @@ class AudioManager {
   }
 
   public async playMusic(musicId: MusicId = "main-soundtrack") {
-    this.musicCtx.play(musicId);
+    this.musicCtx.play(true);
   }
 
   public async pauseMusic() {
