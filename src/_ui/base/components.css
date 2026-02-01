@@ -95,4 +95,13 @@
   .icon-btn {
     @apply flex bg-accent text-accent-contrast size-8 items-center justify-center aspect-square pixel-corner-3 cur-pointer;
   }
+
+  .card {
+    @apply relative bg-border pixel-corner-xl-3;
+
+    &:before {
+      @apply absolute inset-1 bg-foreground pixel-corner-xl-3 -z-1;
+      content: "";
+    }
+  }
 }
