@@ -65,14 +65,14 @@ export class Header extends HTMLElement {
                 src="/assets/icons/volume-high.webp"
                 alt="Speaker icon"
               >
-              <div class="hidden peer-checked:flex pointer-events-none absolute -bottom-4 right-0 translate-y-1/1 card flex-col gap-4 p-6">
+              <div class="hidden peer-checked:flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-1/1 card flex-col gap-4 p-6">
                 <div class="flex items-center gap-4 w-48">
                   <img src="/assets/icons/music.webp" alt="Music icon" class="size-6 object-contain">
-                  <input id="music-volume" type="range" min="0" max="100" value="50" class="w-full cur-default pointer-events-auto">
+                  <input id="music-volume" type="range" min="0" max="100" step="10" value="50" class="w-full cur-default pointer-events-auto">
                 </div>
                 <div class="flex items-center gap-4 w-48">
                   <img src="/assets/icons/volume-high.webp" alt="Sound icon" class="size-6 object-contain">
-                  <input id="sound-volume" type="range" min="0" max="100" value="75" class="w-full cur-default pointer-events-auto">
+                  <input id="sound-volume" type="range" min="0" max="100" step="10" value="75" class="w-full cur-default pointer-events-auto">
                 </div>
               </div>
             </label>

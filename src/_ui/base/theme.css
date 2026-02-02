@@ -20,6 +20,7 @@
   --color-info-contrast: var(--color-neutral-900);
 
   --breakpoint-xs: 30rem;
+  --breakpoint-2xl: 90rem;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

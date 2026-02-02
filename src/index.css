@@ -1,7 +1,7 @@
 @reference "./_ui/main.css";
 
 @layer components {
-  .card {
+  .game-card {
     @apply bg-border pixel-corner-xl-6 p-1 rounded-lg cur-pointer;
 
     & .card-container {
