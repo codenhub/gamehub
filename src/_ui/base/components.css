@@ -97,10 +97,10 @@
   }
 
   .card {
-    @apply relative bg-border pixel-corner-xl-3;
+    @apply relative bg-border pixel-corner-xl-4;
 
     &:before {
-      @apply absolute inset-1 bg-foreground pixel-corner-xl-3 -z-1;
+      @apply absolute inset-1 bg-foreground pixel-corner-xl-4 -z-1;
       content: "";
     }
   }

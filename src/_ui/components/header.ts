@@ -61,29 +61,29 @@ export class Header extends HTMLElement {
             <label for="sound-menu" class="relative cur-pointer">
               <input type="checkbox" id="sound-menu" class="peer sr-only">
               <img
-                class="size-6 object-contain text-text"
+                class="size-6 object-contain not-dark:invert"
                 src="/assets/icons/volume-high.webp"
                 alt="Speaker icon"
               >
               <div class="hidden peer-checked:flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-1/1 card flex-col gap-4 p-6">
                 <div class="flex items-center gap-4 w-48">
-                  <img src="/assets/icons/music.webp" alt="Music icon" class="size-6 object-contain">
+                  <img src="/assets/icons/music.webp" alt="Music icon" class="size-6 object-contain not-dark:invert">
                   <input id="music-volume" type="range" min="0" max="100" step="10" value="50" class="w-full cur-default pointer-events-auto">
                 </div>
                 <div class="flex items-center gap-4 w-48">
-                  <img src="/assets/icons/volume-high.webp" alt="Sound icon" class="size-6 object-contain">
+                  <img src="/assets/icons/volume-high.webp" alt="Sound icon" class="size-6 object-contain not-dark:invert">
                   <input id="sound-volume" type="range" min="0" max="100" step="10" value="75" class="w-full cur-default pointer-events-auto">
                 </div>
               </div>
             </label>
             <button id="theme-toggle" class="flex items-center">
               <img
-                class="dark:hidden size-6 object-contain text-text"
+                class="dark:hidden size-6 object-contain"
                 src="/assets/icons/sun.webp"
                 alt="Sun icon"
               >
               <img
-                class="hidden dark:flex size-6 object-contain text-text"
+                class="hidden dark:flex size-6 object-contain"
                 src="/assets/icons/moon.webp"
                 alt="Moon icon"
               >
