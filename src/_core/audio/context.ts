@@ -12,6 +12,8 @@ type LoadedSFXBuffer = {
   buffer: AudioBuffer;
 };
 
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 export class MusicContext {
   private ctx = new AudioContext();
   private gain = this.ctx.createGain();
@@ -57,7 +59,7 @@ export class MusicContext {
   }
 
   public async play(ease: boolean = true) {
-    if (this.playing) throw new Error("Music is already playing");
+    if (this.source.buffer) throw new Error("Music is already playing");
     const buffer =
       this.getBuffer(this.currentTrack) || (await this.load(this.currentTrack));
     if (!buffer) return;
@@ -75,22 +77,58 @@ export class MusicContext {
     this.playing = true;
   }
 
-  public pause() {
-    this.ctx.suspend();
+  public async pause(ease: boolean = true) {
+    if (!this.playing) throw new Error("Music is not playing");
+    if (!this.source.buffer) throw new Error("No music loaded");
     this.playing = false;
+    if (ease) {
+      gsap.to(this.gain.gain, { value: 0, duration: 1 });
+    } else {
+      this.gain.gain.value = 0;
+    }
+    await delay(1000);
+    await this.ctx.suspend();
   }
 
-  public resume() {
-    this.ctx.resume();
+  public async resume(ease: boolean = true) {
+    if (this.playing) throw new Error("Music is already playing");
+    if (!this.source.buffer) throw new Error("No music loaded");
     this.playing = true;
+    await this.ctx.resume();
+    if (ease) {
+      gsap.to(this.gain.gain, { value: this.volume, duration: 1 });
+    } else {
+      this.gain.gain.value = this.volume;
+    }
+    await delay(1000);
   }
 
-  public changeTrack(id: MusicId, ease: boolean = true) {
-    this.pause();
+  public async changeTrack(id: MusicId, ease: boolean = true) {
+    await this.pause(ease);
     this.source.disconnect();
+    this.source = this.ctx.createBufferSource();
     this.currentTrack = id;
-    this.play();
-    this.resume();
+
+    const buffer =
+      this.getBuffer(this.currentTrack) || (await this.load(this.currentTrack));
+    if (!buffer) return;
+
+    this.gain.gain.value = 0;
+    this.source.buffer = buffer;
+    this.source.connect(this.gain);
+    this.source.loop = true;
+    this.source.start();
+    if (ease) {
+      gsap.to(this.gain.gain, { value: this.volume, duration: 1 });
+    } else {
+      this.gain.gain.value = this.volume;
+    }
+
+    await this.resume(ease);
+  }
+
+  public getTrack() {
+    return this.currentTrack;
   }
 }
 

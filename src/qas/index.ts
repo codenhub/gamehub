@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const pauseMusicBtn = document.getElementById("pause-music-btn");
   const resumeMusicBtn = document.getElementById("resume-music-btn");
   const changeMusicBtn = document.getElementById("change-music-btn");
+  const musicTrackBtn = document.getElementById("track-music-btn");
 
   playSfxBtn?.addEventListener("click", () => {
     AudioManager.playSFX("collect");
@@ -45,7 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
     AudioManager.resumeMusic();
   });
 
-  changeMusicBtn?.addEventListener("click", () => {
-    AudioManager.changeMusic("frenetic-soundtrack");
+  changeMusicBtn?.addEventListener("click", async () => {
+    await AudioManager.changeMusic("frenetic-soundtrack");
+  });
+
+  musicTrackBtn?.addEventListener("click", () => {
+    const track = AudioManager.getMusicTrack();
+    showAlert({ message: `Current track: ${track}`, type: "info" });
   });
 });

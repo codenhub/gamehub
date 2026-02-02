@@ -26,6 +26,10 @@ class AudioManager {
     this.musicCtx.changeTrack(musicId);
   }
 
+  public getMusicTrack() {
+    return this.musicCtx.getTrack();
+  }
+
   public getMusicVolume() {
     return this.musicCtx.getVolume();
   }
