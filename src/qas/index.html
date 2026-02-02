@@ -15,9 +15,46 @@
 
     <main class="flex flex-1 size-full justify-center p-4">
       <section
-        class="flex flex-1 max-w-7xl w-full h-auto gap-4 max-sm:flex-col max-sm:items-center"
+        class="flex flex-1 flex-col max-w-7xl w-full h-auto gap-8 max-sm:flex-col max-sm:items-center"
       >
-        <button id="btn" class="primary-btn size-fit">Show alert</button>
+        <div class="flex flex-col gap-4">
+          <h1>Alerts</h1>
+          <div class="flex gap-4">
+            <button id="success-alert-btn" class="primary-btn size-fit">
+              Show success alert
+            </button>
+            <button id="error-alert-btn" class="primary-btn size-fit">
+              Show error alert
+            </button>
+            <button id="warning-alert-btn" class="primary-btn size-fit">
+              Show warning alert
+            </button>
+            <button id="info-alert-btn" class="primary-btn size-fit">
+              Show info alert
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <h1>Audio module</h1>
+          <div class="flex gap-4">
+            <button id="play-sfx-btn" class="primary-btn size-fit">
+              Play SFX
+            </button>
+            <button id="play-music-btn" class="primary-btn size-fit">
+              Play Music
+            </button>
+            <button id="pause-music-btn" class="primary-btn size-fit">
+              Pause Music
+            </button>
+            <button id="resume-music-btn" class="primary-btn size-fit">
+              Resume Music
+            </button>
+            <button id="change-music-btn" class="primary-btn size-fit">
+              Change Music
+            </button>
+          </div>
+        </div>
       </section>
     </main>
 

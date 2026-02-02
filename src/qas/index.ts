@@ -1,10 +1,51 @@
 import AudioManager from "../_core/audio";
+import { showAlert } from "../_core/utils/alerts";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("btn");
-  AudioManager.loadSFX("collect");
+  const successBtn = document.getElementById("success-alert-btn");
+  const errorBtn = document.getElementById("error-alert-btn");
+  const warningBtn = document.getElementById("warning-alert-btn");
+  const infoBtn = document.getElementById("info-alert-btn");
 
-  btn?.addEventListener("click", () => {
+  successBtn?.addEventListener("click", () => {
+    showAlert({ message: "Success!", type: "success" });
+  });
+
+  errorBtn?.addEventListener("click", () => {
+    showAlert({ message: "Error!", type: "error" });
+  });
+
+  warningBtn?.addEventListener("click", () => {
+    showAlert({ message: "Warning!", type: "warning" });
+  });
+
+  infoBtn?.addEventListener("click", () => {
+    showAlert({ message: "Info!", type: "info" });
+  });
+
+  const playSfxBtn = document.getElementById("play-sfx-btn");
+  const playMusicBtn = document.getElementById("play-music-btn");
+  const pauseMusicBtn = document.getElementById("pause-music-btn");
+  const resumeMusicBtn = document.getElementById("resume-music-btn");
+  const changeMusicBtn = document.getElementById("change-music-btn");
+
+  playSfxBtn?.addEventListener("click", () => {
     AudioManager.playSFX("collect");
+  });
+
+  playMusicBtn?.addEventListener("click", () => {
+    AudioManager.playMusic("main-soundtrack");
+  });
+
+  pauseMusicBtn?.addEventListener("click", () => {
+    AudioManager.pauseMusic();
+  });
+
+  resumeMusicBtn?.addEventListener("click", () => {
+    AudioManager.resumeMusic();
+  });
+
+  changeMusicBtn?.addEventListener("click", () => {
+    AudioManager.changeMusic("frenetic-soundtrack");
   });
 });
