@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Snake | GameHub</title>
+    <link rel="stylesheet" href="../_ui/main.css" />
+    <script type="module" src="../_ui/main.js"></script>
+    <script src="../_ui/components/index.js" type="module" defer></script>
+    <script src="./index.js" type="module" defer></script>
+  </head>
+  <body>
+    <gh-header title="Snake" backBtn></gh-header>
+
+    <main class="flex flex-1 size-full justify-center p-4">
+      <!-- GAME CONTAINER -->
+      <section
+        class="flex flex-1 max-w-7xl w-full h-auto gap-4 flex-col items-center"
+      >
+        <div
+          class="relative bg-border pixel-corner-lg-4 p-1 w-full max-w-lg aspect-square"
+        >
+          <!-- CANVAS -->
+          <canvas
+            id="game"
+            class="flex size-full pixel-corner-lg-4 bg-foreground"
+          ></canvas>
+
+          <!-- TOP BAR (Controls & Score) -->
+          <div
+            class="absolute top-0 inset-x-0 flex items-center justify-between p-4 z-10"
+          >
+            <!-- Game State Controls -->
+            <div class="flex gap-2">
+              <button id="play" class="icon-btn">
+                <img
+                  src="/assets/icons/play.webp"
+                  alt="Play icon"
+                  class="size-4"
+                />
+              </button>
+              <button id="pause" class="icon-btn hidden">
+                <div class="flex gap-1">
+                  <div class="bg-accent-contrast h-4 w-1.5"></div>
+                  <div class="bg-accent-contrast h-4 w-1.5"></div>
+                </div>
+              </button>
+              <button id="stop" class="icon-btn hidden">
+                <div
+                  class="bg-accent-contrast size-4"
+                  aria-label="Stop icon"
+                ></div>
+              </button>
+            </div>
+
+            <!-- Scores -->
+            <div class="flex gap-4 text-xs sm:text-sm font-semibold">
+              <p>High: <span id="high-score">0</span></p>
+              <p>Score: <span id="score">0</span></p>
+            </div>
+          </div>
+
+          <!-- OVERLAYS -->
+          <!-- Start Screen -->
+          <div
+            id="start-screen"
+            class="absolute inset-0 flex flex-col items-center justify-center bg-black/50 pixel-corner-lg-4 z-20"
+          >
+            <h1 class="text-4xl font-bold text-primary mb-4 text-shadow-sm">
+              SNAKE
+            </h1>
+            <p class="mb-8 text-primary-contrast/80">Press Play to Start</p>
+          </div>
+
+          <!-- Game Over Screen (Hidden by default) -->
+          <div
+            id="game-over-screen"
+            class="absolute inset-0 flex-col items-center justify-center bg-black/70 pixel-corner-lg-4 z-20 hidden"
+          >
+            <h2 class="text-3xl font-bold text-red-500 mb-2">GAME OVER</h2>
+            <p class="text-lg mb-4">Score: <span id="final-score">0</span></p>
+            <button id="restart-btn" class="primary-btn">Try Again</button>
+          </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <!-- Desktop: Hints -->
+        <div
+          class="hidden sm:flex flex-col items-center gap-2 text-primary-contrast/50 text-sm"
+        >
+          <p>Use Arrow Keys to Move</p>
+        </div>
+
+        <!-- Mobile: D-Pad -->
+        <div class="flex flex-col items-center gap-2 sm:hidden pb-8">
+          <button class="icon-btn size-14 upBtn" aria-label="Move Up">
+            <img
+              src="/assets/icons/chevron-up.webp"
+              alt="Up"
+              class="size-8 rotate-180"
+            />
+            <!-- Assuming chevron-down rotated or need to find chevron-up -->
+          </button>
+          <div class="flex gap-4">
+            <button class="icon-btn size-14 leftBtn" aria-label="Move Left">
+              <img
+                src="/assets/icons/chevron-left.webp"
+                alt="Left"
+                class="size-8"
+              />
+            </button>
+            <button class="icon-btn size-14 downBtn" aria-label="Move Down">
+              <img
+                src="/assets/icons/chevron-down.webp"
+                alt="Down"
+                class="size-8"
+              />
+            </button>
+            <button class="icon-btn size-14 rightBtn" aria-label="Move Right">
+              <img
+                src="/assets/icons/chevron-right.webp"
+                alt="Right"
+                class="size-8"
+              />
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <gh-footer></gh-footer>
+  </body>
+</html>
