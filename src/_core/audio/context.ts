@@ -1,6 +1,5 @@
 import { MusicId, MusicList } from "./music";
 import { SFXId, SFXList } from "./sfx";
-import gsap from "gsap";
 import { BaseAudioContext, DEFAULT_FADE_DURATION } from "./base";
 
 const DEFAULT_MUSIC_VOLUME = 0.5;
@@ -14,6 +13,11 @@ export class MusicContext extends BaseAudioContext<MusicId> {
 
   constructor(ctx: AudioContext) {
     super(ctx, DEFAULT_MUSIC_VOLUME);
+  }
+
+  public override init(newCtx?: AudioContext) {
+    super.init(newCtx);
+    this.stopSource();
   }
 
   public async load(id: MusicId): Promise<AudioBuffer> {
@@ -40,17 +44,19 @@ export class MusicContext extends BaseAudioContext<MusicId> {
       this.source.loop = true;
       this.source.connect(this.gain);
 
-      gsap.killTweensOf(this.gain.gain);
+      const currentTime = this.ctx.currentTime;
+      this.gain.gain.cancelScheduledValues(currentTime);
+
       if (ease) {
-        this.gain.gain.value = 0;
-        this.source.start();
-        gsap.to(this.gain.gain, {
-          value: this.volume,
-          duration: DEFAULT_FADE_DURATION,
-        });
+        this.gain.gain.setValueAtTime(0, currentTime);
+        this.source.start(0);
+        this.gain.gain.linearRampToValueAtTime(
+          this.volume,
+          currentTime + DEFAULT_FADE_DURATION,
+        );
       } else {
-        this.gain.gain.value = this.volume;
-        this.source.start();
+        this.gain.gain.setValueAtTime(this.volume, currentTime);
+        this.source.start(0);
       }
 
       this.playing = true;
@@ -75,18 +81,29 @@ export class MusicContext extends BaseAudioContext<MusicId> {
     if (!this.playing || !this.source) return;
 
     this.playing = false;
-    gsap.killTweensOf(this.gain.gain);
+    const currentTime = this.ctx.currentTime;
+    this.gain.gain.cancelScheduledValues(currentTime);
+    this.gain.gain.setValueAtTime(this.gain.gain.value, currentTime);
 
     if (ease) {
-      await gsap.to(this.gain.gain, {
-        value: 0,
-        duration: DEFAULT_FADE_DURATION,
-      });
+      this.gain.gain.linearRampToValueAtTime(
+        0,
+        currentTime + DEFAULT_FADE_DURATION,
+      );
+
+      const sourceToStop = this.source;
+      setTimeout(
+        () => {
+          if (this.source === sourceToStop && !this.playing) {
+            this.stopSource();
+          }
+        },
+        DEFAULT_FADE_DURATION * 1000 + 50,
+      );
     } else {
       this.gain.gain.value = 0;
+      this.stopSource();
     }
-
-    this.stopSource();
   }
 
   public async resume(ease: boolean = true) {
@@ -101,6 +118,11 @@ export class MusicContext extends BaseAudioContext<MusicId> {
     try {
       if (this.playing) {
         await this.pause(ease);
+        if (ease) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, DEFAULT_FADE_DURATION * 1000),
+          );
+        }
       }
       this.currentTrack = id;
       await this.play(ease);

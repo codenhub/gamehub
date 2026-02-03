@@ -1,8 +1,6 @@
-import gsap from "gsap";
-
 export const DEFAULT_FADE_DURATION = 1;
 
-export const clampVolume = (volume: number): number =>
+const clampVolume = (volume: number): number =>
   Math.max(0, Math.min(1, volume));
 
 export abstract class BaseAudioContext<T extends string> {
@@ -21,16 +19,29 @@ export abstract class BaseAudioContext<T extends string> {
     this.gain.gain.value = this.volume;
   }
 
+  public init(newCtx?: AudioContext) {
+    if (newCtx) {
+      this.ctx = newCtx;
+      this.gain = this.ctx.createGain();
+      this.gain.connect(this.ctx.destination);
+      this.gain.gain.value = this.volume;
+    }
+  }
+
   public setVolume(volume: number, ease: boolean = true) {
     this.volume = clampVolume(volume);
-    gsap.killTweensOf(this.gain.gain);
+    const currentTime = this.ctx.currentTime;
+
     if (ease) {
-      gsap.to(this.gain.gain, {
-        value: this.volume,
-        duration: DEFAULT_FADE_DURATION,
-      });
+      this.gain.gain.cancelScheduledValues(currentTime);
+      this.gain.gain.setValueAtTime(this.gain.gain.value, currentTime);
+      this.gain.gain.linearRampToValueAtTime(
+        this.volume,
+        currentTime + DEFAULT_FADE_DURATION,
+      );
     } else {
-      this.gain.gain.value = this.volume;
+      this.gain.gain.cancelScheduledValues(currentTime);
+      this.gain.gain.setValueAtTime(this.volume, currentTime);
     }
   }
 
