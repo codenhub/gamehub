@@ -1,147 +1,169 @@
 import { MusicId, MusicList } from "./music";
 import { SFXId, SFXList } from "./sfx";
-import gsap from "gsap";
+import { BaseAudioContext, DEFAULT_FADE_DURATION } from "./base";
 
-type LoadedMusicBuffer = {
-  id: MusicId;
-  buffer: AudioBuffer;
-};
+const DEFAULT_MUSIC_VOLUME = 0.5;
+const DEFAULT_SFX_VOLUME = 0.75;
 
-type LoadedSFXBuffer = {
-  id: SFXId;
-  buffer: AudioBuffer;
-};
-
-export class MusicContext {
-  private ctx = new AudioContext();
-  private gain = this.ctx.createGain();
-  private volume: number = 0.5;
+export class MusicContext extends BaseAudioContext<MusicId> {
   private currentTrack: MusicId = "main-soundtrack";
-  private source = this.ctx.createBufferSource();
+  private source: AudioBufferSourceNode | null = null;
   private playing: boolean = false;
+  private isChangingTrack: boolean = false;
 
-  private loadedBuffers: LoadedMusicBuffer[] = [];
-
-  constructor() {
-    this.gain.connect(this.ctx.destination);
-    this.gain.gain.value = this.volume;
+  constructor(ctx: AudioContext) {
+    super(ctx, DEFAULT_MUSIC_VOLUME);
   }
 
-  public setVolume(volume: number, ease: boolean = true) {
-    this.volume = volume;
-    if (ease) {
-      gsap.to(this.gain.gain, { value: volume, duration: 1 });
-    } else {
-      this.gain.gain.value = volume;
-    }
+  public override init(newCtx?: AudioContext) {
+    super.init(newCtx);
+    this.stopSource();
   }
 
-  public getVolume() {
-    return this.volume;
-  }
-
-  private getBuffer(id: MusicId) {
-    return this.loadedBuffers.find((buffer) => buffer.id === id)?.buffer;
-  }
-
-  public async load(id: MusicId) {
-    const res = await fetch(MusicList[id]);
-    const buffer = await this.ctx.decodeAudioData(await res.arrayBuffer());
-    this.loadedBuffers.push({ id, buffer });
-    return buffer;
+  public async load(id: MusicId): Promise<AudioBuffer> {
+    return super.load(id, MusicList[id]);
   }
 
   public async loadMultiple(ids: MusicId[]) {
-    const promises = ids.map((id) => this.load(id));
-    await Promise.all(promises);
+    return super.loadMultiple(ids, MusicList);
   }
 
   public async play(ease: boolean = true) {
-    if (this.playing) throw new Error("Music is already playing");
-    const buffer =
-      this.getBuffer(this.currentTrack) || (await this.load(this.currentTrack));
-    if (!buffer) return;
+    if (this.playing && this.source) return;
 
-    this.gain.gain.value = 0;
-    this.source.buffer = buffer;
-    this.source.connect(this.gain);
-    this.source.loop = true;
-    this.source.start();
-    if (ease) {
-      gsap.to(this.gain.gain, { value: this.volume, duration: 1 });
-    } else {
-      this.gain.gain.value = this.volume;
+    try {
+      const buffer =
+        this.getBuffer(this.currentTrack) ||
+        (await this.load(this.currentTrack));
+      if (!buffer) return;
+
+      this.stopSource();
+
+      this.source = this.ctx.createBufferSource();
+      this.source.buffer = buffer;
+      this.source.loop = true;
+      this.source.connect(this.gain);
+
+      const currentTime = this.ctx.currentTime;
+      this.gain.gain.cancelScheduledValues(currentTime);
+
+      if (ease) {
+        this.gain.gain.setValueAtTime(0, currentTime);
+        this.source.start(0);
+        this.gain.gain.linearRampToValueAtTime(
+          this.volume,
+          currentTime + DEFAULT_FADE_DURATION,
+        );
+      } else {
+        this.gain.gain.setValueAtTime(this.volume, currentTime);
+        this.source.start(0);
+      }
+
+      this.playing = true;
+    } catch (error) {
+      console.error("[MusicContext] Error playing music:", error);
     }
-    this.playing = true;
   }
 
-  public pause() {
-    this.ctx.suspend();
+  private stopSource() {
+    if (this.source) {
+      try {
+        this.source.stop();
+        this.source.disconnect();
+      } catch {
+        // Ignore errors if source already stopped
+      }
+      this.source = null;
+    }
+  }
+
+  public async pause(ease: boolean = true) {
+    if (!this.playing || !this.source) return;
+
     this.playing = false;
+    const currentTime = this.ctx.currentTime;
+    this.gain.gain.cancelScheduledValues(currentTime);
+    this.gain.gain.setValueAtTime(this.gain.gain.value, currentTime);
+
+    if (ease) {
+      this.gain.gain.linearRampToValueAtTime(
+        0,
+        currentTime + DEFAULT_FADE_DURATION,
+      );
+
+      const sourceToStop = this.source;
+      setTimeout(
+        () => {
+          if (this.source === sourceToStop && !this.playing) {
+            this.stopSource();
+          }
+        },
+        DEFAULT_FADE_DURATION * 1000 + 50,
+      );
+    } else {
+      this.gain.gain.value = 0;
+      this.stopSource();
+    }
   }
 
-  public resume() {
-    this.ctx.resume();
-    this.playing = true;
+  public async resume(ease: boolean = true) {
+    if (this.playing) return;
+    await this.play(ease);
   }
 
-  public changeTrack(id: MusicId, ease: boolean = true) {
-    this.pause();
-    this.source.disconnect();
-    this.currentTrack = id;
-    this.play();
-    this.resume();
+  public async changeTrack(id: MusicId, ease: boolean = true) {
+    if (this.isChangingTrack) return;
+    this.isChangingTrack = true;
+
+    try {
+      if (this.playing) {
+        await this.pause(ease);
+        if (ease) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, DEFAULT_FADE_DURATION * 1000),
+          );
+        }
+      }
+      this.currentTrack = id;
+      await this.play(ease);
+    } finally {
+      this.isChangingTrack = false;
+    }
+  }
+
+  public getTrack() {
+    return this.currentTrack;
   }
 }
 
-export class SFXContext {
-  private ctx = new AudioContext({ latencyHint: "interactive" });
-  private gain = this.ctx.createGain();
-  private volume: number = 0.75;
-
-  private loadedBuffers: LoadedSFXBuffer[] = [];
-
-  constructor() {
-    this.gain.connect(this.ctx.destination);
-    this.gain.gain.value = this.volume;
+export class SFXContext extends BaseAudioContext<SFXId> {
+  constructor(ctx: AudioContext) {
+    super(ctx, DEFAULT_SFX_VOLUME);
   }
 
-  public setVolume(volume: number, ease: boolean = true) {
-    this.volume = volume;
-    if (ease) {
-      gsap.to(this.gain.gain, { value: volume, duration: 1 });
-    } else {
-      this.gain.gain.value = volume;
-    }
-  }
-
-  public getVolume() {
-    return this.volume;
-  }
-
-  private getBuffer(id: SFXId) {
-    return this.loadedBuffers.find((buffer) => buffer.id === id)?.buffer;
-  }
-
-  public async load(id: SFXId) {
-    const res = await fetch(SFXList[id]);
-    const buffer = await this.ctx.decodeAudioData(await res.arrayBuffer());
-    this.loadedBuffers.push({ id, buffer });
-    return buffer;
+  public async load(id: SFXId): Promise<AudioBuffer> {
+    return super.load(id, SFXList[id]);
   }
 
   public async loadMultiple(ids: SFXId[]) {
-    const promises = ids.map((id) => this.load(id));
-    await Promise.all(promises);
+    return super.loadMultiple(ids, SFXList);
   }
 
   public async play(id: SFXId) {
-    const buffer = this.getBuffer(id) || (await this.load(id));
-    if (!buffer) return;
+    try {
+      const buffer = this.getBuffer(id) || (await this.load(id));
+      if (!buffer) return;
 
-    const source = this.ctx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(this.gain);
-    source.start();
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.gain);
+      source.start();
+
+      source.onended = () => {
+        source.disconnect();
+      };
+    } catch (error) {
+      console.error(`[SFXContext] Error playing "${id}":`, error);
+    }
   }
 }

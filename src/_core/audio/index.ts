@@ -3,55 +3,144 @@ import { SFXId } from "./sfx";
 import { MusicContext, SFXContext } from "./context";
 
 class AudioManager {
-  private musicCtx = new MusicContext();
-  private sfxCtx = new SFXContext();
+  private ctx?: AudioContext;
+  private musicCtx?: MusicContext;
+  private sfxCtx?: SFXContext;
+  private initialized: boolean = false;
 
-  constructor() {
-    this.musicCtx.load("main-soundtrack");
+  private ensureInit() {
+    if (this.initialized && this.ctx && this.musicCtx && this.sfxCtx) return;
+
+    try {
+      const AudioContextClass =
+        window.AudioContext || (window as any).webkitAudioContext;
+      this.ctx = new AudioContextClass();
+
+      this.musicCtx = new MusicContext(this.ctx);
+      this.sfxCtx = new SFXContext(this.ctx);
+
+      this.initialized = true;
+
+      this.musicCtx.load("main-soundtrack").catch((err) => {
+        console.warn("[AudioManager] Failed to preload main soundtrack:", err);
+      });
+    } catch (err) {
+      console.error("[AudioManager] Failed to initialize AudioContext:", err);
+    }
+  }
+
+  public async resumeContext() {
+    this.ensureInit();
+    if (!this.ctx) return;
+
+    try {
+      if (this.ctx.state === "suspended") {
+        await this.ctx.resume();
+      }
+    } catch (err) {
+      console.warn("[AudioManager] Failed to resume audio context:", err);
+    }
   }
 
   public async playMusic(musicId: MusicId = "main-soundtrack") {
-    this.musicCtx.play(true);
+    await this.resumeContext();
+    if (!this.musicCtx) return;
+
+    try {
+      if (this.musicCtx.getTrack() !== musicId) {
+        await this.musicCtx.changeTrack(musicId);
+      } else {
+        await this.musicCtx.play(true);
+      }
+    } catch (err) {
+      console.warn("[AudioManager] Failed to play music:", err);
+    }
   }
 
-  public async pauseMusic() {
-    this.musicCtx.pause();
+  public pauseMusic() {
+    if (!this.initialized || !this.musicCtx) return;
+
+    this.musicCtx.pause().catch((err) => {
+      console.warn("[AudioManager] Failed to pause music:", err);
+    });
   }
 
   public async resumeMusic() {
-    this.musicCtx.resume();
+    await this.resumeContext();
+    if (!this.musicCtx) return;
+
+    try {
+      await this.musicCtx.resume();
+    } catch (err) {
+      console.warn("[AudioManager] Failed to resume music:", err);
+    }
   }
 
-  public async changeMusic(musicId: MusicId) {
-    this.musicCtx.changeTrack(musicId);
+  public changeMusic(musicId: MusicId) {
+    this.ensureInit();
+    if (!this.musicCtx) return;
+
+    this.musicCtx.changeTrack(musicId).catch((err) => {
+      console.warn("[AudioManager] Failed to change music:", err);
+    });
+  }
+
+  public getMusicTrack() {
+    if (!this.musicCtx) return null;
+    return this.musicCtx.getTrack();
   }
 
   public getMusicVolume() {
+    if (!this.musicCtx) return 0;
     return this.musicCtx.getVolume();
   }
 
   public setMusicVolume(volume: number, ease: boolean = true) {
-    this.musicCtx.setVolume(volume, ease);
+    this.ensureInit();
+    if (this.musicCtx) {
+      this.musicCtx.setVolume(volume, ease);
+    }
   }
 
   public async playSFX(sfxId: SFXId) {
-    this.sfxCtx.play(sfxId);
+    await this.resumeContext();
+    if (!this.sfxCtx) return;
+
+    try {
+      await this.sfxCtx.play(sfxId);
+    } catch (err) {
+      console.warn(`[AudioManager] Failed to play SFX "${sfxId}":`, err);
+    }
   }
 
-  public async loadSFX(sfxId: SFXId) {
-    this.sfxCtx.load(sfxId);
+  public loadSFX(sfxId: SFXId) {
+    this.ensureInit();
+    if (!this.sfxCtx) return;
+
+    this.sfxCtx.load(sfxId).catch((err) => {
+      console.warn(`[AudioManager] Failed to preload SFX "${sfxId}":`, err);
+    });
   }
 
-  public async loadMultipleSFX(sfxIds: SFXId[]) {
-    this.sfxCtx.loadMultiple(sfxIds);
+  public loadMultipleSFX(sfxIds: SFXId[]) {
+    this.ensureInit();
+    if (!this.sfxCtx) return;
+
+    this.sfxCtx.loadMultiple(sfxIds).catch((err) => {
+      console.warn("[AudioManager] Failed to preload some SFX:", err);
+    });
   }
 
   public getSFXVolume() {
+    if (!this.sfxCtx) return 0;
     return this.sfxCtx.getVolume();
   }
 
   public setSFXVolume(volume: number, ease: boolean = true) {
-    this.sfxCtx.setVolume(volume, ease);
+    this.ensureInit();
+    if (this.sfxCtx) {
+      this.sfxCtx.setVolume(volume, ease);
+    }
   }
 }
 
