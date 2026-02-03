@@ -1,88 +1,27 @@
 import { MusicId, MusicList } from "./music";
 import { SFXId, SFXList } from "./sfx";
 import gsap from "gsap";
+import { BaseAudioContext, DEFAULT_FADE_DURATION } from "./base";
 
 const DEFAULT_MUSIC_VOLUME = 0.5;
 const DEFAULT_SFX_VOLUME = 0.75;
-const DEFAULT_FADE_DURATION = 1;
 
-const clampVolume = (volume: number): number =>
-  Math.max(0, Math.min(1, volume));
-
-export class MusicContext {
-  private ctx: AudioContext;
-  private gain: GainNode;
-  private volume: number = DEFAULT_MUSIC_VOLUME;
+export class MusicContext extends BaseAudioContext<MusicId> {
   private currentTrack: MusicId = "main-soundtrack";
   private source: AudioBufferSourceNode | null = null;
   private playing: boolean = false;
   private isChangingTrack: boolean = false;
 
-  private loadedBuffers: Map<MusicId, AudioBuffer> = new Map();
-  private loadingPromises: Map<MusicId, Promise<AudioBuffer>> = new Map();
-
   constructor(ctx: AudioContext) {
-    this.ctx = ctx;
-    this.gain = this.ctx.createGain();
-    this.gain.connect(this.ctx.destination);
-    this.gain.gain.value = this.volume;
-  }
-
-  public setVolume(volume: number, ease: boolean = true) {
-    this.volume = clampVolume(volume);
-    gsap.killTweensOf(this.gain.gain);
-    if (ease) {
-      gsap.to(this.gain.gain, {
-        value: this.volume,
-        duration: DEFAULT_FADE_DURATION,
-      });
-    } else {
-      this.gain.gain.value = this.volume;
-    }
-  }
-
-  public getVolume() {
-    return this.volume;
-  }
-
-  private getBuffer(id: MusicId) {
-    return this.loadedBuffers.get(id);
+    super(ctx, DEFAULT_MUSIC_VOLUME);
   }
 
   public async load(id: MusicId): Promise<AudioBuffer> {
-    const existingBuffer = this.getBuffer(id);
-    if (existingBuffer) return existingBuffer;
-
-    if (this.loadingPromises.has(id)) {
-      return this.loadingPromises.get(id)!;
-    }
-
-    const loadPromise = (async () => {
-      try {
-        const res = await fetch(MusicList[id]);
-        if (!res.ok) {
-          throw new Error(
-            `Failed to load music "${id}": ${res.status} ${res.statusText}`,
-          );
-        }
-        const arrayBuffer = await res.arrayBuffer();
-        const buffer = await this.ctx.decodeAudioData(arrayBuffer);
-        this.loadedBuffers.set(id, buffer);
-        return buffer;
-      } catch (error) {
-        console.error(`[MusicContext] Error loading "${id}":`, error);
-        throw error;
-      } finally {
-        this.loadingPromises.delete(id);
-      }
-    })();
-
-    this.loadingPromises.set(id, loadPromise);
-    return loadPromise;
+    return super.load(id, MusicList[id]);
   }
 
   public async loadMultiple(ids: MusicId[]) {
-    await Promise.all(ids.map((id) => this.load(id)));
+    return super.loadMultiple(ids, MusicList);
   }
 
   public async play(ease: boolean = true) {
@@ -175,76 +114,17 @@ export class MusicContext {
   }
 }
 
-export class SFXContext {
-  private ctx: AudioContext;
-  private gain: GainNode;
-  private volume: number = DEFAULT_SFX_VOLUME;
-
-  private loadedBuffers: Map<SFXId, AudioBuffer> = new Map();
-  private loadingPromises: Map<SFXId, Promise<AudioBuffer>> = new Map();
-
+export class SFXContext extends BaseAudioContext<SFXId> {
   constructor(ctx: AudioContext) {
-    this.ctx = ctx;
-    this.gain = this.ctx.createGain();
-    this.gain.connect(this.ctx.destination);
-    this.gain.gain.value = this.volume;
-  }
-
-  public setVolume(volume: number, ease: boolean = true) {
-    this.volume = clampVolume(volume);
-    gsap.killTweensOf(this.gain.gain);
-    if (ease) {
-      gsap.to(this.gain.gain, {
-        value: this.volume,
-        duration: DEFAULT_FADE_DURATION,
-      });
-    } else {
-      this.gain.gain.value = this.volume;
-    }
-  }
-
-  public getVolume() {
-    return this.volume;
-  }
-
-  private getBuffer(id: SFXId) {
-    return this.loadedBuffers.get(id);
+    super(ctx, DEFAULT_SFX_VOLUME);
   }
 
   public async load(id: SFXId): Promise<AudioBuffer> {
-    const existingBuffer = this.getBuffer(id);
-    if (existingBuffer) return existingBuffer;
-
-    if (this.loadingPromises.has(id)) {
-      return this.loadingPromises.get(id)!;
-    }
-
-    const loadPromise = (async () => {
-      try {
-        const res = await fetch(SFXList[id]);
-        if (!res.ok) {
-          throw new Error(
-            `Failed to load SFX "${id}": ${res.status} ${res.statusText}`,
-          );
-        }
-        const arrayBuffer = await res.arrayBuffer();
-        const buffer = await this.ctx.decodeAudioData(arrayBuffer);
-        this.loadedBuffers.set(id, buffer);
-        return buffer;
-      } catch (error) {
-        console.error(`[SFXContext] Error loading "${id}":`, error);
-        throw error;
-      } finally {
-        this.loadingPromises.delete(id);
-      }
-    })();
-
-    this.loadingPromises.set(id, loadPromise);
-    return loadPromise;
+    return super.load(id, SFXList[id]);
   }
 
   public async loadMultiple(ids: SFXId[]) {
-    await Promise.all(ids.map((id) => this.load(id)));
+    return super.loadMultiple(ids, SFXList);
   }
 
   public async play(id: SFXId) {
