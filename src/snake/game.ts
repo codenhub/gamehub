@@ -284,7 +284,7 @@ export class SnakeGame {
   }
 
   private handleGameOver() {
-    AudioManager.playSFX("die");
+    AudioManager.playSFX("fail");
     this.stop();
     this.callbacks.onGameOver(this.state.score);
   }
