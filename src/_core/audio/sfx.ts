@@ -5,6 +5,8 @@ export const SFXList = {
   complete: "/assets/audios/complete.ogg",
   fail: "/assets/audios/fail.ogg",
   unlock: "/assets/audios/unlock.ogg",
+  eat: "/assets/audios/eat.mp3",
+  die: "/assets/audios/die.mp3",
 } as const;
 
 export type SFXId = keyof typeof SFXList;

@@ -1,4 +1,5 @@
 import {
+  initGame,
   startGame,
   pauseGame,
   stopGame,
@@ -6,6 +7,7 @@ import {
   moveDown,
   moveLeft,
   moveRight,
+  resumeGame,
 } from "./game";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -21,19 +23,42 @@ document.addEventListener("DOMContentLoaded", () => {
     "game-over-screen",
   ) as HTMLDivElement;
 
+  const scoreEl = document.getElementById("score") as HTMLSpanElement;
+  const highScoreEl = document.getElementById("high-score") as HTMLSpanElement;
+  const finalScoreEl = document.getElementById(
+    "final-score",
+  ) as HTMLSpanElement;
+  const canvas = document.getElementById("game") as HTMLCanvasElement;
+
+  // INITIALIZE GAME
+  initGame(canvas, {
+    onScoreUpdate: (score, highScore) => {
+      if (scoreEl) scoreEl.innerText = score.toString();
+      if (highScoreEl) highScoreEl.innerText = highScore.toString();
+    },
+    onGameOver: (finalScore) => {
+      if (finalScoreEl) finalScoreEl.innerText = finalScore.toString();
+      setGameOverState();
+    },
+  });
+
   // STATE
   type GameState = "stopped" | "playing" | "paused" | "gameover";
   let state: GameState = "stopped";
 
   // FUNCTIONS
   const setPlayingState = () => {
+    if (state === "paused") {
+      resumeGame();
+    } else {
+      startGame();
+    }
     state = "playing";
     playBtn.classList.add("hidden");
     pauseBtn.classList.remove("hidden");
     stopBtn.classList.remove("hidden");
     startScreen.classList.add("hidden");
     gameOverScreen.classList.add("hidden");
-    startGame();
   };
 
   const setPausedState = () => {
@@ -51,6 +76,15 @@ document.addEventListener("DOMContentLoaded", () => {
     startScreen.classList.remove("hidden");
     gameOverScreen.classList.add("hidden");
     stopGame();
+  };
+
+  const setGameOverState = () => {
+    state = "gameover";
+    playBtn.classList.remove("hidden");
+    pauseBtn.classList.add("hidden");
+    stopBtn.classList.add("hidden");
+    gameOverScreen.classList.remove("hidden");
+    gameOverScreen.classList.add("flex");
   };
 
   // EVENT LISTENERS
