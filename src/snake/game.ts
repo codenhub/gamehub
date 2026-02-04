@@ -1,5 +1,3 @@
-// Game Logic Skeleton
-
 export function startGame(): void {
   console.log("Game Started");
 }

@@ -6,10 +6,9 @@ import {
   moveDown,
   moveLeft,
   moveRight,
-} from "./game.js"; // Importing .js is still valid in TS if allowJs/moduleResoltion supports it, but usually standard in Vite/TS is often just import from './game' or matching extension if using specific config. Sticking to extensions or no extensions.  Vite handles .ts imports. I'll use ./game.
+} from "./game";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // UI REFERENCES
   const playBtn = document.getElementById("play") as HTMLButtonElement;
   const pauseBtn = document.getElementById("pause") as HTMLButtonElement;
   const stopBtn = document.getElementById("stop") as HTMLButtonElement;
@@ -61,14 +60,24 @@ document.addEventListener("DOMContentLoaded", () => {
   if (restartBtn) restartBtn.addEventListener("click", setPlayingState);
 
   // CONTROLS
-  const btnMap = [
-    { selector: ".upBtn", action: moveUp },
-    { selector: ".downBtn", action: moveDown },
-    { selector: ".leftBtn", action: moveLeft },
-    { selector: ".rightBtn", action: moveRight },
+  type Control = {
+    keys: string[];
+    selector: string;
+    action: () => void;
+  };
+
+  const controls: Control[] = [
+    { keys: ["ArrowUp", "w", "W"], selector: ".upBtn", action: moveUp },
+    { keys: ["ArrowDown", "s", "S"], selector: ".downBtn", action: moveDown },
+    { keys: ["ArrowLeft", "a", "A"], selector: ".leftBtn", action: moveLeft },
+    {
+      keys: ["ArrowRight", "d", "D"],
+      selector: ".rightBtn",
+      action: moveRight,
+    },
   ];
 
-  btnMap.forEach(({ selector, action }) => {
+  controls.forEach(({ selector, action }) => {
     const btn = document.querySelector(selector);
     if (btn) {
       btn.addEventListener("click", () => {
@@ -77,31 +86,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // KEYBOARD
   document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key === "Enter")
+      state === "playing" ? setPausedState() : setPlayingState();
+
     if (state !== "playing") return;
 
-    switch (e.key) {
-      case "ArrowUp":
-      case "w":
-      case "W":
-        moveUp();
-        break;
-      case "ArrowDown":
-      case "s":
-      case "S":
-        moveDown();
-        break;
-      case "ArrowLeft":
-      case "a":
-      case "A":
-        moveLeft();
-        break;
-      case "ArrowRight":
-      case "d":
-      case "D":
-        moveRight();
-        break;
-    }
+    controls.forEach(({ keys, action }) => {
+      if (keys.includes(e.key)) action();
+    });
   });
 });
