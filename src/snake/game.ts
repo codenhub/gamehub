@@ -1,35 +1,79 @@
 import AudioManager from "../_core/audio";
+import { showAlert } from "../_core/utils/alerts";
+
+// Constants & Config
+const COLORS = {
+  background: "#262626",
+  food: "#22c55e",
+  snakeHead: "#fafafa",
+  snakeBody: "#d4d4d4",
+};
+
+const GAME_CONFIG = {
+  tileSize: 20,
+  defaultFps: 10,
+  localStorageKey: "snake-high-score",
+};
 
 type Point = { x: number; y: number };
-type GameCallbacks = {
+
+export type GameCallbacks = {
   onScoreUpdate: (score: number, highScore: number) => void;
   onGameOver: (finalScore: number) => void;
 };
 
+interface GameState {
+  snake: Point[];
+  food: Point;
+  direction: Point;
+  nextDirection: Point;
+  score: number;
+  highScore: number;
+  isPaused: boolean;
+  isRunning: boolean;
+  animationId: number | null;
+  lastRenderTime: number;
+}
+
+// Global State (Module Level)
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
 let callbacks: GameCallbacks;
 
-// Game Config
-const TILE_SIZE = 20;
-let FPS = 10;
+// Initial State Factory
+const createInitialState = (): GameState => ({
+  snake: [],
+  food: { x: 0, y: 0 },
+  direction: { x: 0, y: 0 },
+  nextDirection: { x: 0, y: 0 },
+  score: 0,
+  highScore: 0,
+  isPaused: false,
+  isRunning: false,
+  animationId: null,
+  lastRenderTime: 0,
+});
 
-// Game State
-let animationId: number | null = null;
-let snake: Point[] = [];
-let food: Point = { x: 0, y: 0 };
-let direction: Point = { x: 0, y: 0 };
-let nextDirection: Point = { x: 0, y: 0 };
-let score = 0;
-let highScore = 0;
-let isPaused = false;
+let state: GameState = createInitialState();
 
+// Initialization
 export function initGame(
   gameCanvas: HTMLCanvasElement,
   gameCallbacks: GameCallbacks,
 ): void {
   canvas = gameCanvas;
-  ctx = canvas.getContext("2d")!;
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    showAlert({
+      message: "Failed to get canvas context. Game cannot start.",
+      type: "error",
+    });
+    console.error("Failed to get 2D context");
+    return;
+  }
+
+  ctx = context;
   callbacks = gameCallbacks;
 
   // Set canvas size
@@ -37,85 +81,68 @@ export function initGame(
   canvas.height = canvas.clientHeight;
 
   // Align to grid
-  canvas.width -= canvas.width % TILE_SIZE;
-  canvas.height -= canvas.height % TILE_SIZE;
+  canvas.width -= canvas.width % GAME_CONFIG.tileSize;
+  canvas.height -= canvas.height % GAME_CONFIG.tileSize;
 
-  // Load High Score
-  const savedHighScore = localStorage.getItem("snake-high-score");
-  if (savedHighScore) {
-    highScore = parseInt(savedHighScore, 10);
-  }
-  callbacks.onScoreUpdate(0, highScore);
+  loadHighScore();
+  callbacks.onScoreUpdate(0, state.highScore);
 
   draw();
 }
 
+// Game Logic
 export function startGame(): void {
-  if (animationId) cancelAnimationFrame(animationId);
+  if (state.animationId) cancelAnimationFrame(state.animationId);
 
-  // Reset State
-  isPaused = false;
-  score = 0;
-  // Start in middle
-  const startX = Math.floor(canvas.width / TILE_SIZE / 2) * TILE_SIZE;
-  const startY = Math.floor(canvas.height / TILE_SIZE / 2) * TILE_SIZE;
-  snake = [{ x: startX, y: startY }];
-  direction = { x: 0, y: 0 }; // Stationary start
-  nextDirection = { x: 0, y: 0 };
+  // Reset core game state while preserving high score
+  const currentHighScore = state.highScore;
+  state = createInitialState();
+  state.highScore = currentHighScore;
+  state.isRunning = true;
+
+  // Center start
+  const startX =
+    Math.floor(canvas.width / GAME_CONFIG.tileSize / 2) * GAME_CONFIG.tileSize;
+  const startY =
+    Math.floor(canvas.height / GAME_CONFIG.tileSize / 2) * GAME_CONFIG.tileSize;
+
+  state.snake = [{ x: startX, y: startY }];
+  state.direction = { x: 0, y: 0 };
+  state.nextDirection = { x: 0, y: 0 };
 
   spawnFood();
-  callbacks.onScoreUpdate(score, highScore);
+  callbacks.onScoreUpdate(state.score, state.highScore);
 
   gameLoop();
 }
 
-export function pauseGame(): void {
-  isPaused = true;
-  if (animationId) {
-    cancelAnimationFrame(animationId);
-    animationId = null;
-  }
-}
-
-export function resumeGame(): void {
-  if (isPaused) {
-    isPaused = false;
-    gameLoop();
-  }
-}
-
-export function stopGame(): void {
-  isPaused = false;
-  if (animationId) {
-    cancelAnimationFrame(animationId);
-    animationId = null;
-  }
-}
-
-let lastRenderTime = 0;
 function gameLoop(currentTime?: number) {
-  animationId = requestAnimationFrame(gameLoop);
+  if (!state.isRunning) return;
+
+  state.animationId = requestAnimationFrame(gameLoop);
 
   if (!currentTime) return;
-  const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000;
-  if (secondsSinceLastRender < 1 / FPS) return;
+  const secondsSinceLastRender = (currentTime - state.lastRenderTime) / 1000;
+  if (secondsSinceLastRender < 1 / GAME_CONFIG.defaultFps) return;
 
-  lastRenderTime = currentTime;
+  state.lastRenderTime = currentTime;
 
-  update();
-  draw();
+  if (!state.isPaused) {
+    update();
+    draw();
+  }
 }
 
 function update() {
   // Apply queued direction
-  direction = nextDirection;
+  state.direction = state.nextDirection;
 
-  // If no direction (start of game), don't update snake
-  if (direction.x === 0 && direction.y === 0) return;
+  // If stationary, don't move
+  if (state.direction.x === 0 && state.direction.y === 0) return;
 
-  const head = { ...snake[0] };
-  head.x += direction.x * TILE_SIZE;
-  head.y += direction.y * TILE_SIZE;
+  const head = { ...state.snake[0] };
+  head.x += state.direction.x * GAME_CONFIG.tileSize;
+  head.y += state.direction.y * GAME_CONFIG.tileSize;
 
   // Wall Collision
   if (
@@ -124,90 +151,159 @@ function update() {
     head.y < 0 ||
     head.y >= canvas.height
   ) {
-    AudioManager.playSFX("die");
-    gameOver();
+    handleGameOver();
     return;
   }
 
   // Self Collision
-  for (let i = 0; i < snake.length; i++) {
-    if (head.x === snake[i].x && head.y === snake[i].y) {
-      AudioManager.playSFX("die");
-      gameOver();
+  for (let i = 0; i < state.snake.length; i++) {
+    if (head.x === state.snake[i].x && head.y === state.snake[i].y) {
+      handleGameOver();
       return;
     }
   }
 
-  snake.unshift(head); // Add new head
+  state.snake.unshift(head);
 
   // Check Food
-  if (head.x === food.x && head.y === food.y) {
-    score += 10;
-    if (score > highScore) {
-      highScore = score;
-      localStorage.setItem("snake-high-score", highScore.toString());
-    }
-    callbacks.onScoreUpdate(score, highScore);
-    AudioManager.playSFX("eat");
-    spawnFood();
+  if (head.x === state.food.x && head.y === state.food.y) {
+    handleEatFood();
   } else {
-    snake.pop(); // Remove tail
+    state.snake.pop();
+  }
+}
+
+function handleEatFood() {
+  state.score += 10;
+  if (state.score > state.highScore) {
+    state.highScore = state.score;
+    saveHighScore();
+  }
+  callbacks.onScoreUpdate(state.score, state.highScore);
+  AudioManager.playSFX("eat");
+  spawnFood();
+}
+
+function handleGameOver() {
+  AudioManager.playSFX("die");
+  stopGame();
+  callbacks.onGameOver(state.score);
+}
+
+function spawnFood() {
+  const cols = canvas.width / GAME_CONFIG.tileSize;
+  const rows = canvas.height / GAME_CONFIG.tileSize;
+  const maxAttempts = cols * rows;
+  let attempts = 0;
+  let valid = false;
+
+  while (!valid && attempts < maxAttempts) {
+    state.food = {
+      x: Math.floor(Math.random() * cols) * GAME_CONFIG.tileSize,
+      y: Math.floor(Math.random() * rows) * GAME_CONFIG.tileSize,
+    };
+
+    // Check if on snake
+    valid = !state.snake.some(
+      (s) => s.x === state.food.x && s.y === state.food.y,
+    );
+    attempts++;
+  }
+
+  if (!valid) {
+    // Should count as a win or just game over if board is full
+    console.warn("No valid space for food!");
+    // For now, treat as game over if we really can't spawn food (perfect game?)
+    handleGameOver();
   }
 }
 
 function draw() {
   // Clear
-  ctx.fillStyle = "#1a1a1a"; // Dark background
+  ctx.fillStyle = COLORS.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Draw Food
-  ctx.fillStyle = "#ff5555"; // Red food
-  ctx.fillRect(food.x, food.y, TILE_SIZE, TILE_SIZE);
+  ctx.fillStyle = COLORS.food;
+  ctx.fillRect(
+    state.food.x,
+    state.food.y,
+    GAME_CONFIG.tileSize,
+    GAME_CONFIG.tileSize,
+  );
 
   // Draw Snake
-  ctx.fillStyle = "#55ff55"; // Green snake
-  snake.forEach((segment, index) => {
-    // Make head slightly different
-    ctx.fillStyle = index === 0 ? "#88ff88" : "#55ff55";
-    ctx.fillRect(segment.x, segment.y, TILE_SIZE, TILE_SIZE);
+  state.snake.forEach((segment, index) => {
+    ctx.fillStyle = index === 0 ? COLORS.snakeHead : COLORS.snakeBody;
+    ctx.fillRect(
+      segment.x,
+      segment.y,
+      GAME_CONFIG.tileSize,
+      GAME_CONFIG.tileSize,
+    );
   });
 }
 
-function spawnFood() {
-  // Random grid position
-  const cols = canvas.width / TILE_SIZE;
-  const rows = canvas.height / TILE_SIZE;
-
-  // Simple random
-  let valid = false;
-  while (!valid) {
-    food = {
-      x: Math.floor(Math.random() * cols) * TILE_SIZE,
-      y: Math.floor(Math.random() * rows) * TILE_SIZE,
-    };
-    // Check if on snake
-    valid = !snake.some((s) => s.x === food.x && s.y === food.y);
+// Storage Helpers
+function loadHighScore() {
+  try {
+    const saved = localStorage.getItem(GAME_CONFIG.localStorageKey);
+    if (saved) {
+      state.highScore = parseInt(saved, 10);
+    }
+  } catch (error) {
+    console.warn("Failed to load high score from localStorage", error);
   }
 }
 
-function gameOver() {
-  stopGame();
-  callbacks.onGameOver(score);
+function saveHighScore() {
+  try {
+    localStorage.setItem(
+      GAME_CONFIG.localStorageKey,
+      state.highScore.toString(),
+    );
+  } catch (error) {
+    console.warn("Failed to save high score to localStorage", error);
+  }
 }
 
-// Controls
+// Controls & Lifecycle
+export function pauseGame(): void {
+  state.isPaused = true;
+  if (state.animationId) {
+    cancelAnimationFrame(state.animationId);
+    state.animationId = null;
+  }
+}
+
+export function resumeGame(): void {
+  if (state.isPaused) {
+    state.isPaused = false;
+    gameLoop();
+  }
+}
+
+export function stopGame(): void {
+  state.isRunning = false;
+  state.isPaused = false;
+  if (state.animationId) {
+    cancelAnimationFrame(state.animationId);
+    state.animationId = null;
+  }
+}
+
 export function moveUp(): void {
-  if (direction.y === 0) nextDirection = { x: 0, y: -1 };
+  if (state.direction.y === 0) state.nextDirection = { x: 0, y: -1 };
 }
 
 export function moveDown(): void {
-  if (direction.y === 0) nextDirection = { x: 0, y: 1 };
+  if (state.direction.y === 0) state.nextDirection = { x: 0, y: 1 };
 }
 
 export function moveLeft(): void {
-  if (direction.x === 0) nextDirection = { x: -1, y: 0 };
+  if (state.direction.x === 0) state.nextDirection = { x: -1, y: 0 };
 }
 
 export function moveRight(): void {
-  if (direction.x === 0) nextDirection = { x: 1, y: 0 };
+  if (state.direction.x === 0) state.nextDirection = { x: 1, y: 0 };
 }
