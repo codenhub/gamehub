@@ -1,80 +1,19 @@
-// GAME CONTROLS
-const moveDown = () => {
-  if (isValidMove(currentPiece, currentX, currentY + 1)) {
-    currentY++;
-    draw();
-  }
-};
-const moveLeft = () => {
-  if (isValidMove(currentPiece, currentX - 1, currentY)) {
-    currentX--;
-    draw();
-  }
-};
-const moveRight = () => {
-  if (isValidMove(currentPiece, currentX + 1, currentY)) {
-    currentX++;
-    draw();
-  }
-};
-const rotateLeft = () => {
-  const rotated = rotatePiece(rotatePiece(rotatePiece(currentPiece)));
-  if (isValidMove(rotated, currentX, currentY)) {
-    currentPiece = rotated;
-    draw();
-  }
-};
-const rotateRight = () => {
-  const rotated = rotatePiece(currentPiece);
-  if (isValidMove(rotated, currentX, currentY)) {
-    currentPiece = rotated;
-    draw();
-  }
-};
-const dropPiece = () => {
-  while (isValidMove(currentPiece, currentX, currentY + 1)) {
-    currentY++;
-  }
-  placePiece();
-  draw();
-};
-
-// GAME STATE
-const playGame = () => {
-  if (!isPlaying) {
-    isPlaying = true;
-    if (!canvas) initGame();
-    gameLoop = setInterval(gameTick, 500);
-  }
-};
-const pauseGame = () => {
-  if (isPlaying) {
-    clearInterval(gameLoop);
-    isPlaying = false;
-  }
-};
-const stopGame = () => {
-  clearInterval(gameLoop);
-  isPlaying = false;
-  resetGrid();
-  score = 0;
-  updateScore();
-  spawnPiece();
-  draw();
-};
+// Types
+type PieceMatrix = number[][];
 
 // GAME CONSTANTS
 const ROWS = 20;
 const COLS = 10;
 const BLOCK_SIZE = 30;
+const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
 const COLORS = {
-  piece: "#f5f5f5", // neutral-100
+  piece: "#f5f5f5",
   background: "#171717",
   grid: "#404040",
 };
 
 // TETROMINOES
-const TETROMINOES = {
+const TETROMINOES: Record<string, PieceMatrix> = {
   I: [
     [0, 0, 0, 0],
     [1, 1, 1, 1],
@@ -113,10 +52,12 @@ const TETROMINOES = {
 };
 
 // ROTATE PIECE
-const rotatePiece = (piece) => {
+const rotatePiece = (piece: PieceMatrix): PieceMatrix => {
   const rows = piece.length;
   const cols = piece[0].length;
-  const rotated = Array.from({ length: cols }, () => Array(rows).fill(0));
+  const rotated: PieceMatrix = Array.from({ length: cols }, () =>
+    Array(rows).fill(0),
+  );
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       rotated[x][rows - 1 - y] = piece[y][x];
@@ -126,24 +67,44 @@ const rotatePiece = (piece) => {
 };
 
 // GAME VARIABLES
-let canvas;
-let ctx;
-let grid = [];
-let currentPiece;
-let currentX;
-let currentY;
+let canvas: HTMLCanvasElement;
+let ctx: CanvasRenderingContext2D;
+let grid: number[][] = [];
+let currentPiece: PieceMatrix;
+let currentX: number;
+let currentY: number;
 let score = 0;
-let gameLoop;
+let highScore = loadHighScore();
+let gameLoop: ReturnType<typeof setInterval>;
 let isPlaying = false;
+
+// HIGH SCORE PERSISTENCE
+function loadHighScore(): number {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? parseInt(saved, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+const saveHighScore = () => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, highScore.toString());
+  } catch {
+    /* localStorage may be unavailable */
+  }
+};
 
 // INITIALIZE GAME
 const initGame = () => {
-  canvas = document.getElementById("game");
-  ctx = canvas.getContext("2d");
+  canvas = document.getElementById("game") as HTMLCanvasElement;
+  ctx = canvas.getContext("2d")!;
   canvas.width = COLS * BLOCK_SIZE;
   canvas.height = ROWS * BLOCK_SIZE;
   resetGrid();
   spawnPiece();
+  updateScore();
   draw();
 };
 
@@ -215,7 +176,7 @@ const draw = () => {
 };
 
 // CHECK COLLISION
-const isValidMove = (piece, x, y) => {
+const isValidMove = (piece: PieceMatrix, x: number, y: number): boolean => {
   for (let py = 0; py < piece.length; py++) {
     for (let px = 0; px < piece[py].length; px++) {
       if (piece[py][px]) {
@@ -266,10 +227,15 @@ const clearLines = () => {
 
 // UPDATE SCORE
 const updateScore = () => {
-  const scoreElement = document.querySelector("p");
-  if (scoreElement) {
-    scoreElement.textContent = `Score: ${score}`;
+  if (score > highScore) {
+    highScore = score;
+    saveHighScore();
   }
+
+  const scoreEl = document.getElementById("score");
+  const highScoreEl = document.getElementById("high-score");
+  if (scoreEl) scoreEl.textContent = score.toString();
+  if (highScoreEl) highScoreEl.textContent = highScore.toString();
 };
 
 // GAME OVER
@@ -286,6 +252,71 @@ const gameTick = () => {
   } else {
     currentY++;
   }
+  draw();
+};
+
+// GAME CONTROLS
+const moveDown = () => {
+  if (isValidMove(currentPiece, currentX, currentY + 1)) {
+    currentY++;
+    draw();
+  }
+};
+const moveLeft = () => {
+  if (isValidMove(currentPiece, currentX - 1, currentY)) {
+    currentX--;
+    draw();
+  }
+};
+const moveRight = () => {
+  if (isValidMove(currentPiece, currentX + 1, currentY)) {
+    currentX++;
+    draw();
+  }
+};
+const rotateLeft = () => {
+  const rotated = rotatePiece(rotatePiece(rotatePiece(currentPiece)));
+  if (isValidMove(rotated, currentX, currentY)) {
+    currentPiece = rotated;
+    draw();
+  }
+};
+const rotateRight = () => {
+  const rotated = rotatePiece(currentPiece);
+  if (isValidMove(rotated, currentX, currentY)) {
+    currentPiece = rotated;
+    draw();
+  }
+};
+const dropPiece = () => {
+  while (isValidMove(currentPiece, currentX, currentY + 1)) {
+    currentY++;
+  }
+  placePiece();
+  draw();
+};
+
+// GAME STATE
+const playGame = () => {
+  if (!isPlaying) {
+    isPlaying = true;
+    if (!canvas) initGame();
+    gameLoop = setInterval(gameTick, 500);
+  }
+};
+const pauseGame = () => {
+  if (isPlaying) {
+    clearInterval(gameLoop);
+    isPlaying = false;
+  }
+};
+const stopGame = () => {
+  clearInterval(gameLoop);
+  isPlaying = false;
+  resetGrid();
+  score = 0;
+  updateScore();
+  spawnPiece();
   draw();
 };
 
