@@ -1,6 +1,8 @@
 import AudioManager from "../_core/audio";
 import { showAlert } from "../_core/utils/alerts";
 
+AudioManager.loadMultipleSFX(["eat", "fail", "complete"]);
+
 // Constants
 const COLORS = {
   background: "#262626",
@@ -292,6 +294,7 @@ export class SnakeGame {
   private handleGameWin() {
     this.stop();
     this.callbacks.onGameWin(this.state.score);
+    AudioManager.playSFX("complete");
   }
 
   private spawnFood() {
