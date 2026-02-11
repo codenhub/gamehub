@@ -5,6 +5,7 @@ type PieceMatrix = number[][];
 const ROWS = 20;
 const COLS = 10;
 const BLOCK_SIZE = 30;
+const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
 const COLORS = {
   piece: "#f5f5f5",
   background: "#171717",
@@ -73,8 +74,27 @@ let currentPiece: PieceMatrix;
 let currentX: number;
 let currentY: number;
 let score = 0;
+let highScore = loadHighScore();
 let gameLoop: ReturnType<typeof setInterval>;
 let isPlaying = false;
+
+// HIGH SCORE PERSISTENCE
+function loadHighScore(): number {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? parseInt(saved, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+const saveHighScore = () => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, highScore.toString());
+  } catch {
+    /* localStorage may be unavailable */
+  }
+};
 
 // INITIALIZE GAME
 const initGame = () => {
@@ -84,6 +104,7 @@ const initGame = () => {
   canvas.height = ROWS * BLOCK_SIZE;
   resetGrid();
   spawnPiece();
+  updateScore();
   draw();
 };
 
@@ -206,10 +227,15 @@ const clearLines = () => {
 
 // UPDATE SCORE
 const updateScore = () => {
-  const scoreElement = document.querySelector("p");
-  if (scoreElement) {
-    scoreElement.textContent = `Score: ${score}`;
+  if (score > highScore) {
+    highScore = score;
+    saveHighScore();
   }
+
+  const scoreEl = document.getElementById("score");
+  const highScoreEl = document.getElementById("high-score");
+  if (scoreEl) scoreEl.textContent = score.toString();
+  if (highScoreEl) highScoreEl.textContent = highScore.toString();
 };
 
 // GAME OVER
