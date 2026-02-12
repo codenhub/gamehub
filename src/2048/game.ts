@@ -110,17 +110,8 @@ export class Game2048 {
           tile.style.backgroundColor = colors.bg;
           tile.style.color = colors.text;
         } else {
-          tile.style.backgroundColor = "#3a3a3a";
+          tile.style.backgroundColor = "var(--color-background)";
           tile.style.color = "transparent";
-        }
-
-        // Scale down font for large numbers
-        if (value >= 1024) {
-          tile.style.fontSize = "1.25rem";
-        } else if (value >= 128) {
-          tile.style.fontSize = "1.5rem";
-        } else {
-          tile.style.fontSize = "";
         }
       }
     }
