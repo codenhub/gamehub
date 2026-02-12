@@ -1,69 +1,21 @@
-// Types
-type PieceMatrix = number[][];
+import {
+  type PieceMatrix,
+  ROWS,
+  COLS,
+  TETROMINOES,
+  rotatePiece,
+  isValidMove as checkMove,
+  clearLines as computeClearedLines,
+  createEmptyGrid,
+} from "./logic";
 
-// GAME CONSTANTS
-const ROWS = 20;
-const COLS = 10;
+// RENDERING CONSTANTS
 const BLOCK_SIZE = 30;
 const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
 const COLORS = {
   piece: "#f5f5f5",
   background: "#171717",
   grid: "#404040",
-};
-
-// TETROMINOES
-const TETROMINOES: Record<string, PieceMatrix> = {
-  I: [
-    [0, 0, 0, 0],
-    [1, 1, 1, 1],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-  ],
-  O: [
-    [1, 1],
-    [1, 1],
-  ],
-  T: [
-    [0, 1, 0],
-    [1, 1, 1],
-    [0, 0, 0],
-  ],
-  S: [
-    [0, 1, 1],
-    [1, 1, 0],
-    [0, 0, 0],
-  ],
-  Z: [
-    [1, 1, 0],
-    [0, 1, 1],
-    [0, 0, 0],
-  ],
-  J: [
-    [1, 0, 0],
-    [1, 1, 1],
-    [0, 0, 0],
-  ],
-  L: [
-    [0, 0, 1],
-    [1, 1, 1],
-    [0, 0, 0],
-  ],
-};
-
-// ROTATE PIECE
-const rotatePiece = (piece: PieceMatrix): PieceMatrix => {
-  const rows = piece.length;
-  const cols = piece[0].length;
-  const rotated: PieceMatrix = Array.from({ length: cols }, () =>
-    Array(rows).fill(0),
-  );
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      rotated[x][rows - 1 - y] = piece[y][x];
-    }
-  }
-  return rotated;
 };
 
 // GAME VARIABLES
@@ -129,7 +81,7 @@ const initGame = (): boolean => {
 
 // RESET GRID
 const resetGrid = () => {
-  grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+  grid = createEmptyGrid();
 };
 
 // SPAWN NEW PIECE
@@ -199,26 +151,9 @@ const draw = () => {
   }
 };
 
-// CHECK COLLISION
-const isValidMove = (piece: PieceMatrix, x: number, y: number): boolean => {
-  for (let py = 0; py < piece.length; py++) {
-    for (let px = 0; px < piece[py].length; px++) {
-      if (piece[py][px]) {
-        const newX = x + px;
-        const newY = y + py;
-        if (
-          newX < 0 ||
-          newX >= COLS ||
-          newY >= ROWS ||
-          (newY >= 0 && grid[newY][newX])
-        ) {
-          return false;
-        }
-      }
-    }
-  }
-  return true;
-};
+// CHECK COLLISION — wraps pure function with current game state
+const isValidMove = (piece: PieceMatrix, x: number, y: number): boolean =>
+  checkMove({ grid, piece, x, y });
 
 // PLACE PIECE
 const placePiece = () => {
@@ -243,16 +178,13 @@ const placePiece = () => {
   }
 };
 
-// CLEAR LINES
+// CLEAR LINES — wraps pure function, mutates game state
 const clearLines = () => {
-  for (let y = ROWS - 1; y >= 0; y--) {
-    if (grid[y].every((cell) => cell !== 0)) {
-      grid.splice(y, 1);
-      grid.unshift(Array(COLS).fill(0));
-      score += 100;
-      updateScore();
-      y++; // Check the same line again
-    }
+  const result = computeClearedLines(grid);
+  grid = result.grid;
+  if (result.linesCleared > 0) {
+    score += result.linesCleared * 100;
+    updateScore();
   }
 };
 
