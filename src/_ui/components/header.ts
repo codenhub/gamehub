@@ -95,10 +95,15 @@ export class Header extends HTMLElement {
 
     const musicVolumeEl = document.getElementById(
       "music-volume",
-    ) as HTMLInputElement;
+    ) as HTMLInputElement | null;
     const soundVolumeEl = document.getElementById(
       "sound-volume",
-    ) as HTMLInputElement;
+    ) as HTMLInputElement | null;
+
+    if (!musicVolumeEl || !soundVolumeEl) {
+      console.warn("[Header] Volume controls not found in DOM");
+      return;
+    }
 
     const musicVolume = Number(localStorage.getItem("music-volume") || "50");
     const soundVolume = Number(localStorage.getItem("sound-volume") || "75");

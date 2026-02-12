@@ -3,7 +3,9 @@ import AudioManager from "../_core/audio";
 document.addEventListener(
   "click",
   () => {
-    AudioManager.playMusic();
+    AudioManager.playMusic().catch((err) => {
+      console.warn("[UI] Failed to start music on click:", err);
+    });
   },
   { once: true },
 );
@@ -11,7 +13,9 @@ document.addEventListener(
 document.addEventListener(
   "keydown",
   () => {
-    AudioManager.playMusic();
+    AudioManager.playMusic().catch((err) => {
+      console.warn("[UI] Failed to start music on keydown:", err);
+    });
   },
   { once: true },
 );

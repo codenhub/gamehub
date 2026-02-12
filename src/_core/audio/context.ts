@@ -70,8 +70,9 @@ export class MusicContext extends BaseAudioContext<MusicId> {
       try {
         this.source.stop();
         this.source.disconnect();
-      } catch {
-        // Ignore errors if source already stopped
+      } catch (error) {
+        // Expected if source was already stopped or never started
+        console.debug("[MusicContext] Source cleanup:", error);
       }
       this.source = null;
     }
