@@ -9,8 +9,6 @@ import {
   COLS,
 } from "./logic";
 
-// ─── rotatePiece ────────────────────────────────────────────
-
 describe("rotatePiece", () => {
   it("should rotate T-piece clockwise", () => {
     const rotated = rotatePiece(TETROMINOES.T);
@@ -66,8 +64,6 @@ describe("rotatePiece", () => {
   });
 });
 
-// ─── isValidMove ────────────────────────────────────────────
-
 describe("isValidMove", () => {
   it("should allow placement on empty grid center", () => {
     const grid = createEmptyGrid();
@@ -119,8 +115,6 @@ describe("isValidMove", () => {
 
   it("should allow piece partially above grid (entering from top)", () => {
     const grid = createEmptyGrid();
-    // At y=-1, row 0 (block at offset 1) has newY=-1 — the code
-    // only rejects if newY >= 0 && grid collision, so negative Y is allowed
     expect(isValidMove({ grid, piece: TETROMINOES.T, x: 3, y: -1 })).toBe(true);
   });
 
@@ -128,7 +122,6 @@ describe("isValidMove", () => {
     const grid = createEmptyGrid();
     grid[5][5] = 1;
 
-    // T-piece row 0 has block at offset 1 — at x=4, y=5: newX=5, newY=5 → collision
     expect(isValidMove({ grid, piece: TETROMINOES.T, x: 4, y: 5 })).toBe(false);
   });
 
@@ -136,12 +129,9 @@ describe("isValidMove", () => {
     const grid = createEmptyGrid();
     grid[5][5] = 1;
 
-    // T-piece at x=6: row 1 blocks at 6,7,8 — no overlap with (5,5)
     expect(isValidMove({ grid, piece: TETROMINOES.T, x: 6, y: 4 })).toBe(true);
   });
 });
-
-// ─── clearLines ─────────────────────────────────────────────
 
 describe("clearLines", () => {
   it("should return zero when no lines are full", () => {
@@ -164,9 +154,7 @@ describe("clearLines", () => {
 
     expect(result.linesCleared).toBe(1);
     expect(result.grid).toHaveLength(ROWS);
-    // New top row should be empty
     expect(result.grid[0].every((c) => c === 0)).toBe(true);
-    // Bottom row (previously full) is now empty
     expect(result.grid[ROWS - 1].every((c) => c === 0)).toBe(true);
   });
 
@@ -220,8 +208,6 @@ describe("clearLines", () => {
     expect(grid[ROWS - 1].every((c) => c !== 0)).toBe(true);
   });
 });
-
-// ─── createEmptyGrid ───────────────────────────────────────
 
 describe("createEmptyGrid", () => {
   it("should create grid with default dimensions", () => {

@@ -151,7 +151,7 @@ const draw = () => {
   }
 };
 
-// CHECK COLLISION — wraps pure function with current game state
+// CHECK COLLISION
 const isValidMove = (piece: PieceMatrix, x: number, y: number): boolean =>
   checkMove({ grid, piece, x, y });
 
@@ -163,8 +163,7 @@ const placePiece = () => {
         const gridY = currentY + y;
         const gridX = currentX + x;
 
-        // Bounds safety — should always be valid if isValidMove was checked,
-        // but guard against edge cases
+        // Bounds safety
         if (gridY >= 0 && gridY < ROWS && gridX >= 0 && gridX < COLS) {
           grid[gridY][gridX] = 1;
         }
@@ -178,7 +177,7 @@ const placePiece = () => {
   }
 };
 
-// CLEAR LINES — wraps pure function, mutates game state
+// CLEAR LINES
 const clearLines = () => {
   const result = computeClearedLines(grid);
   grid = result.grid;

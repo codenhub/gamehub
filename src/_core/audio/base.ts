@@ -1,6 +1,6 @@
 export const DEFAULT_FADE_DURATION = 1;
 
-const clampVolume = (volume: number): number =>
+export const clampVolume = (volume: number): number =>
   Math.max(0, Math.min(1, volume));
 
 export abstract class BaseAudioContext<T extends string> {

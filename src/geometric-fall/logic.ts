@@ -1,11 +1,8 @@
-// Types
 export type PieceMatrix = number[][];
 
-// Grid Constants
 export const ROWS = 20;
 export const COLS = 10;
 
-// Tetrominoes
 export const TETROMINOES: Record<string, PieceMatrix> = {
   I: [
     [0, 0, 0, 0],
@@ -44,8 +41,6 @@ export const TETROMINOES: Record<string, PieceMatrix> = {
   ],
 };
 
-// Pure Functions
-
 export function createEmptyGrid(
   rows: number = ROWS,
   cols: number = COLS,
@@ -74,7 +69,6 @@ interface MoveValidation {
   y: number;
 }
 
-/** Checks if a piece can be placed at (x, y) without colliding. */
 export function isValidMove({ grid, piece, x, y }: MoveValidation): boolean {
   const rows = grid.length;
   const cols = grid[0]?.length ?? 0;
@@ -103,7 +97,6 @@ interface ClearLinesResult {
   linesCleared: number;
 }
 
-/** Returns a new grid with full lines removed and empty lines prepended. */
 export function clearLines(grid: number[][]): ClearLinesResult {
   const cols = grid[0]?.length ?? 0;
   const filteredGrid = grid.filter((row) => !row.every((cell) => cell !== 0));
