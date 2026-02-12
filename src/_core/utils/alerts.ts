@@ -18,13 +18,15 @@ const alertColors = {
 function getOrCreateContainer(): HTMLDivElement {
   let container = document.getElementById(
     "global-alert-container",
-  ) as HTMLDivElement;
+  ) as HTMLDivElement | null;
   if (!container) {
     container = document.createElement("div");
     container.id = "global-alert-container";
     container.className =
       "fixed top-4 right-4 z-50 flex flex-col-reverse gap-2 pointer-events-none";
-    document.body.appendChild(container);
+
+    const target = document.body ?? document.documentElement;
+    target.appendChild(container);
   }
   return container;
 }
@@ -45,17 +47,19 @@ function createAlertElement(options: AlertOptions): HTMLDivElement {
 
 function removeAlert(alertElement: HTMLDivElement) {
   const container = getOrCreateContainer();
-  if (container.contains(alertElement)) {
-    gsap.to(alertElement, {
-      xPercent: 100,
-      opacity: 0,
-      duration: 0.4,
-      ease: "power1.inOut",
-    });
-    setTimeout(() => {
+  if (!container.contains(alertElement)) return;
+
+  gsap.to(alertElement, {
+    xPercent: 100,
+    opacity: 0,
+    duration: 0.4,
+    ease: "power1.inOut",
+  });
+  setTimeout(() => {
+    if (container.contains(alertElement)) {
       container.removeChild(alertElement);
-    }, 400);
-  }
+    }
+  }, 400);
 }
 
 export function showAlert(options: AlertOptions) {
