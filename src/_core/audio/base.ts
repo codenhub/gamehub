@@ -86,6 +86,17 @@ export abstract class BaseAudioContext<T extends string> {
   }
 
   public async loadMultiple(ids: T[], urlMap: Record<T, string>) {
-    await Promise.all(ids.map((id) => this.load(id, urlMap[id])));
+    const results = await Promise.allSettled(
+      ids.map((id) => this.load(id, urlMap[id])),
+    );
+
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.warn(
+          `[AudioContext] Failed to load "${ids[index]}":`,
+          result.reason,
+        );
+      }
+    });
   }
 }

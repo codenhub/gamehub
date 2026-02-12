@@ -29,7 +29,13 @@ const themes = {
   },
 };
 
-const setTheme = (theme: "dark" | "light") => {
+const VALID_THEMES = ["dark", "light"] as const;
+type Theme = (typeof VALID_THEMES)[number];
+
+const isValidTheme = (value: string | null): value is Theme =>
+  value !== null && VALID_THEMES.includes(value as Theme);
+
+const setTheme = (theme: Theme) => {
   document.documentElement.classList.toggle("dark", theme === "dark");
   localStorage.setItem("theme", theme);
 
@@ -45,11 +51,12 @@ export class Header extends HTMLElement {
     const title = this.getAttribute("title") || "GameHub";
     const backBtn = this.hasAttribute("backBtn");
 
-    const theme =
-      (localStorage.getItem("theme") as "dark" | "light") ??
-      (window.matchMedia("(prefers-color-scheme: dark)").matches
+    const storedTheme = localStorage.getItem("theme");
+    const theme = isValidTheme(storedTheme)
+      ? storedTheme
+      : window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
-        : "light");
+        : "light";
 
     setTheme(theme);
 

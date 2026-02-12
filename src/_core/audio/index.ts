@@ -144,4 +144,16 @@ class AudioManager {
   }
 }
 
-export default new AudioManager();
+const AUDIO_MANAGER_KEY = "__AUDIO_MANAGER__" as const;
+
+function getAudioManagerInstance(): AudioManager {
+  const global = globalThis as Record<string, unknown>;
+
+  if (!global[AUDIO_MANAGER_KEY]) {
+    global[AUDIO_MANAGER_KEY] = new AudioManager();
+  }
+
+  return global[AUDIO_MANAGER_KEY] as AudioManager;
+}
+
+export default getAudioManagerInstance();
