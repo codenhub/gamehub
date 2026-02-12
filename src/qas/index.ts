@@ -31,11 +31,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const musicTrackBtn = document.getElementById("track-music-btn");
 
   playSfxBtn?.addEventListener("click", () => {
-    AudioManager.playSFX("collect");
+    AudioManager.playSFX("collect").catch((err) => {
+      console.warn("[QAS] Failed to play SFX:", err);
+    });
   });
 
   playMusicBtn?.addEventListener("click", () => {
-    AudioManager.playMusic("main-soundtrack");
+    AudioManager.playMusic("main-soundtrack").catch((err) => {
+      console.warn("[QAS] Failed to play music:", err);
+    });
   });
 
   pauseMusicBtn?.addEventListener("click", () => {
@@ -43,11 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   resumeMusicBtn?.addEventListener("click", () => {
-    AudioManager.resumeMusic();
+    AudioManager.resumeMusic().catch((err) => {
+      console.warn("[QAS] Failed to resume music:", err);
+    });
   });
 
-  changeMusicBtn?.addEventListener("click", async () => {
-    await AudioManager.changeMusic("frenetic-soundtrack");
+  changeMusicBtn?.addEventListener("click", () => {
+    AudioManager.changeMusic("frenetic-soundtrack");
   });
 
   musicTrackBtn?.addEventListener("click", () => {

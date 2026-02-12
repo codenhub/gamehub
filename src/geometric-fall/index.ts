@@ -12,12 +12,28 @@ import {
 
 type GameState = "stopped" | "playing" | "paused";
 
+function getRequiredElement<T extends HTMLElement>(
+  id: string,
+  elementType: string,
+): T | null {
+  const el = document.getElementById(id) as T | null;
+  if (!el) {
+    console.warn(`[GeometricFall] Required ${elementType} #${id} not found`);
+  }
+  return el;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // GAME STATE MANAGEMENT
   let state: GameState = "stopped";
-  const playBtn = document.getElementById("play") as HTMLButtonElement;
-  const pauseBtn = document.getElementById("pause") as HTMLButtonElement;
-  const stopBtn = document.getElementById("stop") as HTMLButtonElement;
+  const playBtn = getRequiredElement<HTMLButtonElement>("play", "button");
+  const pauseBtn = getRequiredElement<HTMLButtonElement>("pause", "button");
+  const stopBtn = getRequiredElement<HTMLButtonElement>("stop", "button");
+
+  if (!playBtn || !pauseBtn || !stopBtn) {
+    console.error("[GeometricFall] Missing required game control buttons");
+    return;
+  }
 
   playBtn.addEventListener("click", () => {
     state = "playing";

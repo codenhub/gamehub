@@ -77,13 +77,18 @@ let score = 0;
 let highScore = loadHighScore();
 let gameLoop: ReturnType<typeof setInterval>;
 let isPlaying = false;
+let isInitialized = false;
 
 // HIGH SCORE PERSISTENCE
 function loadHighScore(): number {
   try {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return saved ? parseInt(saved, 10) : 0;
-  } catch {
+    if (!saved) return 0;
+
+    const parsed = parseInt(saved, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  } catch (error) {
+    console.warn("[GeometricFall] Failed to load high score:", error);
     return 0;
   }
 }
@@ -91,21 +96,35 @@ function loadHighScore(): number {
 const saveHighScore = () => {
   try {
     localStorage.setItem(LOCAL_STORAGE_KEY, highScore.toString());
-  } catch {
-    /* localStorage may be unavailable */
+  } catch (error) {
+    console.warn("[GeometricFall] Failed to save high score:", error);
   }
 };
 
 // INITIALIZE GAME
-const initGame = () => {
-  canvas = document.getElementById("game") as HTMLCanvasElement;
-  ctx = canvas.getContext("2d")!;
+const initGame = (): boolean => {
+  const canvasEl = document.getElementById("game");
+  if (!(canvasEl instanceof HTMLCanvasElement)) {
+    console.error("[GeometricFall] Canvas element #game not found");
+    return false;
+  }
+  canvas = canvasEl;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    console.error("[GeometricFall] Failed to get 2D canvas context");
+    return false;
+  }
+  ctx = context;
+
   canvas.width = COLS * BLOCK_SIZE;
   canvas.height = ROWS * BLOCK_SIZE;
   resetGrid();
   spawnPiece();
   updateScore();
   draw();
+  isInitialized = true;
+  return true;
 };
 
 // RESET GRID
@@ -116,6 +135,11 @@ const resetGrid = () => {
 // SPAWN NEW PIECE
 const spawnPiece = () => {
   const pieces = Object.keys(TETROMINOES);
+  if (pieces.length === 0) {
+    console.error("[GeometricFall] No tetrominoes defined");
+    return;
+  }
+
   const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
   currentPiece = TETROMINOES[randomPiece];
   currentX = Math.floor(COLS / 2) - Math.floor(currentPiece[0].length / 2);
@@ -201,7 +225,14 @@ const placePiece = () => {
   for (let y = 0; y < currentPiece.length; y++) {
     for (let x = 0; x < currentPiece[y].length; x++) {
       if (currentPiece[y][x]) {
-        grid[currentY + y][currentX + x] = 1;
+        const gridY = currentY + y;
+        const gridX = currentX + x;
+
+        // Bounds safety — should always be valid if isValidMove was checked,
+        // but guard against edge cases
+        if (gridY >= 0 && gridY < ROWS && gridX >= 0 && gridX < COLS) {
+          grid[gridY][gridX] = 1;
+        }
       }
     }
   }
@@ -300,7 +331,12 @@ const dropPiece = () => {
 const playGame = () => {
   if (!isPlaying) {
     isPlaying = true;
-    if (!canvas) initGame();
+    if (!isInitialized) {
+      if (!initGame()) {
+        isPlaying = false;
+        return;
+      }
+    }
     gameLoop = setInterval(gameTick, 500);
   }
 };
@@ -313,6 +349,9 @@ const pauseGame = () => {
 const stopGame = () => {
   clearInterval(gameLoop);
   isPlaying = false;
+
+  if (!isInitialized) return;
+
   resetGrid();
   score = 0;
   updateScore();

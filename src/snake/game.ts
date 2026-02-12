@@ -63,9 +63,12 @@ export class SnakeGame {
     let savedHighScore = 0;
     try {
       const saved = localStorage.getItem(GAME_CONFIG.localStorageKey);
-      if (saved) savedHighScore = parseInt(saved, 10);
-    } catch (e) {
-      console.warn("LocalStorage access failed", e);
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        savedHighScore = Number.isNaN(parsed) ? 0 : parsed;
+      }
+    } catch (error) {
+      console.warn("[Snake] Failed to load high score:", error);
     }
 
     // Initial State
@@ -160,8 +163,8 @@ export class SnakeGame {
     if (!this.state.isRunning || this.state.isPaused) return;
 
     // Prevent 180 reverses
-    if (dx !== 0 && this.state.direction.x !== 0) return; // Moving horizontally, can't move horizontal
-    if (dy !== 0 && this.state.direction.y !== 0) return; // Moving vertically, can't move vertical
+    if (dx !== 0 && this.state.direction.x !== 0) return;
+    if (dy !== 0 && this.state.direction.y !== 0) return;
 
     this.state.nextDirection = { x: dx, y: dy };
   }
@@ -274,19 +277,25 @@ export class SnakeGame {
           GAME_CONFIG.localStorageKey,
           this.state.highScore.toString(),
         );
-      } catch (e) {
-        /* Check quota or privacy mode */
+      } catch (error) {
+        console.warn("[Snake] Failed to save high score:", error);
       }
     }
 
     this.callbacks.onScoreUpdate(this.state.score, this.state.highScore);
-    AudioManager.playSFX("eat");
+
+    AudioManager.playSFX("eat").catch((err) => {
+      console.warn("[Snake] Failed to play eat SFX:", err);
+    });
 
     this.spawnFood();
   }
 
   private handleGameOver() {
-    AudioManager.playSFX("fail");
+    AudioManager.playSFX("fail").catch((err) => {
+      console.warn("[Snake] Failed to play fail SFX:", err);
+    });
+
     this.stop();
     this.callbacks.onGameOver(this.state.score);
   }
@@ -294,7 +303,10 @@ export class SnakeGame {
   private handleGameWin() {
     this.stop();
     this.callbacks.onGameWin(this.state.score);
-    AudioManager.playSFX("complete");
+
+    AudioManager.playSFX("complete").catch((err) => {
+      console.warn("[Snake] Failed to play complete SFX:", err);
+    });
   }
 
   private spawnFood() {

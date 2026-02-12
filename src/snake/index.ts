@@ -1,50 +1,60 @@
 import { SnakeGame } from "./game";
 
+function getElement<T extends HTMLElement>(id: string): T | null {
+  return document.getElementById(id) as T | null;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  // DOM Elements
-  const playBtn = document.getElementById("play") as HTMLButtonElement;
-  const pauseBtn = document.getElementById("pause") as HTMLButtonElement;
-  const stopBtn = document.getElementById("stop") as HTMLButtonElement;
+  // DOM Elements — validated before use
+  const playBtn = getElement<HTMLButtonElement>("play");
+  const pauseBtn = getElement<HTMLButtonElement>("pause");
+  const stopBtn = getElement<HTMLButtonElement>("stop");
 
-  const restartBtn = document.getElementById(
-    "restart-btn",
-  ) as HTMLButtonElement;
-  const winRestartBtn = document.getElementById(
-    "win-restart-btn",
-  ) as HTMLButtonElement;
+  const restartBtn = getElement<HTMLButtonElement>("restart-btn");
+  const winRestartBtn = getElement<HTMLButtonElement>("win-restart-btn");
 
-  const startScreen = document.getElementById("start-screen") as HTMLDivElement;
+  const startScreen = getElement<HTMLDivElement>("start-screen");
+  const gameOverScreen = getElement<HTMLDivElement>("game-over-screen");
+  const winScreen = getElement<HTMLDivElement>("win-screen");
 
-  const gameOverScreen = document.getElementById(
-    "game-over-screen",
-  ) as HTMLDivElement;
-  const winScreen = document.getElementById("win-screen") as HTMLDivElement;
+  const scoreEl = getElement<HTMLSpanElement>("score");
+  const highScoreEl = getElement<HTMLSpanElement>("high-score");
+  const finalScoreEl = getElement<HTMLSpanElement>("final-score");
+  const winScoreEl = getElement<HTMLSpanElement>("win-score");
 
-  const scoreEl = document.getElementById("score") as HTMLSpanElement;
-  const highScoreEl = document.getElementById("high-score") as HTMLSpanElement;
+  const canvas = getElement<HTMLCanvasElement>("game");
 
-  const finalScoreEl = document.getElementById(
-    "final-score",
-  ) as HTMLSpanElement;
-  const winScoreEl = document.getElementById("win-score") as HTMLSpanElement;
+  if (!canvas) {
+    console.error("[Snake] Canvas element #game not found, cannot start game");
+    return;
+  }
 
-  const canvas = document.getElementById("game") as HTMLCanvasElement;
+  if (!playBtn || !pauseBtn || !stopBtn) {
+    console.error("[Snake] Missing required game control buttons");
+    return;
+  }
 
   // Game Instance
-  const game = new SnakeGame(canvas, {
-    onScoreUpdate: (score, highScore) => {
-      if (scoreEl) scoreEl.innerText = score.toString();
-      if (highScoreEl) highScoreEl.innerText = highScore.toString();
-    },
-    onGameOver: (finalScore) => {
-      if (finalScoreEl) finalScoreEl.innerText = finalScore.toString();
-      setGameOverState();
-    },
-    onGameWin: (finalScore) => {
-      if (winScoreEl) winScoreEl.innerText = finalScore.toString();
-      setWinState();
-    },
-  });
+  let game: SnakeGame;
+  try {
+    game = new SnakeGame(canvas, {
+      onScoreUpdate: (score, highScore) => {
+        if (scoreEl) scoreEl.innerText = score.toString();
+        if (highScoreEl) highScoreEl.innerText = highScore.toString();
+      },
+      onGameOver: (finalScore) => {
+        if (finalScoreEl) finalScoreEl.innerText = finalScore.toString();
+        setGameOverState();
+      },
+      onGameWin: (finalScore) => {
+        if (winScoreEl) winScoreEl.innerText = finalScore.toString();
+        setWinState();
+      },
+    });
+  } catch (error) {
+    console.error("[Snake] Failed to initialize game:", error);
+    return;
+  }
 
   // State Management
   type GameAppState = "stopped" | "playing" | "paused" | "gameover" | "win";
@@ -62,9 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
     pauseBtn.classList.remove("hidden");
     stopBtn.classList.remove("hidden");
 
-    startScreen.classList.add("hidden");
-    gameOverScreen.classList.add("hidden");
-    winScreen.classList.add("hidden");
+    startScreen?.classList.add("hidden");
+    gameOverScreen?.classList.add("hidden");
+    winScreen?.classList.add("hidden");
   };
 
   const setPausedState = () => {
@@ -83,9 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
     pauseBtn.classList.add("hidden");
     stopBtn.classList.add("hidden");
 
-    startScreen.classList.remove("hidden");
-    gameOverScreen.classList.add("hidden");
-    winScreen.classList.add("hidden");
+    startScreen?.classList.remove("hidden");
+    gameOverScreen?.classList.add("hidden");
+    winScreen?.classList.add("hidden");
   };
 
   const setGameOverState = () => {
@@ -95,8 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
     pauseBtn.classList.add("hidden");
     stopBtn.classList.add("hidden");
 
-    gameOverScreen.classList.remove("hidden");
-    gameOverScreen.classList.add("flex");
+    gameOverScreen?.classList.remove("hidden");
+    gameOverScreen?.classList.add("flex");
   };
 
   const setWinState = () => {
@@ -106,17 +116,17 @@ document.addEventListener("DOMContentLoaded", () => {
     pauseBtn.classList.add("hidden");
     stopBtn.classList.add("hidden");
 
-    winScreen.classList.remove("hidden");
-    winScreen.classList.add("flex");
+    winScreen?.classList.remove("hidden");
+    winScreen?.classList.add("flex");
   };
 
   // Event Listeners
-  if (playBtn) playBtn.addEventListener("click", setPlayingState);
-  if (pauseBtn) pauseBtn.addEventListener("click", setPausedState);
-  if (stopBtn) stopBtn.addEventListener("click", setStoppedState);
+  playBtn.addEventListener("click", setPlayingState);
+  pauseBtn.addEventListener("click", setPausedState);
+  stopBtn.addEventListener("click", setStoppedState);
 
-  if (restartBtn) restartBtn.addEventListener("click", setPlayingState);
-  if (winRestartBtn) winRestartBtn.addEventListener("click", setPlayingState);
+  restartBtn?.addEventListener("click", setPlayingState);
+  winRestartBtn?.addEventListener("click", setPlayingState);
 
   // Controls
   type Control = {
