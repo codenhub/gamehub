@@ -12,6 +12,7 @@ export default defineConfig({
         main: "./src/index.html",
         geometricFall: "./src/geometric-fall/index.html",
         snake: "./src/snake/index.html",
+        2048: "./src/2048/index.html",
       },
     },
   },
