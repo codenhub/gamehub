@@ -8,6 +8,9 @@ import {
   clearLines as computeClearedLines,
   createEmptyGrid,
 } from "./logic";
+import AudioManager from "../_core/audio";
+
+AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 
 // RENDERING CONSTANTS
 const BLOCK_SIZE = 30;
@@ -174,6 +177,8 @@ const placePiece = () => {
   spawnPiece();
   if (!isValidMove(currentPiece, currentX, currentY)) {
     gameOver();
+  } else {
+    AudioManager.playSFX("place");
   }
 };
 
@@ -184,6 +189,7 @@ const clearLines = () => {
   if (result.linesCleared > 0) {
     score += result.linesCleared * 100;
     updateScore();
+    AudioManager.playSFX("collect");
   }
 };
 
@@ -204,6 +210,7 @@ const updateScore = () => {
 const gameOver = () => {
   clearInterval(gameLoop);
   isPlaying = false;
+  AudioManager.playSFX("fail");
   alert("Game Over!");
 };
 
@@ -254,6 +261,7 @@ const dropPiece = () => {
   while (isValidMove(currentPiece, currentX, currentY + 1)) {
     currentY++;
   }
+  AudioManager.playSFX("hit");
   placePiece();
   draw();
 };
