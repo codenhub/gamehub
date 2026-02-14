@@ -10,7 +10,7 @@ import {
   hasWon,
 } from "./logic";
 
-AudioManager.loadMultipleSFX(["eat", "fail", "complete"]);
+AudioManager.loadMultipleSFX(["place", "hit", "fail", "complete"]);
 
 const GAME_CONFIG = {
   localStorageKey: "2048-high-score",
@@ -161,8 +161,12 @@ export class Game2048 {
     this.callbacks.onScoreUpdate(this.state.score, this.state.highScore);
 
     if (result.score > 0) {
-      AudioManager.playSFX("eat").catch((err) => {
+      AudioManager.playSFX("hit").catch((err) => {
         console.warn("[2048] Failed to play merge SFX:", err);
+      });
+    } else {
+      AudioManager.playSFX("place").catch((err) => {
+        console.warn("[2048] Failed to play place SFX:", err);
       });
     }
 
