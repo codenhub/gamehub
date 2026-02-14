@@ -113,6 +113,8 @@ export class Game2048 {
           tile.style.backgroundColor = "var(--color-background)";
           tile.style.color = "transparent";
         }
+
+        if (value > 1024) tile.style.fontSize = "2.75rem";
       }
     }
   }

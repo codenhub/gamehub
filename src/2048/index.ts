@@ -115,11 +115,23 @@ document.addEventListener("DOMContentLoaded", () => {
   gridContainer.addEventListener(
     "touchstart",
     (e: TouchEvent) => {
+      // Prevent default to stop scrolling/refresh behavior
+      if (e.cancelable) e.preventDefault();
+
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
     },
-    { passive: true },
+    { passive: false },
+  );
+
+  gridContainer.addEventListener(
+    "touchmove",
+    (e: TouchEvent) => {
+      // Critical for preventing scrolling while swiping
+      if (e.cancelable) e.preventDefault();
+    },
+    { passive: false },
   );
 
   gridContainer.addEventListener(
@@ -145,6 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       game.move(direction);
     },
-    { passive: true },
+    { passive: false },
   );
 });
