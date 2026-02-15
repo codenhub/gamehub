@@ -175,6 +175,7 @@ export class Slider extends HTMLElement {
     this.addEventListener("pointerup", this.handlePointerUp);
     this.addEventListener("pointercancel", this.handlePointerUp);
     this.addEventListener("keydown", this.handleKeyDown);
+    this.addEventListener("click", (e) => e.preventDefault());
   }
 }
 
