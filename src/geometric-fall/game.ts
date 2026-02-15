@@ -19,6 +19,7 @@ const COLORS = {
   piece: "#f5f5f5",
   background: "#171717",
   grid: "#404040",
+  ghost: "rgba(245, 245, 245, 0.2)",
 };
 
 // GAME VARIABLES
@@ -129,12 +130,21 @@ const spawnPiece = () => {
   currentY = 0;
 };
 
+// GET GHOST Y
+const getGhostY = (): number => {
+  let ghostY = currentY;
+  while (isValidMove(currentPiece, currentX, ghostY + 1)) {
+    ghostY++;
+  }
+  return ghostY;
+};
+
 // DRAW GAME
 const draw = () => {
   ctx.fillStyle = COLORS.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Draw grid
+  // DRAW GRID
   ctx.strokeStyle = COLORS.grid;
   for (let x = 0; x <= COLS; x++) {
     ctx.beginPath();
@@ -149,7 +159,7 @@ const draw = () => {
     ctx.stroke();
   }
 
-  // Draw placed pieces
+  // DRAW PLACED PIECES
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
       if (grid[y][x]) {
@@ -160,7 +170,29 @@ const draw = () => {
     }
   }
 
-  // Draw current piece
+  // DRAW GHOST PIECE
+  const ghostY = getGhostY();
+  ctx.fillStyle = COLORS.ghost;
+  for (let y = 0; y < currentPiece.length; y++) {
+    for (let x = 0; x < currentPiece[y].length; x++) {
+      if (currentPiece[y][x]) {
+        ctx.fillRect(
+          (currentX + x) * BLOCK_SIZE,
+          (ghostY + y) * BLOCK_SIZE,
+          BLOCK_SIZE,
+          BLOCK_SIZE,
+        );
+        ctx.strokeRect(
+          (currentX + x) * BLOCK_SIZE,
+          (ghostY + y) * BLOCK_SIZE,
+          BLOCK_SIZE,
+          BLOCK_SIZE,
+        );
+      }
+    }
+  }
+
+  // DRAW CURRENT PIECE
   ctx.fillStyle = COLORS.piece;
   for (let y = 0; y < currentPiece.length; y++) {
     for (let x = 0; x < currentPiece[y].length; x++) {
