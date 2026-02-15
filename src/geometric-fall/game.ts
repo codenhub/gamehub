@@ -215,7 +215,8 @@ const clearLines = () => {
   const result = computeClearedLines(grid);
   grid = result.grid;
   if (result.linesCleared > 0) {
-    score += result.linesCleared * 100;
+    const points = [0, 100, 300, 500, 800];
+    score += points[result.linesCleared] || result.linesCleared * 200;
     updateScore();
     AudioManager.playSFX("collect");
   }
