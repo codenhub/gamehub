@@ -88,15 +88,43 @@ const resetGrid = () => {
 };
 
 // SPAWN NEW PIECE
-const spawnPiece = () => {
+let bag: string[] = [];
+
+// SHUFFLE ARRAY (Fisher-Yates)
+const shuffleArray = (array: string[]) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+};
+
+// REFILL BAG
+const refillBag = () => {
   const pieces = Object.keys(TETROMINOES);
   if (pieces.length === 0) {
     console.error("[GeometricFall] No tetrominoes defined");
     return;
   }
+  bag = [...pieces];
+  shuffleArray(bag);
+};
 
-  const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
-  currentPiece = TETROMINOES[randomPiece];
+// SPAWN NEW PIECE
+const spawnPiece = () => {
+  if (bag.length === 0) {
+    refillBag();
+  }
+
+  const nextPieceKey = bag.pop();
+  if (!nextPieceKey) {
+    // Should not happen if refillBag works, but safety fallback
+    const pieces = Object.keys(TETROMINOES);
+    const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+    currentPiece = TETROMINOES[randomPiece];
+  } else {
+    currentPiece = TETROMINOES[nextPieceKey];
+  }
+
   currentX = Math.floor(COLS / 2) - Math.floor(currentPiece[0].length / 2);
   currentY = 0;
 };
@@ -292,6 +320,7 @@ const stopGame = () => {
   if (!isInitialized) return;
 
   resetGrid();
+  bag = [];
   score = 0;
   updateScore();
   spawnPiece();
