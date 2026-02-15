@@ -510,4 +510,5 @@ export {
   playGame,
   pauseGame,
   stopGame,
+  updateScore,
 };

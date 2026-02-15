@@ -8,6 +8,7 @@ import {
   playGame,
   pauseGame,
   stopGame,
+  updateScore,
 } from "./game";
 
 type GameState = "stopped" | "playing" | "paused";
@@ -34,6 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("[GeometricFall] Missing required game control buttons");
     return;
   }
+
+  // Initialize Score Display
+  updateScore();
 
   playBtn.addEventListener("click", () => {
     state = "playing";
