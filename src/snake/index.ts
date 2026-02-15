@@ -179,7 +179,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (appState !== "playing") return;
 
     controls.forEach(({ keys, action }) => {
-      if (keys.includes(e.key)) action();
+      if (keys.includes(e.key)) {
+        e.preventDefault();
+        action();
+      }
     });
   });
 });
