@@ -1,4 +1,5 @@
 import AudioManager from "../../_core/audio";
+import type { Slider } from "./slider";
 
 const themes = {
   light: {
@@ -46,6 +47,9 @@ const setTheme = (theme: Theme) => {
   });
 };
 
+const DEFAULT_MUSIC_VOLUME = "50";
+const DEFAULT_SOUND_VOLUME = "75";
+
 export class Header extends HTMLElement {
   connectedCallback() {
     const title = this.getAttribute("title") || "GameHub";
@@ -59,6 +63,11 @@ export class Header extends HTMLElement {
         : "light";
 
     setTheme(theme);
+
+    const musicVolume =
+      localStorage.getItem("music-volume") || DEFAULT_MUSIC_VOLUME;
+    const soundVolume =
+      localStorage.getItem("sound-volume") || DEFAULT_SOUND_VOLUME;
 
     this.innerHTML = `
       <header class="flex w-full justify-center p-4 border-b-2 border-border">
@@ -75,11 +84,25 @@ export class Header extends HTMLElement {
               <div class="hidden peer-checked:flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-1/1 card flex-col gap-4 p-6">
                 <div class="flex items-center gap-4 w-48">
                   <img src="/assets/icons/music.webp" alt="Music icon" class="size-6 object-contain not-dark:invert">
-                  <input id="music-volume" type="range" min="0" max="100" step="10" value="50" class="w-full cur-default pointer-events-auto">
+                  <gh-slider
+                    id="music-volume"
+                    min="0"
+                    max="100"
+                    step="10"
+                    value="${musicVolume}"
+                    class="pointer-events-auto"
+                  ></gh-slider>
                 </div>
                 <div class="flex items-center gap-4 w-48">
                   <img src="/assets/icons/volume-high.webp" alt="Sound icon" class="size-6 object-contain not-dark:invert">
-                  <input id="sound-volume" type="range" min="0" max="100" step="10" value="75" class="w-full cur-default pointer-events-auto">
+                  <gh-slider
+                    id="sound-volume"
+                    min="0"
+                    max="100"
+                    step="10"
+                    value="${soundVolume}"
+                    class="pointer-events-auto"
+                  ></gh-slider>
                 </div>
               </div>
             </label>
@@ -102,24 +125,18 @@ export class Header extends HTMLElement {
 
     const musicVolumeEl = document.getElementById(
       "music-volume",
-    ) as HTMLInputElement | null;
+    ) as Slider | null;
     const soundVolumeEl = document.getElementById(
       "sound-volume",
-    ) as HTMLInputElement | null;
+    ) as Slider | null;
 
     if (!musicVolumeEl || !soundVolumeEl) {
       console.warn("[Header] Volume controls not found in DOM");
       return;
     }
 
-    const musicVolume = Number(localStorage.getItem("music-volume") || "50");
-    const soundVolume = Number(localStorage.getItem("sound-volume") || "75");
-
-    musicVolumeEl.value = musicVolume.toString();
-    soundVolumeEl.value = soundVolume.toString();
-
-    AudioManager.setMusicVolume(musicVolume / 100);
-    AudioManager.setSFXVolume(soundVolume / 100);
+    AudioManager.setMusicVolume(Number(musicVolume) / 100);
+    AudioManager.setSFXVolume(Number(soundVolume) / 100);
 
     musicVolumeEl.addEventListener("input", () => {
       localStorage.setItem("music-volume", musicVolumeEl.value);
