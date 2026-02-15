@@ -7,13 +7,14 @@ import {
   isValidMove as checkMove,
   clearLines as computeClearedLines,
   createEmptyGrid,
+  setGridDimensions,
 } from "./logic";
 import AudioManager from "../_core/audio";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 
 // RENDERING CONSTANTS
-const BLOCK_SIZE = 30;
+const TARGET_COLS = 10;
 const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
 const COLORS = {
   piece: "#f5f5f5",
@@ -21,6 +22,10 @@ const COLORS = {
   grid: "#404040",
   ghost: "rgba(245, 245, 245, 0.2)",
 };
+
+// DYNAMIC SIZING
+let blockSize = 30;
+let previewBlockSize = 30;
 
 // GAME VARIABLES
 let canvas: HTMLCanvasElement;
@@ -39,7 +44,6 @@ let isInitialized = false;
 let nextPiece: PieceMatrix;
 let previewCanvases: HTMLCanvasElement[] = [];
 let previewCtxs: CanvasRenderingContext2D[] = [];
-const PREVIEW_BLOCK_SIZE = 30; // Match game block size
 const PREVIEW_COLS = 6;
 const PREVIEW_ROWS = 6;
 
@@ -65,6 +69,40 @@ const saveHighScore = () => {
   }
 };
 
+// CALCULATE DYNAMIC DIMENSIONS
+const calculateDimensions = () => {
+  const container = canvas.parentElement;
+  if (!container) return;
+
+  // Use content box (clientWidth - padding) to match the canvas CSS display size
+  const style = getComputedStyle(container);
+  const paddingX =
+    parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+  const paddingY =
+    parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+  const containerWidth = container.clientWidth - paddingX;
+  const containerHeight = container.clientHeight - paddingY;
+
+  // Block size derived from available width and target columns
+  blockSize = Math.floor(containerWidth / TARGET_COLS);
+  if (blockSize < 1) blockSize = 1;
+
+  const cols = TARGET_COLS;
+  const rows = Math.floor(containerHeight / blockSize);
+
+  setGridDimensions(cols, Math.max(rows, 1));
+
+  canvas.width = COLS * blockSize;
+  canvas.height = ROWS * blockSize;
+
+  // Scale preview block size relative to game block size
+  previewBlockSize = blockSize;
+  previewCanvases.forEach((c) => {
+    c.width = PREVIEW_COLS * previewBlockSize;
+    c.height = PREVIEW_ROWS * previewBlockSize;
+  });
+};
+
 // INITIALIZE GAME
 const initGame = (): boolean => {
   const canvasEl = document.getElementById("game");
@@ -81,9 +119,6 @@ const initGame = (): boolean => {
   }
   ctx = context;
 
-  canvas.width = COLS * BLOCK_SIZE;
-  canvas.height = ROWS * BLOCK_SIZE;
-
   // Initialize Next Piece Canvas(es)
   const nextels = document.querySelectorAll(".next-canvas");
   previewCanvases = Array.from(nextels) as HTMLCanvasElement[];
@@ -91,10 +126,8 @@ const initGame = (): boolean => {
     .map((c) => c.getContext("2d"))
     .filter((c): c is CanvasRenderingContext2D => !!c);
 
-  previewCanvases.forEach((c) => {
-    c.width = PREVIEW_COLS * PREVIEW_BLOCK_SIZE;
-    c.height = PREVIEW_ROWS * PREVIEW_BLOCK_SIZE;
-  });
+  calculateDimensions();
+  setupResizeObserver();
 
   resetGrid();
   // Reset nextPiece so spawnPiece does a proper double-spawn
@@ -159,21 +192,19 @@ const spawnPiece = () => {
   currentX = Math.floor(COLS / 2) - Math.floor(currentPiece[0].length / 2);
   currentY = 0;
 
-  drawNextPiece();
+  if (previewCtxs.length > 0) drawNextPiece();
 };
 
 // DRAW NEXT PIECE PREVIEW
 const drawNextPiece = () => {
   previewCtxs.forEach((pCtx, i) => {
     const pCanvas = previewCanvases[i];
-    pCtx.fillStyle = COLORS.background; // Use game background or separate?
-    // Actually the UI has its own background color (bg-foreground), so maybe transparent or match?
-    // The previous canvas had class "bg-foreground", let's clear it transparently first.
+    pCtx.fillStyle = COLORS.background;
     pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
 
     // Calculate center offset
-    const pieceWidth = nextPiece[0].length * PREVIEW_BLOCK_SIZE;
-    const pieceHeight = nextPiece.length * PREVIEW_BLOCK_SIZE;
+    const pieceWidth = nextPiece[0].length * previewBlockSize;
+    const pieceHeight = nextPiece.length * previewBlockSize;
     const updateX = (pCanvas.width - pieceWidth) / 2;
     const updateY = (pCanvas.height - pieceHeight) / 2;
 
@@ -183,16 +214,16 @@ const drawNextPiece = () => {
       for (let x = 0; x < nextPiece[y].length; x++) {
         if (nextPiece[y][x]) {
           pCtx.fillRect(
-            updateX + x * PREVIEW_BLOCK_SIZE,
-            updateY + y * PREVIEW_BLOCK_SIZE,
-            PREVIEW_BLOCK_SIZE,
-            PREVIEW_BLOCK_SIZE,
+            updateX + x * previewBlockSize,
+            updateY + y * previewBlockSize,
+            previewBlockSize,
+            previewBlockSize,
           );
           pCtx.strokeRect(
-            updateX + x * PREVIEW_BLOCK_SIZE,
-            updateY + y * PREVIEW_BLOCK_SIZE,
-            PREVIEW_BLOCK_SIZE,
-            PREVIEW_BLOCK_SIZE,
+            updateX + x * previewBlockSize,
+            updateY + y * previewBlockSize,
+            previewBlockSize,
+            previewBlockSize,
           );
         }
       }
@@ -218,24 +249,24 @@ const draw = () => {
   ctx.strokeStyle = COLORS.grid;
   for (let x = 0; x <= COLS; x++) {
     ctx.beginPath();
-    ctx.moveTo(x * BLOCK_SIZE, 0);
-    ctx.lineTo(x * BLOCK_SIZE, canvas.height);
+    ctx.moveTo(x * blockSize, 0);
+    ctx.lineTo(x * blockSize, canvas.height);
     ctx.stroke();
   }
   for (let y = 0; y <= ROWS; y++) {
     ctx.beginPath();
-    ctx.moveTo(0, y * BLOCK_SIZE);
-    ctx.lineTo(canvas.width, y * BLOCK_SIZE);
+    ctx.moveTo(0, y * blockSize);
+    ctx.lineTo(canvas.width, y * blockSize);
     ctx.stroke();
   }
 
   // DRAW PLACED PIECES
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
-      if (grid[y][x]) {
+      if (grid[y]?.[x]) {
         ctx.fillStyle = COLORS.piece;
-        ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-        ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
       }
     }
   }
@@ -247,16 +278,16 @@ const draw = () => {
     for (let x = 0; x < currentPiece[y].length; x++) {
       if (currentPiece[y][x]) {
         ctx.fillRect(
-          (currentX + x) * BLOCK_SIZE,
-          (ghostY + y) * BLOCK_SIZE,
-          BLOCK_SIZE,
-          BLOCK_SIZE,
+          (currentX + x) * blockSize,
+          (ghostY + y) * blockSize,
+          blockSize,
+          blockSize,
         );
         ctx.strokeRect(
-          (currentX + x) * BLOCK_SIZE,
-          (ghostY + y) * BLOCK_SIZE,
-          BLOCK_SIZE,
-          BLOCK_SIZE,
+          (currentX + x) * blockSize,
+          (ghostY + y) * blockSize,
+          blockSize,
+          blockSize,
         );
       }
     }
@@ -268,16 +299,16 @@ const draw = () => {
     for (let x = 0; x < currentPiece[y].length; x++) {
       if (currentPiece[y][x]) {
         ctx.fillRect(
-          (currentX + x) * BLOCK_SIZE,
-          (currentY + y) * BLOCK_SIZE,
-          BLOCK_SIZE,
-          BLOCK_SIZE,
+          (currentX + x) * blockSize,
+          (currentY + y) * blockSize,
+          blockSize,
+          blockSize,
         );
         ctx.strokeRect(
-          (currentX + x) * BLOCK_SIZE,
-          (currentY + y) * BLOCK_SIZE,
-          BLOCK_SIZE,
-          BLOCK_SIZE,
+          (currentX + x) * blockSize,
+          (currentY + y) * blockSize,
+          blockSize,
+          blockSize,
         );
       }
     }
@@ -429,6 +460,44 @@ const stopGame = () => {
   nextPiece = null as any; // Reset next piece
   spawnPiece();
   draw();
+};
+
+// RESIZE OBSERVER
+let resizeObserver: ResizeObserver | null = null;
+
+const setupResizeObserver = () => {
+  const container = canvas.parentElement;
+  if (!container) return;
+
+  resizeObserver = new ResizeObserver(() => {
+    const oldCols = COLS;
+    const oldRows = ROWS;
+
+    calculateDimensions();
+
+    // Rebuild grid if dimensions changed, preserving existing placed blocks
+    if (oldCols !== COLS || oldRows !== ROWS) {
+      const newGrid = createEmptyGrid();
+      for (let y = 0; y < Math.min(oldRows, ROWS); y++) {
+        for (let x = 0; x < Math.min(oldCols, COLS); x++) {
+          if (grid[y]?.[x]) newGrid[y][x] = grid[y][x];
+        }
+      }
+      grid = newGrid;
+
+      // Clamp current piece position to new bounds
+      if (currentPiece) {
+        currentX = Math.min(currentX, COLS - currentPiece[0].length);
+        currentX = Math.max(currentX, 0);
+        currentY = Math.min(currentY, ROWS - 1);
+      }
+    }
+
+    draw();
+    if (nextPiece && previewCtxs.length > 0) drawNextPiece();
+  });
+
+  resizeObserver.observe(container);
 };
 
 export {

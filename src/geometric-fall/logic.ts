@@ -1,7 +1,12 @@
 export type PieceMatrix = number[][];
 
-export const ROWS = 20;
-export const COLS = 10;
+export let ROWS = 20;
+export let COLS = 10;
+
+export const setGridDimensions = (cols: number, rows: number) => {
+  COLS = cols;
+  ROWS = rows;
+};
 
 export const TETROMINOES: Record<string, PieceMatrix> = {
   I: [
