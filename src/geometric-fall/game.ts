@@ -35,6 +35,14 @@ let gameLoop: ReturnType<typeof setInterval>;
 let isPlaying = false;
 let isInitialized = false;
 
+// NEXT PIECE VARIABLES
+let nextPiece: PieceMatrix;
+let previewCanvases: HTMLCanvasElement[] = [];
+let previewCtxs: CanvasRenderingContext2D[] = [];
+const PREVIEW_BLOCK_SIZE = 30; // Match game block size
+const PREVIEW_COLS = 6;
+const PREVIEW_ROWS = 6;
+
 // HIGH SCORE PERSISTENCE
 function loadHighScore(): number {
   try {
@@ -75,7 +83,22 @@ const initGame = (): boolean => {
 
   canvas.width = COLS * BLOCK_SIZE;
   canvas.height = ROWS * BLOCK_SIZE;
+
+  // Initialize Next Piece Canvas(es)
+  const nextels = document.querySelectorAll(".next-canvas");
+  previewCanvases = Array.from(nextels) as HTMLCanvasElement[];
+  previewCtxs = previewCanvases
+    .map((c) => c.getContext("2d"))
+    .filter((c): c is CanvasRenderingContext2D => !!c);
+
+  previewCanvases.forEach((c) => {
+    c.width = PREVIEW_COLS * PREVIEW_BLOCK_SIZE;
+    c.height = PREVIEW_ROWS * PREVIEW_BLOCK_SIZE;
+  });
+
   resetGrid();
+  // Reset nextPiece so spawnPiece does a proper double-spawn
+  nextPiece = null as any;
   spawnPiece();
   updateScore();
   draw();
@@ -110,24 +133,71 @@ const refillBag = () => {
   shuffleArray(bag);
 };
 
-// SPAWN NEW PIECE
-const spawnPiece = () => {
-  if (bag.length === 0) {
-    refillBag();
-  }
+// GET NEXT PIECE FROM BAG
+const getNextPieceFromBag = (): PieceMatrix => {
+  if (bag.length === 0) refillBag();
 
-  const nextPieceKey = bag.pop();
-  if (!nextPieceKey) {
+  const key = bag.pop();
+  if (!key) {
     // Should not happen if refillBag works, but safety fallback
     const pieces = Object.keys(TETROMINOES);
-    const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
-    currentPiece = TETROMINOES[randomPiece];
-  } else {
-    currentPiece = TETROMINOES[nextPieceKey];
+    const randomKey = pieces[Math.floor(Math.random() * pieces.length)];
+    return TETROMINOES[randomKey];
   }
+  return TETROMINOES[key];
+};
+
+// SPAWN NEW PIECE
+const spawnPiece = () => {
+  if (!nextPiece) {
+    nextPiece = getNextPieceFromBag();
+  }
+
+  currentPiece = nextPiece;
+  nextPiece = getNextPieceFromBag();
 
   currentX = Math.floor(COLS / 2) - Math.floor(currentPiece[0].length / 2);
   currentY = 0;
+
+  drawNextPiece();
+};
+
+// DRAW NEXT PIECE PREVIEW
+const drawNextPiece = () => {
+  previewCtxs.forEach((pCtx, i) => {
+    const pCanvas = previewCanvases[i];
+    pCtx.fillStyle = COLORS.background; // Use game background or separate?
+    // Actually the UI has its own background color (bg-foreground), so maybe transparent or match?
+    // The previous canvas had class "bg-foreground", let's clear it transparently first.
+    pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+    // Calculate center offset
+    const pieceWidth = nextPiece[0].length * PREVIEW_BLOCK_SIZE;
+    const pieceHeight = nextPiece.length * PREVIEW_BLOCK_SIZE;
+    const updateX = (pCanvas.width - pieceWidth) / 2;
+    const updateY = (pCanvas.height - pieceHeight) / 2;
+
+    pCtx.fillStyle = COLORS.piece;
+    pCtx.strokeStyle = COLORS.grid;
+    for (let y = 0; y < nextPiece.length; y++) {
+      for (let x = 0; x < nextPiece[y].length; x++) {
+        if (nextPiece[y][x]) {
+          pCtx.fillRect(
+            updateX + x * PREVIEW_BLOCK_SIZE,
+            updateY + y * PREVIEW_BLOCK_SIZE,
+            PREVIEW_BLOCK_SIZE,
+            PREVIEW_BLOCK_SIZE,
+          );
+          pCtx.strokeRect(
+            updateX + x * PREVIEW_BLOCK_SIZE,
+            updateY + y * PREVIEW_BLOCK_SIZE,
+            PREVIEW_BLOCK_SIZE,
+            PREVIEW_BLOCK_SIZE,
+          );
+        }
+      }
+    }
+  });
 };
 
 // GET GHOST Y
@@ -356,6 +426,7 @@ const stopGame = () => {
   bag = [];
   score = 0;
   updateScore();
+  nextPiece = null as any; // Reset next piece
   spawnPiece();
   draw();
 };

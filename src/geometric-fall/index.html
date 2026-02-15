@@ -18,16 +18,9 @@
       <section
         class="flex flex-1 max-w-7xl w-full h-auto gap-4 max-sm:flex-col max-sm:items-center"
       >
-        <div
-          class="relative bg-border pixel-corner-lg-4 p-1 sm:max-w-lg h-full"
-        >
-          <canvas
-            id="game"
-            class="flex size-full pixel-corner-lg-4 bg-foreground"
-          ></canvas>
-          <div
-            class="absolute top-0 inset-x-0 flex items-center justify-between p-4"
-          >
+        <div class="flex flex-col gap-4 h-full">
+          <div class="flex items-center justify-between gap-4">
+            <!-- CONTROLS -->
             <div class="flex gap-2">
               <button id="play" class="icon-btn">
                 <img
@@ -48,16 +41,42 @@
                   aria-label="Stop icon"
                 ></div>
               </button>
-            </div>
-            <div class="flex gap-4 text-sm">
-              <p>Score: <span id="score">0</span></p>
+              <p class="ml-2">Score: <span id="score">0</span></p>
               <p>Best: <span id="high-score">0</span></p>
             </div>
+            <!-- NEXT PIECE -->
+            <div
+              class="relative sm:hidden size-24 aspect-square p-1 pixel-corner-lg-4 bg-border"
+            >
+              <p
+                class="absolute top-1 left-1/2 -translate-x-1/2 z-10 text-base"
+              >
+                Next:
+              </p>
+              <canvas
+                class="size-full pixel-corner-lg-4 bg-foreground next-canvas"
+              ></canvas>
+            </div>
+          </div>
+          <!-- GAME -->
+          <div class="bg-border pixel-corner-lg-4 p-1 sm:max-w-lg h-full">
+            <canvas
+              id="game"
+              class="size-full pixel-corner-lg-4 bg-foreground"
+            ></canvas>
           </div>
         </div>
 
         <!-- DESKTOP CONTROLS -->
-        <div class="hidden flex-col gap-4 sm:flex">
+        <div class="hidden flex-col gap-4 w-min sm:flex">
+          <div
+            class="relative w-full aspect-square p-1 pixel-corner-lg-4 bg-border"
+          >
+            <p class="absolute top-1 left-1/2 -translate-x-1/2 z-10">Next:</p>
+            <canvas
+              class="next-canvas size-full pixel-corner-lg-4 bg-foreground"
+            ></canvas>
+          </div>
           <div class="flex gap-4">
             <button class="icon-btn size-12 dropBtn">
               <img
