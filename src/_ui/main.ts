@@ -1,4 +1,7 @@
 import AudioManager from "../_core/audio";
+import ThemeManager from "../_core/utils/theme";
+
+ThemeManager.init();
 
 document.addEventListener(
   "click",

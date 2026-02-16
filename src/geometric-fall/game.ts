@@ -10,17 +10,21 @@ import {
   setGridDimensions,
 } from "./logic";
 import AudioManager from "../_core/audio";
+import ThemeManager from "../_core/utils/theme";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 
 // RENDERING CONSTANTS
 const TARGET_COLS = 10;
 const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
-const COLORS = {
-  piece: "#f5f5f5",
-  background: "#171717",
-  grid: "#404040",
-  ghost: "rgba(245, 245, 245, 0.2)",
+
+const getColors = () => {
+  return {
+    piece: ThemeManager.getColor("--color-primary"),
+    background: ThemeManager.getColor("--color-foreground"),
+    grid: ThemeManager.getColor("--color-border"),
+    ghost: ThemeManager.getColor("--color-accent"),
+  };
 };
 
 // DYNAMIC SIZING
@@ -128,6 +132,7 @@ const initGame = (): boolean => {
 
   calculateDimensions();
   setupResizeObserver();
+  setupThemeListener();
 
   resetGrid();
   // Reset nextPiece so spawnPiece does a proper double-spawn
@@ -137,6 +142,13 @@ const initGame = (): boolean => {
   draw();
   isInitialized = true;
   return true;
+};
+
+const setupThemeListener = () => {
+  window.addEventListener("theme-changed", () => {
+    draw();
+    if (nextPiece && previewCtxs.length > 0) drawNextPiece();
+  });
 };
 
 // RESET GRID
@@ -197,9 +209,10 @@ const spawnPiece = () => {
 
 // DRAW NEXT PIECE PREVIEW
 const drawNextPiece = () => {
+  const colors = getColors();
   previewCtxs.forEach((pCtx, i) => {
     const pCanvas = previewCanvases[i];
-    pCtx.fillStyle = COLORS.background;
+    pCtx.fillStyle = colors.background;
     pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
 
     // Calculate center offset
@@ -208,8 +221,8 @@ const drawNextPiece = () => {
     const updateX = (pCanvas.width - pieceWidth) / 2;
     const updateY = (pCanvas.height - pieceHeight) / 2;
 
-    pCtx.fillStyle = COLORS.piece;
-    pCtx.strokeStyle = COLORS.grid;
+    pCtx.fillStyle = colors.piece;
+    pCtx.strokeStyle = colors.grid;
     for (let y = 0; y < nextPiece.length; y++) {
       for (let x = 0; x < nextPiece[y].length; x++) {
         if (nextPiece[y][x]) {
@@ -242,11 +255,12 @@ const getGhostY = (): number => {
 
 // DRAW GAME
 const draw = () => {
-  ctx.fillStyle = COLORS.background;
+  const colors = getColors();
+  ctx.fillStyle = colors.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // DRAW GRID
-  ctx.strokeStyle = COLORS.grid;
+  ctx.strokeStyle = colors.grid;
   for (let x = 0; x <= COLS; x++) {
     ctx.beginPath();
     ctx.moveTo(x * blockSize, 0);
@@ -264,7 +278,7 @@ const draw = () => {
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
       if (grid[y]?.[x]) {
-        ctx.fillStyle = COLORS.piece;
+        ctx.fillStyle = colors.piece;
         ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
         ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
       }
@@ -273,7 +287,7 @@ const draw = () => {
 
   // DRAW GHOST PIECE
   const ghostY = getGhostY();
-  ctx.fillStyle = COLORS.ghost;
+  ctx.fillStyle = colors.ghost;
   for (let y = 0; y < currentPiece.length; y++) {
     for (let x = 0; x < currentPiece[y].length; x++) {
       if (currentPiece[y][x]) {
@@ -294,7 +308,7 @@ const draw = () => {
   }
 
   // DRAW CURRENT PIECE
-  ctx.fillStyle = COLORS.piece;
+  ctx.fillStyle = colors.piece;
   for (let y = 0; y < currentPiece.length; y++) {
     for (let x = 0; x < currentPiece[y].length; x++) {
       if (currentPiece[y][x]) {
