@@ -1,5 +1,6 @@
 import AudioManager from "../_core/audio";
 import { showAlert } from "../_core/utils/alerts";
+import { getThemeColor } from "../_core/utils/theme";
 import {
   type Point,
   TILE_SIZE,
@@ -13,12 +14,12 @@ import {
 
 AudioManager.loadMultipleSFX(["eat", "fail", "complete"]);
 
-const COLORS = {
-  background: "#262626",
-  food: "#22c55e",
-  snakeHead: "#fafafa",
-  snakeBody: "#d4d4d4",
-};
+const getColors = () => ({
+  background: getThemeColor("--color-foreground"),
+  food: getThemeColor("--color-success"),
+  snakeHead: getThemeColor("--color-primary"),
+  snakeBody: getThemeColor("--color-primary-hover"),
+});
 
 const GAME_CONFIG = {
   tileSize: TILE_SIZE,
@@ -88,6 +89,13 @@ export class SnakeGame {
     };
 
     this.initCanvas();
+    this.setupThemeListener();
+  }
+
+  private setupThemeListener() {
+    window.addEventListener("theme-changed", () => {
+      this.draw();
+    });
   }
 
   private initCanvas() {
@@ -235,12 +243,13 @@ export class SnakeGame {
   }
 
   private draw() {
+    const colors = getColors();
     // Clear
-    this.ctx.fillStyle = COLORS.background;
+    this.ctx.fillStyle = colors.background;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw Food
-    this.ctx.fillStyle = COLORS.food;
+    this.ctx.fillStyle = colors.food;
     this.ctx.fillRect(
       this.state.food.x,
       this.state.food.y,
@@ -250,7 +259,7 @@ export class SnakeGame {
 
     // Draw Snake
     this.state.snake.forEach((segment, index) => {
-      this.ctx.fillStyle = index === 0 ? COLORS.snakeHead : COLORS.snakeBody;
+      this.ctx.fillStyle = index === 0 ? colors.snakeHead : colors.snakeBody;
       this.ctx.fillRect(
         segment.x,
         segment.y,
