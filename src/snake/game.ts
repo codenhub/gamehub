@@ -18,7 +18,7 @@ const getColors = () => ({
   background: ThemeManager.getColor("--color-foreground"),
   food: ThemeManager.getColor("--color-success"),
   snakeHead: ThemeManager.getColor("--color-primary"),
-  snakeBody: ThemeManager.getColor("--color-primary-hover"),
+  snakeBody: ThemeManager.getColor("--color-accent"),
 });
 
 const GAME_CONFIG = {

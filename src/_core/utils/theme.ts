@@ -43,7 +43,7 @@ export const THEMES: Record<Theme, Partial<Record<ThemeVariable, string>>> = {
     "--color-primary": "var(--color-neutral-50)",
     "--color-primary-contrast": "var(--color-neutral-950)",
     "--color-primary-hover": "var(--color-neutral-300)",
-    "--color-accent": "var(--color-neutral-300)",
+    "--color-accent": "var(--color-neutral-500)",
     "--color-accent-contrast": "var(--color-neutral-950)",
     "--color-accent-hover": "var(--color-neutral-400)",
     "--color-border": "var(--color-neutral-600)",
@@ -71,7 +71,9 @@ class ThemeManager {
   }
 
   private isValidTheme(value: string | null): value is Theme {
-    return value !== null && (VALID_THEMES as readonly string[]).includes(value);
+    return (
+      value !== null && (VALID_THEMES as readonly string[]).includes(value)
+    );
   }
 
   public getTheme(): Theme {

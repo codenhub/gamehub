@@ -19,12 +19,11 @@ const TARGET_COLS = 10;
 const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
 
 const getColors = () => {
-  const primary = ThemeManager.getColor("--color-primary");
   return {
-    piece: primary,
+    piece: ThemeManager.getColor("--color-primary"),
     background: ThemeManager.getColor("--color-foreground"),
     grid: ThemeManager.getColor("--color-border"),
-    ghost: primary.startsWith("#") ? primary + "33" : primary.replace("rgb", "rgba").replace(")", ", 0.2)"),
+    ghost: ThemeManager.getColor("--color-accent"),
   };
 };
 
