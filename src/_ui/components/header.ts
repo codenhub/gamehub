@@ -1,5 +1,5 @@
 import AudioManager from "../../_core/audio";
-import { getTheme, setTheme } from "../../_core/utils/theme";
+import ThemeManager from "../../_core/utils/theme";
 import type { Slider } from "./slider";
 
 const DEFAULT_MUSIC_VOLUME = "50";
@@ -10,7 +10,7 @@ export class Header extends HTMLElement {
     const title = this.getAttribute("title") || "GameHub";
     const backBtn = this.hasAttribute("backBtn");
 
-    setTheme(getTheme());
+    ThemeManager.init();
 
     const musicVolume =
       localStorage.getItem("music-volume") || DEFAULT_MUSIC_VOLUME;
@@ -97,9 +97,8 @@ export class Header extends HTMLElement {
     });
 
     document.getElementById("theme-toggle")?.addEventListener("click", () => {
-      if (document.documentElement.classList.contains("dark"))
-        return setTheme("light");
-      setTheme("dark");
+      if (ThemeManager.getTheme() === "dark") return ThemeManager.setTheme("light");
+      ThemeManager.setTheme("dark");
     });
   }
 }

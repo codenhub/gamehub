@@ -10,7 +10,7 @@ import {
   setGridDimensions,
 } from "./logic";
 import AudioManager from "../_core/audio";
-import { getThemeColor } from "../_core/utils/theme";
+import ThemeManager from "../_core/utils/theme";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 
@@ -19,11 +19,11 @@ const TARGET_COLS = 10;
 const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
 
 const getColors = () => {
-  const primary = getThemeColor("--color-primary");
+  const primary = ThemeManager.getColor("--color-primary");
   return {
     piece: primary,
-    background: getThemeColor("--color-foreground"),
-    grid: getThemeColor("--color-border"),
+    background: ThemeManager.getColor("--color-foreground"),
+    grid: ThemeManager.getColor("--color-border"),
     ghost: primary.startsWith("#") ? primary + "33" : primary.replace("rgb", "rgba").replace(")", ", 0.2)"),
   };
 };

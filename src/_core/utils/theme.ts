@@ -1,7 +1,31 @@
 export const VALID_THEMES = ["dark", "light"] as const;
 export type Theme = (typeof VALID_THEMES)[number];
 
-export const THEMES: Record<Theme, Record<string, string>> = {
+export const THEME_VARIABLES = [
+  "--color-primary",
+  "--color-primary-contrast",
+  "--color-primary-hover",
+  "--color-accent",
+  "--color-accent-contrast",
+  "--color-accent-hover",
+  "--color-border",
+  "--color-background",
+  "--color-foreground",
+  "--color-text",
+  "--color-text-secondary",
+  "--color-success",
+  "--color-success-contrast",
+  "--color-error",
+  "--color-error-contrast",
+  "--color-warning",
+  "--color-warning-contrast",
+  "--color-info",
+  "--color-info-contrast",
+] as const;
+
+export type ThemeVariable = (typeof THEME_VARIABLES)[number];
+
+export const THEMES: Record<Theme, Partial<Record<ThemeVariable, string>>> = {
   light: {
     "--color-primary": "var(--color-neutral-950)",
     "--color-primary-contrast": "var(--color-neutral-50)",
@@ -30,37 +54,70 @@ export const THEMES: Record<Theme, Record<string, string>> = {
   },
 };
 
-export const isValidTheme = (value: string | null): value is Theme =>
-  value !== null && VALID_THEMES.includes(value as Theme);
+class ThemeManager {
+  private currentTheme: Theme;
 
-export const getTheme = (): Theme => {
-  const storedTheme = localStorage.getItem("theme");
-  if (isValidTheme(storedTheme)) return storedTheme;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-};
+  constructor() {
+    this.currentTheme = this.getStoredTheme();
+  }
 
-export const setTheme = (theme: Theme) => {
-  document.documentElement.classList.toggle("dark", theme === "dark");
-  localStorage.setItem("theme", theme);
+  private getStoredTheme(): Theme {
+    const stored = localStorage.getItem("theme");
+    if (this.isValidTheme(stored)) return stored;
 
-  const t = THEMES[theme];
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
 
-  (Object.keys(t) as Array<keyof typeof t>).forEach((k) => {
-    document.documentElement.style.setProperty(k, t[k]);
-  });
+  private isValidTheme(value: string | null): value is Theme {
+    return value !== null && (VALID_THEMES as readonly string[]).includes(value);
+  }
 
-  // Dispatch event so games can react to theme changes
-  window.dispatchEvent(new CustomEvent("theme-changed", { detail: { theme } }));
-};
+  public getTheme(): Theme {
+    return this.currentTheme;
+  }
 
-export const initTheme = () => {
-  setTheme(getTheme());
-};
+  public setTheme(theme: Theme) {
+    this.currentTheme = theme;
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
 
-export const getThemeColor = (variable: string) => {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(variable)
-    .trim();
-};
+    const variables = THEMES[theme];
+
+    (Object.keys(variables) as ThemeVariable[]).forEach((k) => {
+      const val = variables[k];
+      if (val) {
+        document.documentElement.style.setProperty(k, val);
+      }
+    });
+
+    window.dispatchEvent(
+      new CustomEvent("theme-changed", { detail: { theme } }),
+    );
+  }
+
+  public init() {
+    this.setTheme(this.currentTheme);
+  }
+
+  public getColor(variable: ThemeVariable): string {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(variable)
+      .trim();
+  }
+}
+
+const THEME_MANAGER_KEY = "__THEME_MANAGER__" as const;
+
+function getThemeManagerInstance(): ThemeManager {
+  const global = globalThis as Record<string, unknown>;
+
+  if (!global[THEME_MANAGER_KEY]) {
+    global[THEME_MANAGER_KEY] = new ThemeManager();
+  }
+
+  return global[THEME_MANAGER_KEY] as ThemeManager;
+}
+
+export default getThemeManagerInstance();

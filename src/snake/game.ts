@@ -1,6 +1,6 @@
 import AudioManager from "../_core/audio";
 import { showAlert } from "../_core/utils/alerts";
-import { getThemeColor } from "../_core/utils/theme";
+import ThemeManager from "../_core/utils/theme";
 import {
   type Point,
   TILE_SIZE,
@@ -15,10 +15,10 @@ import {
 AudioManager.loadMultipleSFX(["eat", "fail", "complete"]);
 
 const getColors = () => ({
-  background: getThemeColor("--color-foreground"),
-  food: getThemeColor("--color-success"),
-  snakeHead: getThemeColor("--color-primary"),
-  snakeBody: getThemeColor("--color-primary-hover"),
+  background: ThemeManager.getColor("--color-foreground"),
+  food: ThemeManager.getColor("--color-success"),
+  snakeHead: ThemeManager.getColor("--color-primary"),
+  snakeBody: ThemeManager.getColor("--color-primary-hover"),
 });
 
 const GAME_CONFIG = {
