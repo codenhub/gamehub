@@ -1,51 +1,6 @@
 import AudioManager from "../../_core/audio";
+import { getTheme, setTheme } from "../../_core/utils/theme";
 import type { Slider } from "./slider";
-
-const themes = {
-  light: {
-    "--color-primary": "var(--color-neutral-950)",
-    "--color-primary-contrast": "var(--color-neutral-50)",
-    "--color-primary-hover": "var(--color-neutral-700)",
-    "--color-accent": "var(--color-neutral-300)",
-    "--color-accent-contrast": "var(--color-neutral-950)",
-    "--color-accent-hover": "var(--color-neutral-400)",
-    "--color-border": "var(--color-neutral-300)",
-    "--color-background": "var(--color-neutral-50)",
-    "--color-foreground": "var(--color-neutral-100)",
-    "--color-text": "var(--color-neutral-950)",
-    "--color-text-secondary": "var(--color-neutral-700)",
-  },
-  dark: {
-    "--color-primary": "var(--color-neutral-50)",
-    "--color-primary-contrast": "var(--color-neutral-950)",
-    "--color-primary-hover": "var(--color-neutral-300)",
-    "--color-accent": "var(--color-neutral-300)",
-    "--color-accent-contrast": "var(--color-neutral-950)",
-    "--color-accent-hover": "var(--color-neutral-400)",
-    "--color-border": "var(--color-neutral-600)",
-    "--color-background": "var(--color-neutral-900)",
-    "--color-foreground": "var(--color-neutral-800)",
-    "--color-text": "var(--color-neutral-50)",
-    "--color-text-secondary": "var(--color-neutral-200)",
-  },
-};
-
-const VALID_THEMES = ["dark", "light"] as const;
-type Theme = (typeof VALID_THEMES)[number];
-
-const isValidTheme = (value: string | null): value is Theme =>
-  value !== null && VALID_THEMES.includes(value as Theme);
-
-const setTheme = (theme: Theme) => {
-  document.documentElement.classList.toggle("dark", theme === "dark");
-  localStorage.setItem("theme", theme);
-
-  const t = themes[theme];
-
-  (Object.keys(t) as Array<keyof typeof t>).forEach((k) => {
-    document.documentElement.style.setProperty(k, t[k]);
-  });
-};
 
 const DEFAULT_MUSIC_VOLUME = "50";
 const DEFAULT_SOUND_VOLUME = "75";
@@ -55,14 +10,7 @@ export class Header extends HTMLElement {
     const title = this.getAttribute("title") || "GameHub";
     const backBtn = this.hasAttribute("backBtn");
 
-    const storedTheme = localStorage.getItem("theme");
-    const theme = isValidTheme(storedTheme)
-      ? storedTheme
-      : window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-
-    setTheme(theme);
+    setTheme(getTheme());
 
     const musicVolume =
       localStorage.getItem("music-volume") || DEFAULT_MUSIC_VOLUME;
