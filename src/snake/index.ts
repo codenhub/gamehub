@@ -185,4 +185,53 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // Swipe Controls
+  const MIN_SWIPE_DISTANCE = 30;
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  canvas.addEventListener(
+    "touchstart",
+    (e: TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    },
+    { passive: false },
+  );
+
+  canvas.addEventListener(
+    "touchmove",
+    (e: TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+    },
+    { passive: false },
+  );
+
+  canvas.addEventListener(
+    "touchend",
+    (e: TouchEvent) => {
+      if (appState !== "playing") return;
+
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
+
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+
+      if (Math.max(absDx, absDy) < MIN_SWIPE_DISTANCE) return;
+
+      if (absDx > absDy) {
+        if (dx > 0) game.moveRight();
+        else game.moveLeft();
+      } else {
+        if (dy > 0) game.moveDown();
+        else game.moveUp();
+      }
+    },
+    { passive: false },
+  );
 });

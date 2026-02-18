@@ -81,7 +81,6 @@ export class GeometricFallGame {
     this.spawnPiece();
     this.callbacks.onScoreUpdate(this.score, this.highScore);
     this.draw();
-    this.isInitialized = true;
   }
 
   private loadHighScore(): number {
