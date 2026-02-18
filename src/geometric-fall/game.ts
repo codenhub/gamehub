@@ -14,7 +14,6 @@ import ThemeManager from "../_core/utils/theme";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 
-// RENDERING CONSTANTS
 const TARGET_COLS = 10;
 const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
 
@@ -27,502 +26,471 @@ const getColors = () => {
   };
 };
 
-// DYNAMIC SIZING
-let blockSize = 30;
-let previewBlockSize = 30;
+export type GameCallbacks = {
+  onScoreUpdate: (score: number, highScore: number) => void;
+  onGameOver: (finalScore: number) => void;
+};
 
-// GAME VARIABLES
-let canvas: HTMLCanvasElement;
-let ctx: CanvasRenderingContext2D;
-let grid: number[][] = [];
-let currentPiece: PieceMatrix;
-let currentX: number;
-let currentY: number;
-let score = 0;
-let highScore = loadHighScore();
-let gameLoop: ReturnType<typeof setInterval>;
-let isPlaying = false;
-let isInitialized = false;
+export class GeometricFallGame {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private callbacks: GameCallbacks;
+  private grid: number[][] = [];
+  private currentPiece!: PieceMatrix;
+  private currentX: number = 0;
+  private currentY: number = 0;
+  private score: number = 0;
+  private highScore: number = 0;
+  private gameLoop: ReturnType<typeof setInterval> | null = null;
+  private isPlaying: boolean = false;
 
-// NEXT PIECE VARIABLES
-let nextPiece: PieceMatrix;
-let previewCanvases: HTMLCanvasElement[] = [];
-let previewCtxs: CanvasRenderingContext2D[] = [];
-const PREVIEW_COLS = 6;
-const PREVIEW_ROWS = 6;
+  private nextPiece!: PieceMatrix;
+  private previewCanvases: HTMLCanvasElement[] = [];
+  private previewCtxs: CanvasRenderingContext2D[] = [];
+  private readonly PREVIEW_COLS = 6;
+  private readonly PREVIEW_ROWS = 6;
+  private blockSize: number = 30;
+  private previewBlockSize: number = 30;
+  private bag: string[] = [];
+  private resizeObserver: ResizeObserver | null = null;
 
-// HIGH SCORE PERSISTENCE
-function loadHighScore(): number {
-  try {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!saved) return 0;
+  constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks) {
+    this.canvas = canvas;
+    this.callbacks = callbacks;
 
-    const parsed = parseInt(saved, 10);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  } catch (error) {
-    console.warn("[GeometricFall] Failed to load high score:", error);
-    return 0;
+    const context = this.canvas.getContext("2d");
+    if (!context) throw new Error("Failed to get 2D context");
+    this.ctx = context;
+
+    this.highScore = this.loadHighScore();
+    this.init();
+  }
+
+  private init() {
+    const nextels = document.querySelectorAll(".next-canvas");
+    this.previewCanvases = Array.from(nextels) as HTMLCanvasElement[];
+    this.previewCtxs = this.previewCanvases
+      .map((c) => c.getContext("2d"))
+      .filter((c): c is CanvasRenderingContext2D => !!c);
+
+    this.calculateDimensions();
+    this.setupResizeObserver();
+    this.setupThemeListener();
+
+    this.resetGrid();
+    this.spawnPiece();
+    this.callbacks.onScoreUpdate(this.score, this.highScore);
+    this.draw();
+    this.isInitialized = true;
+  }
+
+  private loadHighScore(): number {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!saved) return 0;
+      const parsed = parseInt(saved, 10);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    } catch (error) {
+      console.warn("[GeometricFall] Failed to load high score:", error);
+      return 0;
+    }
+  }
+
+  private saveHighScore() {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, this.highScore.toString());
+    } catch (error) {
+      console.warn("[GeometricFall] Failed to save high score:", error);
+    }
+  }
+
+  private calculateDimensions() {
+    const container = this.canvas.parentElement;
+    if (!container) return;
+
+    const style = getComputedStyle(container);
+    const paddingX =
+      parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const paddingY =
+      parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+    const containerWidth = container.clientWidth - paddingX;
+    const containerHeight = container.clientHeight - paddingY;
+
+    this.blockSize = Math.floor(containerWidth / TARGET_COLS);
+    if (this.blockSize < 1) this.blockSize = 1;
+
+    const cols = TARGET_COLS;
+    const rows = Math.floor(containerHeight / this.blockSize);
+
+    setGridDimensions(cols, Math.max(rows, 1));
+
+    this.canvas.width = COLS * this.blockSize;
+    this.canvas.height = ROWS * this.blockSize;
+
+    this.previewBlockSize = this.blockSize;
+    this.previewCanvases.forEach((c) => {
+      c.width = this.PREVIEW_COLS * this.previewBlockSize;
+      c.height = this.PREVIEW_ROWS * this.previewBlockSize;
+    });
+  }
+
+  private setupResizeObserver() {
+    const container = this.canvas.parentElement;
+    if (!container) return;
+
+    this.resizeObserver = new ResizeObserver(() => {
+      const oldCols = COLS;
+      const oldRows = ROWS;
+
+      this.calculateDimensions();
+
+      if (oldCols !== COLS || oldRows !== ROWS) {
+        const newGrid = createEmptyGrid();
+        for (let y = 0; y < Math.min(oldRows, ROWS); y++) {
+          for (let x = 0; x < Math.min(oldCols, COLS); x++) {
+            if (this.grid[y]?.[x]) newGrid[y][x] = this.grid[y][x];
+          }
+        }
+        this.grid = newGrid;
+
+        if (this.currentPiece) {
+          this.currentX = Math.min(
+            this.currentX,
+            COLS - this.currentPiece[0].length,
+          );
+          this.currentX = Math.max(this.currentX, 0);
+          this.currentY = Math.min(this.currentY, ROWS - 1);
+        }
+      }
+
+      this.draw();
+      if (this.nextPiece && this.previewCtxs.length > 0) this.drawNextPiece();
+    });
+
+    this.resizeObserver.observe(container);
+  }
+
+  private setupThemeListener() {
+    window.addEventListener("theme-changed", () => {
+      this.draw();
+      if (this.nextPiece && this.previewCtxs.length > 0) this.drawNextPiece();
+    });
+  }
+
+  private resetGrid() {
+    this.grid = createEmptyGrid();
+  }
+
+  private resetGame() {
+    this.resetGrid();
+    this.bag = [];
+    this.score = 0;
+    this.nextPiece = null as any;
+    this.spawnPiece();
+    this.updateScore();
+  }
+
+  private shuffleArray(array: string[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  private refillBag() {
+    const pieces = Object.keys(TETROMINOES);
+    this.bag = [...pieces];
+    this.shuffleArray(this.bag);
+  }
+
+  private getNextPieceFromBag(): PieceMatrix {
+    if (this.bag.length === 0) this.refillBag();
+    const key = this.bag.pop()!;
+    return TETROMINOES[key];
+  }
+
+  private spawnPiece() {
+    if (!this.nextPiece) {
+      this.nextPiece = this.getNextPieceFromBag();
+    }
+    this.currentPiece = this.nextPiece;
+    this.nextPiece = this.getNextPieceFromBag();
+
+    this.currentX =
+      Math.floor(COLS / 2) - Math.floor(this.currentPiece[0].length / 2);
+    this.currentY = 0;
+
+    if (this.previewCtxs.length > 0) this.drawNextPiece();
+  }
+
+  private drawNextPiece() {
+    const colors = getColors();
+    this.previewCtxs.forEach((pCtx, i) => {
+      const pCanvas = this.previewCanvases[i];
+      pCtx.fillStyle = colors.background;
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+      const pieceWidth = this.nextPiece[0].length * this.previewBlockSize;
+      const pieceHeight = this.nextPiece.length * this.previewBlockSize;
+      const updateX = (pCanvas.width - pieceWidth) / 2;
+      const updateY = (pCanvas.height - pieceHeight) / 2;
+
+      pCtx.fillStyle = colors.piece;
+      pCtx.strokeStyle = colors.grid;
+      for (let y = 0; y < this.nextPiece.length; y++) {
+        for (let x = 0; x < this.nextPiece[y].length; x++) {
+          if (this.nextPiece[y][x]) {
+            pCtx.fillRect(
+              updateX + x * this.previewBlockSize,
+              updateY + y * this.previewBlockSize,
+              this.previewBlockSize,
+              this.previewBlockSize,
+            );
+            pCtx.strokeRect(
+              updateX + x * this.previewBlockSize,
+              updateY + y * this.previewBlockSize,
+              this.previewBlockSize,
+              this.previewBlockSize,
+            );
+          }
+        }
+      }
+    });
+  }
+
+  private getGhostY(): number {
+    let ghostY = this.currentY;
+    while (this.isValidMove(this.currentPiece, this.currentX, ghostY + 1)) {
+      ghostY++;
+    }
+    return ghostY;
+  }
+
+  private draw() {
+    const colors = getColors();
+    this.ctx.fillStyle = colors.background;
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.ctx.strokeStyle = colors.grid;
+    for (let x = 0; x <= COLS; x++) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(x * this.blockSize, 0);
+      this.ctx.lineTo(x * this.blockSize, this.canvas.height);
+      this.ctx.stroke();
+    }
+    for (let y = 0; y <= ROWS; y++) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, y * this.blockSize);
+      this.ctx.lineTo(this.canvas.width, y * this.blockSize);
+      this.ctx.stroke();
+    }
+
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (this.grid[y]?.[x]) {
+          this.ctx.fillStyle = colors.piece;
+          this.ctx.fillRect(
+            x * this.blockSize,
+            y * this.blockSize,
+            this.blockSize,
+            this.blockSize,
+          );
+          this.ctx.strokeRect(
+            x * this.blockSize,
+            y * this.blockSize,
+            this.blockSize,
+            this.blockSize,
+          );
+        }
+      }
+    }
+
+    if (this.currentPiece) {
+      const ghostY = this.getGhostY();
+      this.ctx.fillStyle = colors.ghost;
+      for (let y = 0; y < this.currentPiece.length; y++) {
+        for (let x = 0; x < this.currentPiece[y].length; x++) {
+          if (this.currentPiece[y][x]) {
+            this.ctx.fillRect(
+              (this.currentX + x) * this.blockSize,
+              (ghostY + y) * this.blockSize,
+              this.blockSize,
+              this.blockSize,
+            );
+            this.ctx.strokeRect(
+              (this.currentX + x) * this.blockSize,
+              (ghostY + y) * this.blockSize,
+              this.blockSize,
+              this.blockSize,
+            );
+          }
+        }
+      }
+
+      this.ctx.fillStyle = colors.piece;
+      for (let y = 0; y < this.currentPiece.length; y++) {
+        for (let x = 0; x < this.currentPiece[y].length; x++) {
+          if (this.currentPiece[y][x]) {
+            this.ctx.fillRect(
+              (this.currentX + x) * this.blockSize,
+              (this.currentY + y) * this.blockSize,
+              this.blockSize,
+              this.blockSize,
+            );
+            this.ctx.strokeRect(
+              (this.currentX + x) * this.blockSize,
+              (this.currentY + y) * this.blockSize,
+              this.blockSize,
+              this.blockSize,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  private isValidMove(piece: PieceMatrix, x: number, y: number): boolean {
+    return checkMove({ grid: this.grid, piece, x, y });
+  }
+
+  private placePiece() {
+    for (let y = 0; y < this.currentPiece.length; y++) {
+      for (let x = 0; x < this.currentPiece[y].length; x++) {
+        if (this.currentPiece[y][x]) {
+          const gridY = this.currentY + y;
+          const gridX = this.currentX + x;
+          if (gridY >= 0 && gridY < ROWS && gridX >= 0 && gridX < COLS) {
+            this.grid[gridY][gridX] = 1;
+          }
+        }
+      }
+    }
+    this.clearLines();
+    this.spawnPiece();
+    if (!this.isValidMove(this.currentPiece, this.currentX, this.currentY)) {
+      this.handleGameOver();
+    } else {
+      AudioManager.playSFX("place");
+    }
+  }
+
+  private clearLines() {
+    const result = computeClearedLines(this.grid);
+    this.grid = result.grid;
+    if (result.linesCleared > 0) {
+      const points = [0, 100, 300, 500, 800];
+      this.score += points[result.linesCleared] || result.linesCleared * 200;
+      this.updateScore();
+      AudioManager.playSFX("collect");
+    }
+  }
+
+  private updateScore() {
+    if (this.score > this.highScore) {
+      this.highScore = this.score;
+      this.saveHighScore();
+    }
+    this.callbacks.onScoreUpdate(this.score, this.highScore);
+  }
+
+  private handleGameOver() {
+    this.stop();
+    AudioManager.playSFX("fail");
+    this.callbacks.onGameOver(this.score);
+  }
+
+  private gameTick = () => {
+    if (
+      !this.isValidMove(this.currentPiece, this.currentX, this.currentY + 1)
+    ) {
+      this.placePiece();
+    } else {
+      this.currentY++;
+    }
+    this.draw();
+  };
+
+  public moveDown() {
+    if (this.isValidMove(this.currentPiece, this.currentX, this.currentY + 1)) {
+      this.currentY++;
+      this.draw();
+    }
+  }
+
+  public moveLeft() {
+    if (this.isValidMove(this.currentPiece, this.currentX - 1, this.currentY)) {
+      this.currentX--;
+      this.draw();
+    }
+  }
+
+  public moveRight() {
+    if (this.isValidMove(this.currentPiece, this.currentX + 1, this.currentY)) {
+      this.currentX++;
+      this.draw();
+    }
+  }
+
+  public rotateLeft() {
+    const rotated = rotatePiece(rotatePiece(rotatePiece(this.currentPiece)));
+    if (this.isValidMove(rotated, this.currentX, this.currentY)) {
+      this.currentPiece = rotated;
+      this.draw();
+    }
+  }
+
+  public rotateRight() {
+    const rotated = rotatePiece(this.currentPiece);
+    if (this.isValidMove(rotated, this.currentX, this.currentY)) {
+      this.currentPiece = rotated;
+      this.draw();
+    }
+  }
+
+  public dropPiece() {
+    while (
+      this.isValidMove(this.currentPiece, this.currentX, this.currentY + 1)
+    ) {
+      this.currentY++;
+    }
+    AudioManager.playSFX("hit");
+    this.placePiece();
+    this.draw();
+  }
+
+  public start() {
+    this.stop();
+    this.isPlaying = true;
+    this.gameLoop = setInterval(this.gameTick.bind(this), 500);
+  }
+
+  public resume() {
+    if (!this.isPlaying) {
+      this.isPlaying = true;
+      this.gameLoop = setInterval(this.gameTick.bind(this), 500);
+    }
+  }
+
+  public pause() {
+    if (this.isPlaying) {
+      if (this.gameLoop) clearInterval(this.gameLoop);
+      this.gameLoop = null;
+      this.isPlaying = false;
+    }
+  }
+
+  public stop() {
+    if (this.gameLoop) clearInterval(this.gameLoop);
+    this.gameLoop = null;
+    this.isPlaying = false;
+    this.resetGame();
+    this.draw();
+  }
+
+  public destroy() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+    if (this.gameLoop) clearInterval(this.gameLoop);
   }
 }
-
-const saveHighScore = () => {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, highScore.toString());
-  } catch (error) {
-    console.warn("[GeometricFall] Failed to save high score:", error);
-  }
-};
-
-// CALCULATE DYNAMIC DIMENSIONS
-const calculateDimensions = () => {
-  const container = canvas.parentElement;
-  if (!container) return;
-
-  // Use content box (clientWidth - padding) to match the canvas CSS display size
-  const style = getComputedStyle(container);
-  const paddingX =
-    parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-  const paddingY =
-    parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-  const containerWidth = container.clientWidth - paddingX;
-  const containerHeight = container.clientHeight - paddingY;
-
-  // Block size derived from available width and target columns
-  blockSize = Math.floor(containerWidth / TARGET_COLS);
-  if (blockSize < 1) blockSize = 1;
-
-  const cols = TARGET_COLS;
-  const rows = Math.floor(containerHeight / blockSize);
-
-  setGridDimensions(cols, Math.max(rows, 1));
-
-  canvas.width = COLS * blockSize;
-  canvas.height = ROWS * blockSize;
-
-  // Scale preview block size relative to game block size
-  previewBlockSize = blockSize;
-  previewCanvases.forEach((c) => {
-    c.width = PREVIEW_COLS * previewBlockSize;
-    c.height = PREVIEW_ROWS * previewBlockSize;
-  });
-};
-
-// INITIALIZE GAME
-const initGame = (): boolean => {
-  const canvasEl = document.getElementById("game");
-  if (!(canvasEl instanceof HTMLCanvasElement)) {
-    console.error("[GeometricFall] Canvas element #game not found");
-    return false;
-  }
-  canvas = canvasEl;
-
-  const context = canvas.getContext("2d");
-  if (!context) {
-    console.error("[GeometricFall] Failed to get 2D canvas context");
-    return false;
-  }
-  ctx = context;
-
-  // Initialize Next Piece Canvas(es)
-  const nextels = document.querySelectorAll(".next-canvas");
-  previewCanvases = Array.from(nextels) as HTMLCanvasElement[];
-  previewCtxs = previewCanvases
-    .map((c) => c.getContext("2d"))
-    .filter((c): c is CanvasRenderingContext2D => !!c);
-
-  calculateDimensions();
-  setupResizeObserver();
-  setupThemeListener();
-
-  resetGrid();
-  // Reset nextPiece so spawnPiece does a proper double-spawn
-  nextPiece = null as any;
-  spawnPiece();
-  updateScore();
-  draw();
-  isInitialized = true;
-  return true;
-};
-
-const setupThemeListener = () => {
-  window.addEventListener("theme-changed", () => {
-    draw();
-    if (nextPiece && previewCtxs.length > 0) drawNextPiece();
-  });
-};
-
-// RESET GRID
-const resetGrid = () => {
-  grid = createEmptyGrid();
-};
-
-// SPAWN NEW PIECE
-let bag: string[] = [];
-
-// SHUFFLE ARRAY (Fisher-Yates)
-const shuffleArray = (array: string[]) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-};
-
-// REFILL BAG
-const refillBag = () => {
-  const pieces = Object.keys(TETROMINOES);
-  if (pieces.length === 0) {
-    console.error("[GeometricFall] No tetrominoes defined");
-    return;
-  }
-  bag = [...pieces];
-  shuffleArray(bag);
-};
-
-// GET NEXT PIECE FROM BAG
-const getNextPieceFromBag = (): PieceMatrix => {
-  if (bag.length === 0) refillBag();
-
-  const key = bag.pop();
-  if (!key) {
-    // Should not happen if refillBag works, but safety fallback
-    const pieces = Object.keys(TETROMINOES);
-    const randomKey = pieces[Math.floor(Math.random() * pieces.length)];
-    return TETROMINOES[randomKey];
-  }
-  return TETROMINOES[key];
-};
-
-// SPAWN NEW PIECE
-const spawnPiece = () => {
-  if (!nextPiece) {
-    nextPiece = getNextPieceFromBag();
-  }
-
-  currentPiece = nextPiece;
-  nextPiece = getNextPieceFromBag();
-
-  currentX = Math.floor(COLS / 2) - Math.floor(currentPiece[0].length / 2);
-  currentY = 0;
-
-  if (previewCtxs.length > 0) drawNextPiece();
-};
-
-// DRAW NEXT PIECE PREVIEW
-const drawNextPiece = () => {
-  const colors = getColors();
-  previewCtxs.forEach((pCtx, i) => {
-    const pCanvas = previewCanvases[i];
-    pCtx.fillStyle = colors.background;
-    pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-
-    // Calculate center offset
-    const pieceWidth = nextPiece[0].length * previewBlockSize;
-    const pieceHeight = nextPiece.length * previewBlockSize;
-    const updateX = (pCanvas.width - pieceWidth) / 2;
-    const updateY = (pCanvas.height - pieceHeight) / 2;
-
-    pCtx.fillStyle = colors.piece;
-    pCtx.strokeStyle = colors.grid;
-    for (let y = 0; y < nextPiece.length; y++) {
-      for (let x = 0; x < nextPiece[y].length; x++) {
-        if (nextPiece[y][x]) {
-          pCtx.fillRect(
-            updateX + x * previewBlockSize,
-            updateY + y * previewBlockSize,
-            previewBlockSize,
-            previewBlockSize,
-          );
-          pCtx.strokeRect(
-            updateX + x * previewBlockSize,
-            updateY + y * previewBlockSize,
-            previewBlockSize,
-            previewBlockSize,
-          );
-        }
-      }
-    }
-  });
-};
-
-// GET GHOST Y
-const getGhostY = (): number => {
-  let ghostY = currentY;
-  while (isValidMove(currentPiece, currentX, ghostY + 1)) {
-    ghostY++;
-  }
-  return ghostY;
-};
-
-// DRAW GAME
-const draw = () => {
-  const colors = getColors();
-  ctx.fillStyle = colors.background;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // DRAW GRID
-  ctx.strokeStyle = colors.grid;
-  for (let x = 0; x <= COLS; x++) {
-    ctx.beginPath();
-    ctx.moveTo(x * blockSize, 0);
-    ctx.lineTo(x * blockSize, canvas.height);
-    ctx.stroke();
-  }
-  for (let y = 0; y <= ROWS; y++) {
-    ctx.beginPath();
-    ctx.moveTo(0, y * blockSize);
-    ctx.lineTo(canvas.width, y * blockSize);
-    ctx.stroke();
-  }
-
-  // DRAW PLACED PIECES
-  for (let y = 0; y < ROWS; y++) {
-    for (let x = 0; x < COLS; x++) {
-      if (grid[y]?.[x]) {
-        ctx.fillStyle = colors.piece;
-        ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
-        ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
-      }
-    }
-  }
-
-  // DRAW GHOST PIECE
-  const ghostY = getGhostY();
-  ctx.fillStyle = colors.ghost;
-  for (let y = 0; y < currentPiece.length; y++) {
-    for (let x = 0; x < currentPiece[y].length; x++) {
-      if (currentPiece[y][x]) {
-        ctx.fillRect(
-          (currentX + x) * blockSize,
-          (ghostY + y) * blockSize,
-          blockSize,
-          blockSize,
-        );
-        ctx.strokeRect(
-          (currentX + x) * blockSize,
-          (ghostY + y) * blockSize,
-          blockSize,
-          blockSize,
-        );
-      }
-    }
-  }
-
-  // DRAW CURRENT PIECE
-  ctx.fillStyle = colors.piece;
-  for (let y = 0; y < currentPiece.length; y++) {
-    for (let x = 0; x < currentPiece[y].length; x++) {
-      if (currentPiece[y][x]) {
-        ctx.fillRect(
-          (currentX + x) * blockSize,
-          (currentY + y) * blockSize,
-          blockSize,
-          blockSize,
-        );
-        ctx.strokeRect(
-          (currentX + x) * blockSize,
-          (currentY + y) * blockSize,
-          blockSize,
-          blockSize,
-        );
-      }
-    }
-  }
-};
-
-// CHECK COLLISION
-const isValidMove = (piece: PieceMatrix, x: number, y: number): boolean =>
-  checkMove({ grid, piece, x, y });
-
-// PLACE PIECE
-const placePiece = () => {
-  for (let y = 0; y < currentPiece.length; y++) {
-    for (let x = 0; x < currentPiece[y].length; x++) {
-      if (currentPiece[y][x]) {
-        const gridY = currentY + y;
-        const gridX = currentX + x;
-
-        // Bounds safety
-        if (gridY >= 0 && gridY < ROWS && gridX >= 0 && gridX < COLS) {
-          grid[gridY][gridX] = 1;
-        }
-      }
-    }
-  }
-  clearLines();
-  spawnPiece();
-  if (!isValidMove(currentPiece, currentX, currentY)) {
-    gameOver();
-  } else {
-    AudioManager.playSFX("place");
-  }
-};
-
-// CLEAR LINES
-const clearLines = () => {
-  const result = computeClearedLines(grid);
-  grid = result.grid;
-  if (result.linesCleared > 0) {
-    const points = [0, 100, 300, 500, 800];
-    score += points[result.linesCleared] || result.linesCleared * 200;
-    updateScore();
-    AudioManager.playSFX("collect");
-  }
-};
-
-// UPDATE SCORE
-const updateScore = () => {
-  if (score > highScore) {
-    highScore = score;
-    saveHighScore();
-  }
-
-  const scoreEl = document.getElementById("score");
-  const highScoreEl = document.getElementById("high-score");
-  if (scoreEl) scoreEl.textContent = score.toString();
-  if (highScoreEl) highScoreEl.textContent = highScore.toString();
-};
-
-// GAME OVER
-const gameOver = () => {
-  clearInterval(gameLoop);
-  isPlaying = false;
-  AudioManager.playSFX("fail");
-  alert("Game Over!");
-};
-
-// GAME LOOP
-const gameTick = () => {
-  if (!isValidMove(currentPiece, currentX, currentY + 1)) {
-    placePiece();
-  } else {
-    currentY++;
-  }
-  draw();
-};
-
-// GAME CONTROLS
-const moveDown = () => {
-  if (isValidMove(currentPiece, currentX, currentY + 1)) {
-    currentY++;
-    draw();
-  }
-};
-const moveLeft = () => {
-  if (isValidMove(currentPiece, currentX - 1, currentY)) {
-    currentX--;
-    draw();
-  }
-};
-const moveRight = () => {
-  if (isValidMove(currentPiece, currentX + 1, currentY)) {
-    currentX++;
-    draw();
-  }
-};
-const rotateLeft = () => {
-  const rotated = rotatePiece(rotatePiece(rotatePiece(currentPiece)));
-  if (isValidMove(rotated, currentX, currentY)) {
-    currentPiece = rotated;
-    draw();
-  }
-};
-const rotateRight = () => {
-  const rotated = rotatePiece(currentPiece);
-  if (isValidMove(rotated, currentX, currentY)) {
-    currentPiece = rotated;
-    draw();
-  }
-};
-const dropPiece = () => {
-  while (isValidMove(currentPiece, currentX, currentY + 1)) {
-    currentY++;
-  }
-  AudioManager.playSFX("hit");
-  placePiece();
-  draw();
-};
-
-// GAME STATE
-const playGame = () => {
-  if (!isPlaying) {
-    isPlaying = true;
-    if (!isInitialized) {
-      if (!initGame()) {
-        isPlaying = false;
-        return;
-      }
-    }
-    gameLoop = setInterval(gameTick, 500);
-  }
-};
-const pauseGame = () => {
-  if (isPlaying) {
-    clearInterval(gameLoop);
-    isPlaying = false;
-  }
-};
-const stopGame = () => {
-  clearInterval(gameLoop);
-  isPlaying = false;
-
-  if (!isInitialized) return;
-
-  resetGrid();
-  bag = [];
-  score = 0;
-  updateScore();
-  nextPiece = null as any; // Reset next piece
-  spawnPiece();
-  draw();
-};
-
-// RESIZE OBSERVER
-let resizeObserver: ResizeObserver | null = null;
-
-const setupResizeObserver = () => {
-  const container = canvas.parentElement;
-  if (!container) return;
-
-  resizeObserver = new ResizeObserver(() => {
-    const oldCols = COLS;
-    const oldRows = ROWS;
-
-    calculateDimensions();
-
-    // Rebuild grid if dimensions changed, preserving existing placed blocks
-    if (oldCols !== COLS || oldRows !== ROWS) {
-      const newGrid = createEmptyGrid();
-      for (let y = 0; y < Math.min(oldRows, ROWS); y++) {
-        for (let x = 0; x < Math.min(oldCols, COLS); x++) {
-          if (grid[y]?.[x]) newGrid[y][x] = grid[y][x];
-        }
-      }
-      grid = newGrid;
-
-      // Clamp current piece position to new bounds
-      if (currentPiece) {
-        currentX = Math.min(currentX, COLS - currentPiece[0].length);
-        currentX = Math.max(currentX, 0);
-        currentY = Math.min(currentY, ROWS - 1);
-      }
-    }
-
-    draw();
-    if (nextPiece && previewCtxs.length > 0) drawNextPiece();
-  });
-
-  resizeObserver.observe(container);
-};
-
-export {
-  moveDown,
-  moveLeft,
-  moveRight,
-  rotateLeft,
-  rotateRight,
-  dropPiece,
-  playGame,
-  pauseGame,
-  stopGame,
-  updateScore,
-};
