@@ -100,6 +100,39 @@
         <div class="flex sm:hidden text-text-secondary">
           <p>Swipe to move tiles</p>
         </div>
+
+        <!-- Mobile D-Pad -->
+        <div class="flex flex-col items-center gap-2 sm:hidden">
+          <button class="icon-btn size-14 upBtn" aria-label="Move Up">
+            <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
+          </button>
+          <div class="flex gap-2">
+            <button class="icon-btn size-14 leftBtn" aria-label="Move Left">
+              <span class="flex -rotate-90">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
+            </button>
+            <button class="icon-btn size-14 downBtn" aria-label="Move Down">
+              <span class="flex rotate-180">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
+            </button>
+            <button class="icon-btn size-14 rightBtn" aria-label="Move Right">
+              <span class="flex rotate-90">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
+            </button>
+          </div>
+        </div>
       </section>
     </main>
   </body>

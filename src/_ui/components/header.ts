@@ -22,16 +22,12 @@ export class Header extends HTMLElement {
         <div class="flex max-w-7xl w-full justify-between">
           <h2 class="font-contrast">${backBtn ? `<a href="/" class="mr-6 cur-pointer"><</a>` : ""}${title}</h2>
           <div class="flex gap-4 items-center">
-            <label for="sound-menu" class="relative cur-pointer">
+            <label for="sound-menu" class="relative flex items-center justify-center cur-pointer">
               <input type="checkbox" id="sound-menu" class="peer sr-only">
-              <img
-                class="size-6 object-contain not-dark:invert"
-                src="/assets/icons/volume-high.webp"
-                alt="Speaker icon"
-              >
+              <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
               <div class="hidden peer-checked:flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-1/1 card flex-col gap-4 p-6">
                 <div class="flex items-center gap-4 w-48">
-                  <img src="/assets/icons/music.webp" alt="Music icon" class="size-6 object-contain not-dark:invert">
+                  <gh-icon src="/assets/icons/music.webp" width="1.5rem" height="1.5rem"></gh-icon>
                   <gh-slider
                     id="music-volume"
                     min="0"
@@ -42,7 +38,7 @@ export class Header extends HTMLElement {
                   ></gh-slider>
                 </div>
                 <div class="flex items-center gap-4 w-48">
-                  <img src="/assets/icons/volume-high.webp" alt="Sound icon" class="size-6 object-contain not-dark:invert">
+                  <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
                   <gh-slider
                     id="sound-volume"
                     min="0"
@@ -97,7 +93,8 @@ export class Header extends HTMLElement {
     });
 
     document.getElementById("theme-toggle")?.addEventListener("click", () => {
-      if (ThemeManager.getTheme() === "dark") return ThemeManager.setTheme("light");
+      if (ThemeManager.getTheme() === "dark")
+        return ThemeManager.setTheme("light");
       ThemeManager.setTheme("dark");
     });
   }

@@ -78,6 +78,24 @@ document.addEventListener("DOMContentLoaded", () => {
   startBtn?.addEventListener("click", setPlayingState);
   restartBtn?.addEventListener("click", setPlayingState);
   winRestartBtn?.addEventListener("click", setPlayingState);
+
+  // Mobile D-Pad Buttons
+  const controls = [
+    { selector: ".upBtn", direction: "up" as const },
+    { selector: ".downBtn", direction: "down" as const },
+    { selector: ".leftBtn", direction: "left" as const },
+    { selector: ".rightBtn", direction: "right" as const },
+  ];
+
+  controls.forEach(({ selector, direction }) => {
+    const btn = document.querySelector(selector);
+    if (btn) {
+      btn.addEventListener("click", () => {
+        if (appState === "playing") game.move(direction);
+      });
+    }
+  });
+
   const keyDirectionMap: Record<string, Direction> = {
     ArrowUp: "up",
     ArrowDown: "down",

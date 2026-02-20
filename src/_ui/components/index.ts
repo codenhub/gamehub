@@ -1,3 +1,4 @@
 import "./footer.ts";
-import "./slider.ts";
 import "./header.ts";
+import "./icon.ts";
+import "./slider.ts";
