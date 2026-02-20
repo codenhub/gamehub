@@ -21,21 +21,17 @@
         <div class="flex items-center w-full justify-between">
           <div class="flex gap-2">
             <button id="play" class="icon-btn">
-              <img
-                src="/assets/icons/play.webp"
-                alt="Play icon"
-                class="size-4"
-              />
+              <gh-icon src="/assets/icons/play.webp" width="1rem"></gh-icon>
             </button>
             <button id="pause" class="icon-btn hidden">
               <div class="flex gap-1">
-                <div class="bg-accent-contrast h-4 w-1.5"></div>
-                <div class="bg-accent-contrast h-4 w-1.5"></div>
+                <div class="bg-primary-contrast h-4 w-1.5"></div>
+                <div class="bg-primary-contrast h-4 w-1.5"></div>
               </div>
             </button>
             <button id="stop" class="icon-btn hidden">
               <div
-                class="bg-accent-contrast size-4"
+                class="bg-primary-contrast size-4"
                 aria-label="Stop icon"
               ></div>
             </button>
@@ -96,31 +92,34 @@
         </div>
 
         <!-- Mobile D-Pad -->
-        <div class="flex flex-col items-center gap-4 sm:hidden">
+        <div class="flex flex-col items-center gap-2 sm:hidden">
           <button class="icon-btn size-14 upBtn" aria-label="Move Up">
-            <img src="/assets/icons/chevron-up.webp" alt="Up" class="size-8" />
+            <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
           </button>
-          <div class="flex gap-4">
+          <div class="flex gap-2">
             <button class="icon-btn size-14 leftBtn" aria-label="Move Left">
-              <img
-                src="/assets/icons/chevron-up.webp"
-                alt="Arrow left icon"
-                class="size-8 -rotate-90"
-              />
+              <span class="flex -rotate-90">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
             </button>
             <button class="icon-btn size-14 downBtn" aria-label="Move Down">
-              <img
-                src="/assets/icons/chevron-up.webp"
-                alt="Arrow down icon"
-                class="size-8 rotate-180"
-              />
+              <span class="flex rotate-180">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
             </button>
             <button class="icon-btn size-14 rightBtn" aria-label="Move Right">
-              <img
-                src="/assets/icons/chevron-up.webp"
-                alt="Arrow right icon"
-                class="size-8 rotate-90"
-              />
+              <span class="flex rotate-90">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
             </button>
           </div>
         </div>

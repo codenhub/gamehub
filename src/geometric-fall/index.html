@@ -23,20 +23,17 @@
             <!-- CONTROLS -->
             <div class="flex gap-2">
               <button id="play" class="icon-btn">
-                <gh-icon
-                  src="/assets/icons/play.webp"
-                  class="text-amber-500"
-                ></gh-icon>
+                <gh-icon src="/assets/icons/play.webp"></gh-icon>
               </button>
               <button id="pause" class="icon-btn hidden">
                 <div class="flex gap-1">
-                  <div class="bg-accent-contrast h-4 w-1.5"></div>
-                  <div class="bg-accent-contrast h-4 w-1.5"></div>
+                  <div class="bg-primary-contrast h-4 w-1.5"></div>
+                  <div class="bg-primary-contrast h-4 w-1.5"></div>
                 </div>
               </button>
               <button id="stop" class="icon-btn hidden">
                 <div
-                  class="bg-accent-contrast size-4"
+                  class="bg-primary-contrast size-4"
                   aria-label="Stop icon"
                 ></div>
               </button>
@@ -102,48 +99,45 @@
           </div>
           <div class="flex gap-4">
             <button class="icon-btn size-12 dropBtn">
-              <img
+              <gh-icon
                 src="/assets/icons/chevron-drop.webp"
-                alt="Drop down icon"
-                class="size-8"
-              />
+                width="2rem"
+              ></gh-icon>
             </button>
             <button class="icon-btn size-12 rotateLeftBtn">
-              <img
-                src="/assets/icons/rotate.webp"
-                alt="Rotate clockwise icon"
-                class="size-8"
-              />
+              <gh-icon src="/assets/icons/rotate.webp" width="2rem"></gh-icon>
             </button>
             <button class="icon-btn size-12 rotateRightBtn">
-              <img
+              <gh-icon
                 src="/assets/icons/rotate-counter.webp"
-                alt="Rotate counter-clockwise icon"
-                class="size-8"
-              />
+                width="2rem"
+              ></gh-icon>
             </button>
           </div>
           <div class="flex gap-4">
             <button class="icon-btn size-12 downBtn">
-              <img
-                src="/assets/icons/chevron-up.webp"
-                alt="Move down icon"
-                class="size-8 rotate-180"
-              />
+              <span class="flex rotate-180">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
             </button>
             <button class="icon-btn size-12 leftBtn">
-              <img
-                src="/assets/icons/chevron-up.webp"
-                alt="Move left icon"
-                class="size-8 -rotate-90"
-              />
+              <span class="flex -rotate-90">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
             </button>
             <button class="icon-btn size-12 rightBtn">
-              <img
-                src="/assets/icons/chevron-up.webp"
-                alt="Move right icon"
-                class="size-8 rotate-90"
-              />
+              <span class="flex rotate-90">
+                <gh-icon
+                  src="/assets/icons/chevron-up.webp"
+                  width="2rem"
+                ></gh-icon>
+              </span>
             </button>
           </div>
         </div>
@@ -151,46 +145,37 @@
         <!-- MOBILE CONTROLS -->
         <div class="flex w-full justify-center gap-4 sm:hidden">
           <button class="icon-btn size-12 dropBtn">
-            <img
+            <gh-icon
               src="/assets/icons/chevron-drop.webp"
-              alt="Drop down icon"
-              class="size-8"
-            />
+              width="2rem"
+            ></gh-icon>
           </button>
           <button class="icon-btn size-12 rotateLeftBtn">
-            <img
-              src="/assets/icons/rotate.webp"
-              alt="Rotate clockwise icon"
-              class="size-8"
-            />
+            <gh-icon src="/assets/icons/rotate.webp" width="2rem"></gh-icon>
           </button>
           <button class="icon-btn size-12 rotateRightBtn">
-            <img
+            <gh-icon
               src="/assets/icons/rotate-counter.webp"
-              alt="Rotate counter-clockwise icon"
-              class="size-8"
-            />
+              width="2rem"
+            ></gh-icon>
           </button>
           <button class="icon-btn size-12 downBtn">
-            <img
+            <gh-icon
               src="/assets/icons/chevron-down.webp"
-              alt="Move down icon"
-              class="size-8"
-            />
+              width="2rem"
+            ></gh-icon>
           </button>
           <button class="icon-btn size-12 leftBtn">
-            <img
+            <gh-icon
               src="/assets/icons/chevron-left.webp"
-              alt="Move left icon"
-              class="size-8"
-            />
+              width="2rem"
+            ></gh-icon>
           </button>
           <button class="icon-btn size-12 rightBtn">
-            <img
+            <gh-icon
               src="/assets/icons/chevron-right.webp"
-              alt="Move right icon"
-              class="size-8"
-            />
+              width="2rem"
+            ></gh-icon>
           </button>
         </div>
       </section>

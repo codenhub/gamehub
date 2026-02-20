@@ -58,9 +58,7 @@ export class Slider extends HTMLElement {
     this.innerHTML = `
       <div class="absolute top-1/2 inset-x-0 h-2 -translate-y-1/2 bg-border pixel-corner-2"></div>
       <div class="absolute top-1/2 left-0 h-2 -translate-y-1/2 bg-primary pixel-corner-2" data-fill></div>
-      <div class="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 bg-primary pixel-corner-lg-2" data-thumb>
-        <div class="absolute inset-0.5 bg-accent pixel-corner-lg-2"></div>
-      </div>
+      <div class="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 bg-primary pixel-corner-lg-2" data-thumb></div>
     `;
 
     this.fillEl = this.querySelector("[data-fill]")!;
