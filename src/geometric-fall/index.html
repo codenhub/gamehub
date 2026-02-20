@@ -23,11 +23,10 @@
             <!-- CONTROLS -->
             <div class="flex gap-2">
               <button id="play" class="icon-btn">
-                <img
+                <gh-icon
                   src="/assets/icons/play.webp"
-                  alt="Play icon"
-                  class="size-4"
-                />
+                  class="text-amber-500"
+                ></gh-icon>
               </button>
               <button id="pause" class="icon-btn hidden">
                 <div class="flex gap-1">
@@ -83,10 +82,11 @@
               class="absolute inset-0 flex-col items-center justify-center gap-2 bg-foreground/80 pixel-corner-lg-4 z-20 hidden"
             >
               <h2 class="text-error">GAME OVER</h2>
-              <p class="text-2xl mb-2">Score: <span id="final-score">0</span></p>
+              <p class="text-2xl mb-2">
+                Score: <span id="final-score">0</span>
+              </p>
               <button id="restart-btn" class="primary-btn">Try Again</button>
             </div>
-
           </div>
         </div>
 
