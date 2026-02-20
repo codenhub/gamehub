@@ -15,15 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const startBtn = getElement<HTMLButtonElement>("start-btn");
   const restartBtn = getElement<HTMLButtonElement>("restart-btn");
 
-
   const startScreen = getElement<HTMLDivElement>("start-screen");
   const gameOverScreen = getElement<HTMLDivElement>("game-over-screen");
-
 
   const scoreEl = getElement<HTMLSpanElement>("score");
   const highScoreEl = getElement<HTMLSpanElement>("high-score");
   const finalScoreEl = getElement<HTMLSpanElement>("final-score");
-
 
   const canvas = getElement<HTMLCanvasElement>("game");
 
@@ -49,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (finalScoreEl) finalScoreEl.innerText = finalScore.toString();
         setGameOverState();
       },
-
     });
   } catch (error) {
     console.error("[GeometricFall] Failed to initialize game:", error);
@@ -106,8 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
     gameOverScreen?.classList.add("flex");
   };
 
-
-
   // Event Listeners
   playBtn.addEventListener("click", setPlayingState);
   pauseBtn.addEventListener("click", setPausedState);
@@ -115,7 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   startBtn?.addEventListener("click", setPlayingState);
   restartBtn?.addEventListener("click", setPlayingState);
-
 
   // GAME CONTROLS
   type Control = {
@@ -153,9 +146,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", (e: KeyboardEvent) => {
     if (e.key === "Enter") {
-        if (appState === "playing") setPausedState();
-        else setPlayingState();
-        return;
+      if (appState === "playing") setPausedState();
+      else setPlayingState();
+      return;
     }
 
     const action = keyMap[e.code];
@@ -164,4 +157,81 @@ document.addEventListener("DOMContentLoaded", () => {
       if (appState === "playing") action();
     }
   });
+
+  // GESTURE CONTROLS
+  const SWIPE_THRESHOLD = 30;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let lastTouchX = 0;
+  let lastTouchY = 0;
+  let isSwipe = false;
+
+  canvas.addEventListener(
+    "touchstart",
+    (e: TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      lastTouchX = touchStartX;
+      lastTouchY = touchStartY;
+      isSwipe = false;
+    },
+    { passive: false },
+  );
+
+  canvas.addEventListener(
+    "touchmove",
+    (e: TouchEvent) => {
+      if (e.cancelable) e.preventDefault();
+      if (appState !== "playing") return;
+
+      const touch = e.touches[0];
+      const currentX = touch.clientX;
+      const currentY = touch.clientY;
+
+      if (
+        Math.abs(currentX - touchStartX) > 10 ||
+        Math.abs(currentY - touchStartY) > 10
+      ) {
+        isSwipe = true;
+      }
+
+      const dx = currentX - lastTouchX;
+      const dy = currentY - lastTouchY;
+
+      if (Math.abs(dx) >= SWIPE_THRESHOLD) {
+        const moves = Math.floor(Math.abs(dx) / SWIPE_THRESHOLD);
+        for (let i = 0; i < moves; i++) {
+          if (dx > 0) game.moveRight();
+          else game.moveLeft();
+        }
+        lastTouchX += Math.sign(dx) * moves * SWIPE_THRESHOLD;
+      }
+
+      if (dy >= SWIPE_THRESHOLD) {
+        const moves = Math.floor(dy / SWIPE_THRESHOLD);
+        for (let i = 0; i < moves; i++) {
+          game.moveDown();
+        }
+        lastTouchY += moves * SWIPE_THRESHOLD;
+      }
+    },
+    { passive: false },
+  );
+
+  canvas.addEventListener(
+    "touchend",
+    (e: TouchEvent) => {
+      // Don't preventDefault here to allow clicks on other elements,
+      // but in this game context it's only on the canvas anyway.
+      if (e.cancelable) e.preventDefault();
+      if (appState !== "playing") return;
+
+      if (!isSwipe) {
+        game.rotateRight();
+      }
+    },
+    { passive: false },
+  );
 });
