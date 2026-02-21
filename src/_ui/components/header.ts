@@ -155,6 +155,48 @@ export class Header extends HTMLElement {
         { signal },
       );
     });
+
+    const soundMenu = this.querySelector("#sound-menu") as HTMLInputElement;
+    const themeMenu = this.querySelector("#theme-menu") as HTMLInputElement;
+    const soundLabel = soundMenu?.closest("label");
+    const themeLabel = themeMenu?.closest("label");
+
+    // Close one menu when the other opens
+    if (soundMenu && themeMenu) {
+      soundMenu.addEventListener(
+        "change",
+        () => {
+          if (soundMenu.checked) themeMenu.checked = false;
+        },
+        { signal },
+      );
+
+      themeMenu.addEventListener(
+        "change",
+        () => {
+          if (themeMenu.checked) soundMenu.checked = false;
+        },
+        { signal },
+      );
+    }
+
+    // Close menus when clicking outside
+    document.addEventListener(
+      "click",
+      (e) => {
+        const target = e.target as Node;
+
+        // Ensure click wasn't inside the labels/menus
+        if (soundMenu?.checked && soundLabel && !soundLabel.contains(target)) {
+          soundMenu.checked = false;
+        }
+
+        if (themeMenu?.checked && themeLabel && !themeLabel.contains(target)) {
+          themeMenu.checked = false;
+        }
+      },
+      { signal },
+    );
   }
 
   private updateActiveThemeUI(activeTheme: Theme) {
