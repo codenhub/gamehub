@@ -43,10 +43,6 @@ class ThemeManager {
     );
     document.documentElement.classList.add(`theme-${theme}`);
 
-    // Maintain 'dark' class for themes that are dark-oriented for Tailwind compatibility
-    const isDark = theme !== "light";
-    document.documentElement.classList.toggle("dark", isDark);
-
     localStorage.setItem("theme", theme);
 
     // Clear all theme variables before applying new ones to avoid stale values

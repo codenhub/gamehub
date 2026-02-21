@@ -25,6 +25,7 @@ export const THEME_VARIABLES = [
   "--color-warning-contrast",
   "--color-info",
   "--color-info-contrast",
+  "--logo-filter",
 ] as const;
 
 export type ThemeVariable = (typeof THEME_VARIABLES)[number];
@@ -50,6 +51,7 @@ export const THEMES: Record<Theme, Record<ThemeVariable, string>> = {
     "--color-warning-contrast": "var(--color-amber-950)",
     "--color-info": "var(--color-blue-600)",
     "--color-info-contrast": "var(--color-blue-50)",
+    "--logo-filter": "brightness(0)",
   },
   dark: {
     "--color-primary": "var(--color-neutral-50)",
@@ -71,6 +73,7 @@ export const THEMES: Record<Theme, Record<ThemeVariable, string>> = {
     "--color-warning-contrast": "var(--color-amber-950)",
     "--color-info": "var(--color-blue-400)",
     "--color-info-contrast": "var(--color-blue-950)",
+    "--logo-filter": "brightness(0) invert(1)",
   },
   cyberpunk: {
     "--color-primary": "var(--color-fuchsia-500)",
@@ -92,6 +95,7 @@ export const THEMES: Record<Theme, Record<ThemeVariable, string>> = {
     "--color-warning-contrast": "var(--color-yellow-950)",
     "--color-info": "var(--color-sky-400)",
     "--color-info-contrast": "var(--color-sky-950)",
+    "--logo-filter": "brightness(0) invert(1)",
   },
   forest: {
     "--color-primary": "var(--color-emerald-600)",
@@ -113,5 +117,6 @@ export const THEMES: Record<Theme, Record<ThemeVariable, string>> = {
     "--color-warning-contrast": "var(--color-amber-950)",
     "--color-info": "var(--color-sky-500)",
     "--color-info-contrast": "var(--color-sky-950)",
+    "--logo-filter": "brightness(0) invert(1)",
   },
 };

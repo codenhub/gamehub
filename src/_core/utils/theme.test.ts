@@ -60,6 +60,7 @@ describe("THEMES completeness", () => {
 
       (Object.entries(variables) as [string, string][]).forEach(
         ([key, value]) => {
+          if (key === "--logo-filter") return;
           expect(
             varPattern.test(value),
             `Theme "${theme}", variable "${key}" has invalid value: "${value}"`,

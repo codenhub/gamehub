@@ -23,4 +23,8 @@
   --breakpoint-2xl: 90rem;
 }
 
-@custom-variant dark (&:where(.dark, .dark *));
+@layer utilities {
+  .logo-img {
+    filter: var(--logo-filter, brightness(0) invert(1));
+  }
+}
