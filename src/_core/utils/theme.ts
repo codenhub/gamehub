@@ -1,87 +1,22 @@
-export const VALID_THEMES = ["dark", "light", "cyberpunk", "forest"] as const;
-export type Theme = (typeof VALID_THEMES)[number];
+export {
+  VALID_THEMES,
+  THEME_VARIABLES,
+  THEMES,
+  isValidTheme,
+} from "./theme-data";
+export type { Theme, ThemeVariable } from "./theme-data";
 
-export const THEME_VARIABLES = [
-  "--color-primary",
-  "--color-primary-contrast",
-  "--color-primary-hover",
-  "--color-accent",
-  "--color-accent-contrast",
-  "--color-accent-hover",
-  "--color-border",
-  "--color-background",
-  "--color-foreground",
-  "--color-text",
-  "--color-text-secondary",
-  "--color-success",
-  "--color-success-contrast",
-  "--color-error",
-  "--color-error-contrast",
-  "--color-warning",
-  "--color-warning-contrast",
-  "--color-info",
-  "--color-info-contrast",
-] as const;
-
-export type ThemeVariable = (typeof THEME_VARIABLES)[number];
-
-export const THEMES: Record<Theme, Partial<Record<ThemeVariable, string>>> = {
-  light: {
-    "--color-primary": "var(--color-neutral-950)",
-    "--color-primary-contrast": "var(--color-neutral-50)",
-    "--color-primary-hover": "var(--color-neutral-700)",
-    "--color-accent": "var(--color-neutral-300)",
-    "--color-accent-contrast": "var(--color-neutral-950)",
-    "--color-accent-hover": "var(--color-neutral-400)",
-    "--color-border": "var(--color-neutral-300)",
-    "--color-background": "var(--color-neutral-50)",
-    "--color-foreground": "var(--color-neutral-100)",
-    "--color-text": "var(--color-neutral-950)",
-    "--color-text-secondary": "var(--color-neutral-700)",
-  },
-  dark: {
-    "--color-primary": "var(--color-neutral-50)",
-    "--color-primary-contrast": "var(--color-neutral-950)",
-    "--color-primary-hover": "var(--color-neutral-300)",
-    "--color-accent": "var(--color-neutral-500)",
-    "--color-accent-contrast": "var(--color-neutral-950)",
-    "--color-accent-hover": "var(--color-neutral-400)",
-    "--color-border": "var(--color-neutral-600)",
-    "--color-background": "var(--color-neutral-900)",
-    "--color-foreground": "var(--color-neutral-800)",
-    "--color-text": "var(--color-neutral-50)",
-    "--color-text-secondary": "var(--color-neutral-200)",
-  },
-  cyberpunk: {
-    "--color-primary": "var(--color-fuchsia-500)",
-    "--color-primary-contrast": "var(--color-fuchsia-50)",
-    "--color-primary-hover": "var(--color-fuchsia-600)",
-    "--color-accent": "var(--color-cyan-400)",
-    "--color-accent-contrast": "var(--color-cyan-950)",
-    "--color-accent-hover": "var(--color-cyan-500)",
-    "--color-border": "var(--color-fuchsia-900)",
-    "--color-background": "var(--color-slate-950)",
-    "--color-foreground": "var(--color-slate-900)",
-    "--color-text": "var(--color-fuchsia-50)",
-    "--color-text-secondary": "var(--color-fuchsia-200)",
-  },
-  forest: {
-    "--color-primary": "var(--color-emerald-600)",
-    "--color-primary-contrast": "var(--color-emerald-50)",
-    "--color-primary-hover": "var(--color-emerald-700)",
-    "--color-accent": "var(--color-orange-400)",
-    "--color-accent-contrast": "var(--color-orange-950)",
-    "--color-accent-hover": "var(--color-orange-500)",
-    "--color-border": "var(--color-emerald-800)",
-    "--color-background": "var(--color-stone-950)",
-    "--color-foreground": "var(--color-stone-900)",
-    "--color-text": "var(--color-stone-50)",
-    "--color-text-secondary": "var(--color-stone-300)",
-  },
-};
+import {
+  VALID_THEMES,
+  THEME_VARIABLES,
+  THEMES,
+  isValidTheme,
+} from "./theme-data";
+import type { Theme, ThemeVariable } from "./theme-data";
 
 class ThemeManager {
   private currentTheme: Theme;
+  private isInitialized = false;
 
   constructor() {
     this.currentTheme = this.getStoredTheme();
@@ -89,17 +24,11 @@ class ThemeManager {
 
   private getStoredTheme(): Theme {
     const stored = localStorage.getItem("theme");
-    if (this.isValidTheme(stored)) return stored;
+    if (isValidTheme(stored)) return stored;
 
     return window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
-  }
-
-  private isValidTheme(value: string | null): value is Theme {
-    return (
-      value !== null && (VALID_THEMES as readonly string[]).includes(value)
-    );
   }
 
   public getTheme(): Theme {
@@ -120,6 +49,11 @@ class ThemeManager {
 
     localStorage.setItem("theme", theme);
 
+    // Clear all theme variables before applying new ones to avoid stale values
+    THEME_VARIABLES.forEach((v) =>
+      document.documentElement.style.removeProperty(v),
+    );
+
     const variables = THEMES[theme];
 
     (Object.keys(variables) as ThemeVariable[]).forEach((k) => {
@@ -135,6 +69,9 @@ class ThemeManager {
   }
 
   public init() {
+    if (this.isInitialized) return;
+
+    this.isInitialized = true;
     this.setTheme(this.currentTheme);
   }
 
@@ -145,16 +82,5 @@ class ThemeManager {
   }
 }
 
-const THEME_MANAGER_KEY = "__THEME_MANAGER__" as const;
-
-function getThemeManagerInstance(): ThemeManager {
-  const global = globalThis as Record<string, unknown>;
-
-  if (!global[THEME_MANAGER_KEY]) {
-    global[THEME_MANAGER_KEY] = new ThemeManager();
-  }
-
-  return global[THEME_MANAGER_KEY] as ThemeManager;
-}
-
-export default getThemeManagerInstance();
+const themeManager = new ThemeManager();
+export default themeManager;
