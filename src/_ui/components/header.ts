@@ -1,5 +1,5 @@
 import AudioManager from "../../_core/audio";
-import ThemeManager from "../../_core/utils/theme";
+import ThemeManager, { THEMES, VALID_THEMES } from "../../_core/utils/theme";
 import type { Slider } from "./slider";
 
 const DEFAULT_MUSIC_VOLUME = "50";
@@ -17,6 +17,26 @@ export class Header extends HTMLElement {
     const soundVolume =
       localStorage.getItem("sound-volume") || DEFAULT_SOUND_VOLUME;
 
+    const currentTheme = ThemeManager.getTheme();
+    const themeOptions = VALID_THEMES.map((theme) => {
+      const vars = THEMES[theme];
+      const primary = vars["--color-primary"];
+      const accent = vars["--color-accent"];
+      const bg = vars["--color-background"];
+
+      return `
+        <button class="theme-option flex items-center gap-3 w-full p-2 hover:bg-primary/10 rounded-md transition-colors cur-pointer" data-theme="${theme}">
+          <div class="flex size-8 overflow-hidden border-3 border-border">
+            <div class="w-1/3 h-full" style="background: ${bg}"></div>
+            <div class="w-1/2 h-full" style="background: ${primary}"></div>
+            <div class="w-1/3 h-full" style="background: ${accent}"></div>
+          </div>
+          <span class="capitalize text-lg ${currentTheme === theme ? "font-semibold" : "font-normal"} flex-1 text-left ${currentTheme === theme ? "text-primary" : "text-text"}">${theme}</span>
+          ${currentTheme === theme ? `<div class="size-2 bg-primary active-indicator"></div>` : ""}
+        </button>
+      `;
+    }).join("");
+
     this.innerHTML = `
       <header class="flex w-full justify-center p-4 border-b-2 border-border">
         <div class="flex max-w-7xl w-full justify-between">
@@ -25,54 +45,50 @@ export class Header extends HTMLElement {
             <label for="sound-menu" class="relative flex items-center justify-center cur-pointer">
               <input type="checkbox" id="sound-menu" class="peer sr-only">
               <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
-              <div class="hidden peer-checked:flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-1/1 card flex-col gap-4 p-6">
-                <div class="flex items-center gap-4 w-48">
-                  <gh-icon src="/assets/icons/music.webp" width="1.5rem" height="1.5rem"></gh-icon>
-                  <gh-slider
-                    id="music-volume"
-                    min="0"
-                    max="100"
-                    step="10"
-                    value="${musicVolume}"
-                    class="pointer-events-auto"
-                  ></gh-slider>
-                </div>
-                <div class="flex items-center gap-4 w-48">
-                  <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
-                  <gh-slider
-                    id="sound-volume"
-                    min="0"
-                    max="100"
-                    step="10"
-                    value="${soundVolume}"
-                    class="pointer-events-auto"
-                  ></gh-slider>
+              <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-6">
+                <div class="pointer-events-auto flex flex-col gap-4">
+                  <div class="flex items-center gap-4 w-48">
+                    <gh-icon src="/assets/icons/music.webp" width="1.5rem" height="1.5rem"></gh-icon>
+                    <gh-slider
+                      id="music-volume"
+                      min="0"
+                      max="100"
+                      step="10"
+                      value="${musicVolume}"
+                      class="pointer-events-auto"
+                    ></gh-slider>
+                  </div>
+                  <div class="flex items-center gap-4 w-48">
+                    <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
+                    <gh-slider
+                      id="sound-volume"
+                      min="0"
+                      max="100"
+                      step="10"
+                      value="${soundVolume}"
+                      class="pointer-events-auto"
+                    ></gh-slider>
+                  </div>
                 </div>
               </div>
             </label>
-            <button id="theme-toggle" class="flex items-center">
-              <img
-                class="dark:hidden size-6 object-contain"
-                src="/assets/icons/sun.webp"
-                alt="Sun icon"
-              >
-              <img
-                class="hidden dark:flex size-6 object-contain"
-                src="/assets/icons/moon.webp"
-                alt="Moon icon"
-              >
-            </button>
+            
+            <label for="theme-menu" class="relative flex items-center justify-center cur-pointer">
+              <input type="checkbox" id="theme-menu" class="peer sr-only">
+              <gh-icon src="/assets/icons/adjust.webp" width="1.5rem" height="1.5rem"></gh-icon>
+              <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-4">
+                <div class="pointer-events-auto flex flex-col gap-1 min-w-48">
+                  ${themeOptions}
+                </div>
+              </div>
+            </label>
           </div>
         </div>
       </header>
     `;
 
-    const musicVolumeEl = document.getElementById(
-      "music-volume",
-    ) as Slider | null;
-    const soundVolumeEl = document.getElementById(
-      "sound-volume",
-    ) as Slider | null;
+    const musicVolumeEl = this.querySelector("#music-volume") as Slider | null;
+    const soundVolumeEl = this.querySelector("#sound-volume") as Slider | null;
 
     if (!musicVolumeEl || !soundVolumeEl) {
       console.warn("[Header] Volume controls not found in DOM");
@@ -92,10 +108,39 @@ export class Header extends HTMLElement {
       AudioManager.setSFXVolume(soundVolumeEl.valueAsNumber / 100);
     });
 
-    document.getElementById("theme-toggle")?.addEventListener("click", () => {
-      if (ThemeManager.getTheme() === "dark")
-        return ThemeManager.setTheme("light");
-      ThemeManager.setTheme("dark");
+    this.querySelectorAll(".theme-option").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const theme = btn.getAttribute("data-theme") as any;
+        ThemeManager.setTheme(theme);
+
+        // Update active state in UI
+        this.querySelectorAll(".theme-option").forEach((opt) => {
+          const optTheme = opt.getAttribute("data-theme");
+          const isSelected = optTheme === theme;
+          const text = opt.querySelector("span");
+          const indicator = opt.querySelector(".active-indicator");
+
+          if (text) {
+            text.classList.toggle("text-primary", isSelected);
+            text.classList.toggle("text-text", !isSelected);
+          }
+
+          if (isSelected) {
+            if (!indicator) {
+              const div = document.createElement("div");
+              div.className = "size-2 bg-primary active-indicator";
+              opt.appendChild(div);
+            }
+          } else if (indicator) {
+            indicator.remove();
+          }
+        });
+
+        const menuToggle = this.querySelector(
+          "#theme-menu",
+        ) as HTMLInputElement;
+        if (menuToggle) menuToggle.checked = false;
+      });
     });
   }
 }

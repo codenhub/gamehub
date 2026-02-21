@@ -1,4 +1,4 @@
-export const VALID_THEMES = ["dark", "light"] as const;
+export const VALID_THEMES = ["dark", "light", "cyberpunk", "forest"] as const;
 export type Theme = (typeof VALID_THEMES)[number];
 
 export const THEME_VARIABLES = [
@@ -52,6 +52,32 @@ export const THEMES: Record<Theme, Partial<Record<ThemeVariable, string>>> = {
     "--color-text": "var(--color-neutral-50)",
     "--color-text-secondary": "var(--color-neutral-200)",
   },
+  cyberpunk: {
+    "--color-primary": "var(--color-fuchsia-500)",
+    "--color-primary-contrast": "var(--color-fuchsia-50)",
+    "--color-primary-hover": "var(--color-fuchsia-600)",
+    "--color-accent": "var(--color-cyan-400)",
+    "--color-accent-contrast": "var(--color-cyan-950)",
+    "--color-accent-hover": "var(--color-cyan-500)",
+    "--color-border": "var(--color-fuchsia-900)",
+    "--color-background": "var(--color-slate-950)",
+    "--color-foreground": "var(--color-slate-900)",
+    "--color-text": "var(--color-fuchsia-50)",
+    "--color-text-secondary": "var(--color-fuchsia-200)",
+  },
+  forest: {
+    "--color-primary": "var(--color-emerald-600)",
+    "--color-primary-contrast": "var(--color-emerald-50)",
+    "--color-primary-hover": "var(--color-emerald-700)",
+    "--color-accent": "var(--color-orange-400)",
+    "--color-accent-contrast": "var(--color-orange-950)",
+    "--color-accent-hover": "var(--color-orange-500)",
+    "--color-border": "var(--color-emerald-800)",
+    "--color-background": "var(--color-stone-950)",
+    "--color-foreground": "var(--color-stone-900)",
+    "--color-text": "var(--color-stone-50)",
+    "--color-text-secondary": "var(--color-stone-300)",
+  },
 };
 
 class ThemeManager {
@@ -82,7 +108,16 @@ class ThemeManager {
 
   public setTheme(theme: Theme) {
     this.currentTheme = theme;
-    document.documentElement.classList.toggle("dark", theme === "dark");
+
+    VALID_THEMES.forEach((t) =>
+      document.documentElement.classList.remove(`theme-${t}`),
+    );
+    document.documentElement.classList.add(`theme-${theme}`);
+
+    // Maintain 'dark' class for themes that are dark-oriented for Tailwind compatibility
+    const isDark = theme !== "light";
+    document.documentElement.classList.toggle("dark", isDark);
+
     localStorage.setItem("theme", theme);
 
     const variables = THEMES[theme];
