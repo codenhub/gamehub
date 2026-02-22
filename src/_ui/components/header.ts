@@ -62,7 +62,7 @@ export class Header extends HTMLElement {
             
             <label for="theme-menu" class="relative flex items-center justify-center cur-pointer">
               <input type="checkbox" id="theme-menu" class="peer sr-only">
-              <gh-icon src="/assets/icons/adjust.webp" width="1.5rem" height="1.5rem"></gh-icon>
+              <gh-icon src="/assets/icons/contrast.webp" width="1.5rem" height="1.5rem"></gh-icon>
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-4">
                 <div class="pointer-events-auto flex flex-col gap-1 min-w-48">
                   ${this.buildThemeOptions(currentTheme)}
@@ -88,16 +88,19 @@ export class Header extends HTMLElement {
       const primary = vars["--color-primary"];
       const accent = vars["--color-accent"];
       const bg = vars["--color-background"];
+      console.log(theme, bg, primary, accent);
       const isSelected = currentTheme === theme;
 
       return `
         <button class="theme-option flex items-center gap-3 w-full p-2 hover:bg-primary/10 rounded-md transition-colors cur-pointer" data-theme="${theme}">
-          <div class="flex size-8 overflow-hidden border-3 border-border">
-            <div class="w-1/3 h-full" style="background: ${bg}"></div>
-            <div class="w-1/2 h-full" style="background: ${primary}"></div>
-            <div class="w-1/3 h-full" style="background: ${accent}"></div>
+          <div class="flex flex-col size-8 overflow-hidden ring-4 ring-border">
+            <div class="w-full h-1/2" style="background: ${bg}"></div>
+            <div class="flex w-full h-1/2">
+              <div class="w-1/2 h-full" style="background: ${primary}"></div>
+              <div class="w-1/2 h-full" style="background: ${accent}"></div>
+            </div>
           </div>
-          <span class="capitalize text-lg ${isSelected ? "font-semibold text-primary" : "font-normal text-text"} flex-1 text-left">${theme}</span>
+          <span class="capitalize text-xl ${isSelected ? "font-bold text-primary" : "font-normal text-text"} flex-1 text-left">${theme}</span>
           ${isSelected ? `<div class="size-2 bg-primary active-indicator"></div>` : ""}
         </button>
       `;
