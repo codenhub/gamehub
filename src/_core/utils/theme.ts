@@ -13,6 +13,13 @@ import {
   isValidTheme,
 } from "./theme-data";
 import type { Theme, ThemeVariable } from "./theme-data";
+import { createStore } from "../storage";
+
+type ThemeSchema = {
+  theme: string;
+};
+
+const themeStore = createStore<ThemeSchema>("settings");
 
 class ThemeManager {
   private currentTheme: Theme;
@@ -23,7 +30,7 @@ class ThemeManager {
   }
 
   private getStoredTheme(): Theme {
-    const stored = localStorage.getItem("theme");
+    const stored = themeStore.get("theme");
     if (isValidTheme(stored)) return stored;
 
     return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -43,7 +50,7 @@ class ThemeManager {
     );
     document.documentElement.classList.add(`theme-${theme}`);
 
-    localStorage.setItem("theme", theme);
+    themeStore.set("theme", theme);
 
     // Clear all theme variables before applying new ones to avoid stale values
     THEME_VARIABLES.forEach((v) =>

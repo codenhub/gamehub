@@ -1,4 +1,5 @@
 import AudioManager from "../_core/audio";
+import { createStore } from "../_core/storage";
 import {
   type Grid,
   type Direction,
@@ -12,9 +13,11 @@ import {
 
 AudioManager.loadMultipleSFX(["place", "hit", "fail", "complete"]);
 
-const GAME_CONFIG = {
-  localStorageKey: "2048-high-score",
+type Game2048Schema = {
+  highScore: number;
 };
+
+const store = createStore<Game2048Schema>("2048");
 
 const TILE_COLORS: Record<number, { bg: string; text: string }> = {
   2: { bg: "#eee4da", text: "#776e65" },
@@ -58,10 +61,9 @@ export class Game2048 {
 
     let savedHighScore = 0;
     try {
-      const saved = localStorage.getItem(GAME_CONFIG.localStorageKey);
-      if (saved) {
-        const parsed = parseInt(saved, 10);
-        savedHighScore = Number.isNaN(parsed) ? 0 : parsed;
+      const saved = store.get("highScore");
+      if (saved !== null) {
+        savedHighScore = Number.isNaN(saved) ? 0 : saved;
       }
     } catch (error) {
       console.warn("[2048] Failed to load high score:", error);
@@ -148,14 +150,7 @@ export class Game2048 {
     // Update high score
     if (this.state.score > this.state.highScore) {
       this.state.highScore = this.state.score;
-      try {
-        localStorage.setItem(
-          GAME_CONFIG.localStorageKey,
-          this.state.highScore.toString(),
-        );
-      } catch (error) {
-        console.warn("[2048] Failed to save high score:", error);
-      }
+      store.set("highScore", this.state.highScore);
     }
 
     this.callbacks.onScoreUpdate(this.state.score, this.state.highScore);

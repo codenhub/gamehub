@@ -1,4 +1,5 @@
 import AudioManager from "../_core/audio";
+import { createStore } from "../_core/storage";
 import { showAlert } from "../_core/utils/alerts";
 import ThemeManager from "../_core/utils/theme";
 import {
@@ -21,10 +22,15 @@ const getColors = () => ({
   snakeBody: ThemeManager.getColor("--color-accent"),
 });
 
+type SnakeSchema = {
+  highScore: number;
+};
+
+const store = createStore<SnakeSchema>("snake");
+
 const GAME_CONFIG = {
   tileSize: TILE_SIZE,
   defaultFps: 10,
-  localStorageKey: "snake-high-score",
 };
 
 export type GameCallbacks = {
@@ -68,10 +74,9 @@ export class SnakeGame {
 
     let savedHighScore = 0;
     try {
-      const saved = localStorage.getItem(GAME_CONFIG.localStorageKey);
-      if (saved) {
-        const parsed = parseInt(saved, 10);
-        savedHighScore = Number.isNaN(parsed) ? 0 : parsed;
+      const saved = store.get("highScore");
+      if (saved !== null) {
+        savedHighScore = Number.isNaN(saved) ? 0 : saved;
       }
     } catch (error) {
       console.warn("[Snake] Failed to load high score:", error);
@@ -275,14 +280,7 @@ export class SnakeGame {
     // Update High Score
     if (this.state.score > this.state.highScore) {
       this.state.highScore = this.state.score;
-      try {
-        localStorage.setItem(
-          GAME_CONFIG.localStorageKey,
-          this.state.highScore.toString(),
-        );
-      } catch (error) {
-        console.warn("[Snake] Failed to save high score:", error);
-      }
+      store.set("highScore", this.state.highScore);
     }
 
     this.callbacks.onScoreUpdate(this.state.score, this.state.highScore);

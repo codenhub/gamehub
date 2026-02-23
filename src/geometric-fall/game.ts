@@ -10,12 +10,18 @@ import {
   setGridDimensions,
 } from "./logic";
 import AudioManager from "../_core/audio";
+import { createStore } from "../_core/storage";
 import ThemeManager from "../_core/utils/theme";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 
 const TARGET_COLS = 10;
-const LOCAL_STORAGE_KEY = "geometric-fall-high-score";
+
+type GeometricFallSchema = {
+  highScore: number;
+};
+
+const store = createStore<GeometricFallSchema>("geometric-fall");
 
 const getColors = () => {
   return {
@@ -62,7 +68,7 @@ export class GeometricFallGame {
     if (!context) throw new Error("Failed to get 2D context");
     this.ctx = context;
 
-    this.highScore = this.loadHighScore();
+    this.highScore = store.get("highScore") ?? 0;
     this.init();
   }
 
@@ -81,26 +87,6 @@ export class GeometricFallGame {
     this.spawnPiece();
     this.callbacks.onScoreUpdate(this.score, this.highScore);
     this.draw();
-  }
-
-  private loadHighScore(): number {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (!saved) return 0;
-      const parsed = parseInt(saved, 10);
-      return Number.isNaN(parsed) ? 0 : parsed;
-    } catch (error) {
-      console.warn("[GeometricFall] Failed to load high score:", error);
-      return 0;
-    }
-  }
-
-  private saveHighScore() {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, this.highScore.toString());
-    } catch (error) {
-      console.warn("[GeometricFall] Failed to save high score:", error);
-    }
   }
 
   private calculateDimensions() {
@@ -387,7 +373,7 @@ export class GeometricFallGame {
   private updateScore() {
     if (this.score > this.highScore) {
       this.highScore = this.score;
-      this.saveHighScore();
+      store.set("highScore", this.highScore);
     }
     this.callbacks.onScoreUpdate(this.score, this.highScore);
   }

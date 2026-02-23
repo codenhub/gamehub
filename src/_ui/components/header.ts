@@ -1,4 +1,5 @@
 import AudioManager from "../../_core/audio";
+import { createStore } from "../../_core/storage";
 import ThemeManager, {
   THEMES,
   VALID_THEMES,
@@ -10,6 +11,13 @@ import type { Slider } from "./slider";
 const DEFAULT_MUSIC_VOLUME = "50";
 const DEFAULT_SOUND_VOLUME = "75";
 
+type VolumeSchema = {
+  musicVolume: string;
+  soundVolume: string;
+};
+
+const volumeStore = createStore<VolumeSchema>("settings");
+
 export class Header extends HTMLElement {
   private abortController: AbortController | null = null;
 
@@ -17,10 +25,8 @@ export class Header extends HTMLElement {
     const title = this.getAttribute("title") || "GameHub";
     const backBtn = this.hasAttribute("backBtn");
 
-    const musicVolume =
-      localStorage.getItem("music-volume") || DEFAULT_MUSIC_VOLUME;
-    const soundVolume =
-      localStorage.getItem("sound-volume") || DEFAULT_SOUND_VOLUME;
+    const musicVolume = volumeStore.get("musicVolume") || DEFAULT_MUSIC_VOLUME;
+    const soundVolume = volumeStore.get("soundVolume") || DEFAULT_SOUND_VOLUME;
 
     const currentTheme = ThemeManager.getTheme();
 
@@ -125,7 +131,7 @@ export class Header extends HTMLElement {
     musicVolumeEl.addEventListener(
       "input",
       () => {
-        localStorage.setItem("music-volume", musicVolumeEl.value);
+        volumeStore.set("musicVolume", musicVolumeEl.value);
         AudioManager.setMusicVolume(musicVolumeEl.valueAsNumber / 100);
       },
       { signal },
@@ -134,7 +140,7 @@ export class Header extends HTMLElement {
     soundVolumeEl.addEventListener(
       "input",
       () => {
-        localStorage.setItem("sound-volume", soundVolumeEl.value);
+        volumeStore.set("soundVolume", soundVolumeEl.value);
         AudioManager.setSFXVolume(soundVolumeEl.valueAsNumber / 100);
       },
       { signal },
