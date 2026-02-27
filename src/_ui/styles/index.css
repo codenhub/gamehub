@@ -1,3 +1,8 @@
+@import "tailwindcss";
+
+@import "./components.css";
+@import "./theme.css";
+
 @font-face {
   font-family: "Jersey10";
   src: url("/assets/fonts/Jersey10-Regular.woff2") format("woff2");
@@ -22,7 +27,33 @@
   font-family: "Tiny5", monospace;
 }
 
+@utility cur-default {
+  cursor:
+    url(/assets/cursor.png) 0 0,
+    auto;
+}
+
+@utility cur-pointer {
+  cursor:
+    url(/assets/cursor-pointer.png) 0 0,
+    auto;
+}
+
 @layer base {
+  html,
+  body {
+    @apply flex flex-col min-h-screen overflow-x-hidden bg-background font-default text-text cur-default;
+  }
+
+  button,
+  a {
+    @apply not-disabled:cur-pointer;
+  }
+
+  img {
+    user-select: none;
+  }
+
   ::selection {
     @apply bg-primary text-primary-contrast;
   }
