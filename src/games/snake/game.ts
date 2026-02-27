@@ -22,6 +22,8 @@ const getColors = () => ({
   snakeBody: ThemeManager.getColor("--color-accent"),
 });
 
+type GameColors = ReturnType<typeof getColors>;
+
 type SnakeSchema = {
   highScore: number;
 };
@@ -61,6 +63,21 @@ export class SnakeGame {
   private state: GameState;
   private animationId: number | null = null;
   private lastRenderTime = 0;
+  private colors: GameColors = getColors();
+  private resizeObserver: ResizeObserver | null = null;
+
+  private readonly handleThemeChanged = () => {
+    this.colors = getColors();
+    this.draw();
+  };
+
+  private readonly handleResize = () => {
+    const hasCanvasResized = this.resizeCanvas();
+    if (!hasCanvasResized) return;
+
+    this.syncStateWithCanvasBounds();
+    this.draw();
+  };
 
   constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks) {
     this.canvas = canvas;
@@ -98,24 +115,74 @@ export class SnakeGame {
     };
 
     this.initCanvas();
+    this.setupResizeObserver();
     this.setupThemeListener();
   }
 
   private setupThemeListener() {
-    window.addEventListener("theme-changed", () => {
-      this.draw();
-    });
+    window.addEventListener("theme-changed", this.handleThemeChanged);
+  }
+
+  private setupResizeObserver() {
+    const target = this.canvas.parentElement ?? this.canvas;
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", this.handleResize);
+      return;
+    }
+
+    this.resizeObserver = new ResizeObserver(this.handleResize);
+    this.resizeObserver.observe(target);
   }
 
   private initCanvas() {
-    this.canvas.width = this.canvas.clientWidth;
-    this.canvas.height = this.canvas.clientHeight;
-
-    this.canvas.width -= this.canvas.width % GAME_CONFIG.tileSize;
-    this.canvas.height -= this.canvas.height % GAME_CONFIG.tileSize;
+    this.resizeCanvas();
 
     this.draw();
     this.callbacks.onScoreUpdate(0, this.state.highScore);
+  }
+
+  private resizeCanvas(): boolean {
+    const width = this.canvas.clientWidth;
+    const height = this.canvas.clientHeight;
+
+    if (width < GAME_CONFIG.tileSize || height < GAME_CONFIG.tileSize) {
+      return false;
+    }
+
+    const snappedWidth = width - (width % GAME_CONFIG.tileSize);
+    const snappedHeight = height - (height % GAME_CONFIG.tileSize);
+
+    if (snappedWidth === this.canvas.width && snappedHeight === this.canvas.height) {
+      return false;
+    }
+
+    this.canvas.width = snappedWidth;
+    this.canvas.height = snappedHeight;
+
+    return true;
+  }
+
+  private syncStateWithCanvasBounds() {
+    if (this.state.snake.length > 0) {
+      const maxX = this.canvas.width - GAME_CONFIG.tileSize;
+      const maxY = this.canvas.height - GAME_CONFIG.tileSize;
+
+      this.state.snake = this.state.snake.map((segment) => ({
+        x: Math.min(Math.max(segment.x, 0), maxX),
+        y: Math.min(Math.max(segment.y, 0), maxY),
+      }));
+    }
+
+    const isFoodInsideCanvas =
+      this.state.food.x >= 0 &&
+      this.state.food.x < this.canvas.width &&
+      this.state.food.y >= 0 &&
+      this.state.food.y < this.canvas.height;
+
+    if (!isFoodInsideCanvas) {
+      this.spawnFood();
+    }
   }
 
   public start() {
@@ -169,6 +236,18 @@ export class SnakeGame {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
     }
+  }
+
+  public destroy() {
+    this.stop();
+
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+
+    window.removeEventListener("resize", this.handleResize);
+    window.removeEventListener("theme-changed", this.handleThemeChanged);
   }
 
   public queueMove(dx: number, dy: number) {
@@ -246,18 +325,17 @@ export class SnakeGame {
   }
 
   private draw() {
-    const colors = getColors();
     // Clear
-    this.ctx.fillStyle = colors.background;
+    this.ctx.fillStyle = this.colors.background;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw Food
-    this.ctx.fillStyle = colors.food;
+    this.ctx.fillStyle = this.colors.food;
     this.ctx.fillRect(this.state.food.x, this.state.food.y, GAME_CONFIG.tileSize, GAME_CONFIG.tileSize);
 
     // Draw Snake
     this.state.snake.forEach((segment, index) => {
-      this.ctx.fillStyle = index === 0 ? colors.snakeHead : colors.snakeBody;
+      this.ctx.fillStyle = index === 0 ? this.colors.snakeHead : this.colors.snakeBody;
       this.ctx.fillRect(segment.x, segment.y, GAME_CONFIG.tileSize, GAME_CONFIG.tileSize);
     });
   }
