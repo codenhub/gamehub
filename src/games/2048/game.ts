@@ -1,7 +1,8 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
+import type { Grid } from "../common/types";
+import { DEFAULT_TILE, TILE_COLORS } from "./constants";
 import {
-  type Grid,
   type Direction,
   GRID_SIZE,
   createEmptyGrid,
@@ -18,22 +19,6 @@ type Game2048Schema = {
 };
 
 const store = createStore<Game2048Schema>("2048");
-
-const TILE_COLORS: Record<number, { bg: string; text: string }> = {
-  2: { bg: "var(--color-foreground)", text: "var(--color-text)" },
-  4: { bg: "var(--color-border)", text: "var(--color-text)" },
-  8: { bg: "var(--color-accent)", text: "var(--color-accent-contrast)" },
-  16: { bg: "var(--color-info)", text: "var(--color-info-contrast)" },
-  32: { bg: "var(--color-success)", text: "var(--color-success-contrast)" },
-  64: { bg: "var(--color-warning)", text: "var(--color-warning-contrast)" },
-  128: { bg: "var(--color-primary)", text: "var(--color-primary-contrast)" },
-  256: { bg: "var(--color-primary-hover)", text: "var(--color-primary-contrast)" },
-  512: { bg: "var(--color-error)", text: "var(--color-error-contrast)" },
-  1024: { bg: "var(--color-error)", text: "var(--color-error-contrast)" },
-  2048: { bg: "var(--color-error)", text: "var(--color-error-contrast)" },
-};
-
-const DEFAULT_TILE = { bg: "var(--color-text-secondary)", text: "var(--color-background)" };
 
 export type GameCallbacks = {
   onScoreUpdate: (score: number, highScore: number) => void;
@@ -160,13 +145,9 @@ export class Game2048 {
     this.callbacks.onScoreUpdate(this.state.score, this.state.highScore);
 
     if (result.score > 0) {
-      AudioManager.playSFX("hit").catch((err) => {
-        console.warn("[2048] Failed to play merge SFX:", err);
-      });
+      AudioManager.playSFX("hit");
     } else {
-      AudioManager.playSFX("place").catch((err) => {
-        console.warn("[2048] Failed to play place SFX:", err);
-      });
+      AudioManager.playSFX("place");
     }
 
     // Add new tile
@@ -179,9 +160,7 @@ export class Game2048 {
       this.state.isRunning = false;
       this.callbacks.onGameWin(this.state.score);
 
-      AudioManager.playSFX("complete").catch((err) => {
-        console.warn("[2048] Failed to play win SFX:", err);
-      });
+      AudioManager.playSFX("complete");
       return;
     }
 
@@ -190,9 +169,7 @@ export class Game2048 {
       this.state.isRunning = false;
       this.callbacks.onGameOver(this.state.score);
 
-      AudioManager.playSFX("fail").catch((err) => {
-        console.warn("[2048] Failed to play fail SFX:", err);
-      });
+      AudioManager.playSFX("fail");
     }
   }
 

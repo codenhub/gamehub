@@ -1,6 +1,8 @@
-export type Point = { x: number; y: number };
+import type { Point } from "../common/types";
 
-export const TILE_SIZE = 20;
+import { GAME_CONFIG } from "./constants";
+
+export const TILE_SIZE = GAME_CONFIG.tileSize;
 
 /**
  * Checks if a requested direction is the exact opposite of the current one.

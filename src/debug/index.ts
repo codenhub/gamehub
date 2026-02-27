@@ -35,15 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const musicTrackBtn = document.getElementById("track-music-btn");
 
   playSfxBtn?.addEventListener("click", () => {
-    AudioManager.playSFX("collect").catch((err) => {
-      console.warn("[QAS] Failed to play SFX:", err);
-    });
+    AudioManager.playSFX("collect");
   });
 
   playMusicBtn?.addEventListener("click", () => {
-    AudioManager.playMusic("main-soundtrack").catch((err) => {
-      console.warn("[QAS] Failed to play music:", err);
-    });
+    AudioManager.playMusic("main-soundtrack");
   });
 
   pauseMusicBtn?.addEventListener("click", () => {
@@ -51,9 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   resumeMusicBtn?.addEventListener("click", () => {
-    AudioManager.resumeMusic().catch((err) => {
-      console.warn("[QAS] Failed to resume music:", err);
-    });
+    AudioManager.resumeMusic();
   });
 
   changeMusicBtn?.addEventListener("click", () => {

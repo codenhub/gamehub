@@ -2,9 +2,9 @@ import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
 import { showAlert } from "../../_core/utils/alerts";
 import ThemeManager from "../../_core/utils/theme";
+import type { Point } from "../common/types";
+import { GAME_CONFIG } from "./constants";
 import {
-  type Point,
-  TILE_SIZE,
   isReverseDirection,
   moveHead,
   isWallCollision,
@@ -29,11 +29,6 @@ type SnakeSchema = {
 };
 
 const store = createStore<SnakeSchema>("snake");
-
-const GAME_CONFIG = {
-  tileSize: TILE_SIZE,
-  defaultFps: 10,
-};
 
 export type GameCallbacks = {
   onScoreUpdate: (score: number, highScore: number) => void;
@@ -351,17 +346,13 @@ export class SnakeGame {
 
     this.callbacks.onScoreUpdate(this.state.score, this.state.highScore);
 
-    AudioManager.playSFX("eat").catch((err) => {
-      console.warn("[Snake] Failed to play eat SFX:", err);
-    });
+    AudioManager.playSFX("eat");
 
     this.spawnFood();
   }
 
   private handleGameOver() {
-    AudioManager.playSFX("fail").catch((err) => {
-      console.warn("[Snake] Failed to play fail SFX:", err);
-    });
+    AudioManager.playSFX("fail");
 
     this.stop();
     this.callbacks.onGameOver(this.state.score);
@@ -371,9 +362,7 @@ export class SnakeGame {
     this.stop();
     this.callbacks.onGameWin(this.state.score);
 
-    AudioManager.playSFX("complete").catch((err) => {
-      console.warn("[Snake] Failed to play complete SFX:", err);
-    });
+    AudioManager.playSFX("complete");
   }
 
   private spawnFood() {

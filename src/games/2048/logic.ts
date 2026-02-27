@@ -1,4 +1,4 @@
-export type Grid = number[][];
+import type { Grid } from "../common/types";
 
 export type Direction = "up" | "down" | "left" | "right";
 

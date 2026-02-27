@@ -11,9 +11,7 @@ ThemeManager.init();
 document.addEventListener(
   "click",
   () => {
-    AudioManager.playMusic().catch((err) => {
-      console.warn("[UI] Failed to start music on click:", err);
-    });
+    AudioManager.playMusic();
   },
   { once: true },
 );
@@ -21,9 +19,7 @@ document.addEventListener(
 document.addEventListener(
   "keydown",
   () => {
-    AudioManager.playMusic().catch((err) => {
-      console.warn("[UI] Failed to start music on keydown:", err);
-    });
+    AudioManager.playMusic();
   },
   { once: true },
 );
