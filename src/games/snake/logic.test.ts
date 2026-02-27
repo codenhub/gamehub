@@ -80,9 +80,7 @@ describe("isWallCollision", () => {
 
   it("should allow valid positions", () => {
     expect(isWallCollision({ point: { x: 0, y: 0 }, ...bounds })).toBe(false);
-    expect(isWallCollision({ point: { x: 199, y: 199 }, ...bounds })).toBe(
-      false,
-    );
+    expect(isWallCollision({ point: { x: 199, y: 199 }, ...bounds })).toBe(false);
   });
 });
 

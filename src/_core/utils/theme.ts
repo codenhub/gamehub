@@ -1,17 +1,7 @@
-export {
-  VALID_THEMES,
-  THEME_VARIABLES,
-  THEMES,
-  isValidTheme,
-} from "./theme-data";
+export { VALID_THEMES, THEME_VARIABLES, THEMES, isValidTheme } from "./theme-data";
 export type { Theme, ThemeVariable } from "./theme-data";
 
-import {
-  VALID_THEMES,
-  THEME_VARIABLES,
-  THEMES,
-  isValidTheme,
-} from "./theme-data";
+import { VALID_THEMES, THEME_VARIABLES, THEMES, isValidTheme } from "./theme-data";
 import type { Theme, ThemeVariable } from "./theme-data";
 import { createStore } from "../storage";
 
@@ -36,9 +26,7 @@ class ThemeManager {
     const stored = themeStore.get("theme");
     if (isValidTheme(stored)) return stored;
 
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
 
   public getTheme(): Theme {
@@ -48,17 +36,13 @@ class ThemeManager {
   public setTheme(theme: Theme) {
     this.currentTheme = theme;
 
-    VALID_THEMES.forEach((t) =>
-      document.documentElement.classList.remove(`theme-${t}`),
-    );
+    VALID_THEMES.forEach((t) => document.documentElement.classList.remove(`theme-${t}`));
     document.documentElement.classList.add(`theme-${theme}`);
 
     themeStore.set("theme", theme);
 
     // Clear all theme variables before applying new ones to avoid stale values
-    THEME_VARIABLES.forEach((v) =>
-      document.documentElement.style.removeProperty(v),
-    );
+    THEME_VARIABLES.forEach((v) => document.documentElement.style.removeProperty(v));
 
     const variables = THEMES[theme];
 
@@ -69,9 +53,7 @@ class ThemeManager {
       }
     });
 
-    window.dispatchEvent(
-      new CustomEvent("theme-changed", { detail: { theme } }),
-    );
+    window.dispatchEvent(new CustomEvent("theme-changed", { detail: { theme } }));
   }
 
   public init() {
@@ -82,9 +64,7 @@ class ThemeManager {
   }
 
   public getColor(variable: ThemeVariable): string {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(variable)
-      .trim();
+    return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
   }
 }
 

@@ -1,13 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  rotatePiece,
-  isValidMove,
-  clearLines,
-  createEmptyGrid,
-  TETROMINOES,
-  ROWS,
-  COLS,
-} from "./logic";
+import { rotatePiece, isValidMove, clearLines, createEmptyGrid, TETROMINOES, ROWS, COLS } from "./logic";
 
 describe("rotatePiece", () => {
   it("should rotate T-piece clockwise", () => {
@@ -80,9 +72,7 @@ describe("isValidMove", () => {
   it("should reject piece past left wall", () => {
     const grid = createEmptyGrid();
     // At x=-1, row 1 offset 0 → newX = -1 (out of bounds)
-    expect(isValidMove({ grid, piece: TETROMINOES.T, x: -1, y: 0 })).toBe(
-      false,
-    );
+    expect(isValidMove({ grid, piece: TETROMINOES.T, x: -1, y: 0 })).toBe(false);
   });
 
   it("should allow piece flush against right wall", () => {
@@ -100,17 +90,13 @@ describe("isValidMove", () => {
   it("should reject piece past bottom", () => {
     const grid = createEmptyGrid();
     // T-piece has blocks in rows 0 and 1 — at y=ROWS-1, row 1 goes to ROWS
-    expect(isValidMove({ grid, piece: TETROMINOES.T, x: 3, y: ROWS - 1 })).toBe(
-      false,
-    );
+    expect(isValidMove({ grid, piece: TETROMINOES.T, x: 3, y: ROWS - 1 })).toBe(false);
   });
 
   it("should allow piece flush against bottom", () => {
     const grid = createEmptyGrid();
     // At y=ROWS-2, row 1 blocks land at ROWS-1 (last valid row)
-    expect(isValidMove({ grid, piece: TETROMINOES.T, x: 3, y: ROWS - 2 })).toBe(
-      true,
-    );
+    expect(isValidMove({ grid, piece: TETROMINOES.T, x: 3, y: ROWS - 2 })).toBe(true);
   });
 
   it("should allow piece partially above grid (entering from top)", () => {

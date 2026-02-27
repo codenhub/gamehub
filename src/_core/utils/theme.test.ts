@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  isValidTheme,
-  VALID_THEMES,
-  THEME_VARIABLES,
-  THEMES,
-} from "./theme-data";
+import { isValidTheme, VALID_THEMES, THEME_VARIABLES, THEMES } from "./theme-data";
 
 describe("isValidTheme", () => {
   it("should accept all valid themes", () => {
@@ -40,14 +35,8 @@ describe("THEMES completeness", () => {
       const variables = THEMES[theme];
 
       THEME_VARIABLES.forEach((variable) => {
-        expect(
-          variables[variable],
-          `Theme "${theme}" is missing variable "${variable}"`,
-        ).toBeDefined();
-        expect(
-          variables[variable].length,
-          `Theme "${theme}" has empty variable "${variable}"`,
-        ).toBeGreaterThan(0);
+        expect(variables[variable], `Theme "${theme}" is missing variable "${variable}"`).toBeDefined();
+        expect(variables[variable].length, `Theme "${theme}" has empty variable "${variable}"`).toBeGreaterThan(0);
       });
     });
   });
@@ -58,15 +47,10 @@ describe("THEMES completeness", () => {
     VALID_THEMES.forEach((theme) => {
       const variables = THEMES[theme];
 
-      (Object.entries(variables) as [string, string][]).forEach(
-        ([key, value]) => {
-          if (key === "--logo-filter") return;
-          expect(
-            varPattern.test(value),
-            `Theme "${theme}", variable "${key}" has invalid value: "${value}"`,
-          ).toBe(true);
-        },
-      );
+      (Object.entries(variables) as [string, string][]).forEach(([key, value]) => {
+        if (key === "--logo-filter") return;
+        expect(varPattern.test(value), `Theme "${theme}", variable "${key}" has invalid value: "${value}"`).toBe(true);
+      });
     });
   });
 });

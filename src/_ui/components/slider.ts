@@ -1,8 +1,6 @@
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
 
-const snapToStep = (value: number, step: number): number =>
-  Math.round(value / step) * step;
+const snapToStep = (value: number, step: number): number => Math.round(value / step) * step;
 
 /**
  * Custom accessible slider component for volume and other range inputs.
@@ -34,10 +32,7 @@ export class Slider extends HTMLElement {
    * Sets the current value, clamping and snapping it to the nearest step.
    */
   set value(val: string) {
-    this.currentValue = snapToStep(
-      clamp(Number(val), this.min, this.max),
-      this.step,
-    );
+    this.currentValue = snapToStep(clamp(Number(val), this.min, this.max), this.step);
     this.updateVisuals();
   }
 
@@ -49,21 +44,9 @@ export class Slider extends HTMLElement {
     this.min = Number(this.getAttribute("min") ?? 0);
     this.max = Number(this.getAttribute("max") ?? 100);
     this.step = Number(this.getAttribute("step") ?? 1);
-    this.currentValue = clamp(
-      Number(this.getAttribute("value") ?? 50),
-      this.min,
-      this.max,
-    );
+    this.currentValue = clamp(Number(this.getAttribute("value") ?? 50), this.min, this.max);
 
-    this.classList.add(
-      "relative",
-      "block",
-      "w-full",
-      "h-4",
-      "cur-pointer",
-      "select-none",
-      "touch-none",
-    );
+    this.classList.add("relative", "block", "w-full", "h-4", "cur-pointer", "select-none", "touch-none");
     this.setAttribute("role", "slider");
     this.setAttribute("tabindex", "0");
 
@@ -80,11 +63,7 @@ export class Slider extends HTMLElement {
     this.bindEvents();
   }
 
-  attributeChangedCallback(
-    name: string,
-    oldValue: string | null,
-    newValue: string | null,
-  ): void {
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue || !this.fillEl) return;
 
     switch (name) {
@@ -147,20 +126,12 @@ export class Slider extends HTMLElement {
       case "ArrowRight":
       case "ArrowUp":
         event.preventDefault();
-        this.currentValue = clamp(
-          this.currentValue + stepSize,
-          this.min,
-          this.max,
-        );
+        this.currentValue = clamp(this.currentValue + stepSize, this.min, this.max);
         break;
       case "ArrowLeft":
       case "ArrowDown":
         event.preventDefault();
-        this.currentValue = clamp(
-          this.currentValue - stepSize,
-          this.min,
-          this.max,
-        );
+        this.currentValue = clamp(this.currentValue - stepSize, this.min, this.max);
         break;
       case "Home":
         event.preventDefault();

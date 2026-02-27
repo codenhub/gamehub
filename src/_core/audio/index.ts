@@ -20,8 +20,7 @@ class AudioManager {
     if (this.initialized && this.ctx && this.musicCtx && this.sfxCtx) return;
 
     try {
-      const AudioContextClass =
-        window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       this.ctx = new AudioContextClass();
 
       this.musicCtx = new MusicContext(this.ctx);

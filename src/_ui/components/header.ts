@@ -1,10 +1,6 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
-import ThemeManager, {
-  THEMES,
-  VALID_THEMES,
-  isValidTheme,
-} from "../../_core/utils/theme";
+import ThemeManager, { THEMES, VALID_THEMES, isValidTheme } from "../../_core/utils/theme";
 import type { Theme } from "../../_core/utils/theme";
 import type { Slider } from "./slider";
 
@@ -163,9 +159,7 @@ export class Header extends HTMLElement {
           ThemeManager.setTheme(raw);
           this.updateActiveThemeUI(raw);
 
-          const menuToggle = this.querySelector(
-            "#theme-menu",
-          ) as HTMLInputElement;
+          const menuToggle = this.querySelector("#theme-menu") as HTMLInputElement;
           if (menuToggle) menuToggle.checked = false;
         },
         { signal },

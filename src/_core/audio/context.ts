@@ -36,9 +36,7 @@ export class MusicContext extends BaseAudioContext<MusicId> {
     if (this.playing && this.source) return;
 
     try {
-      const buffer =
-        this.getBuffer(this.currentTrack) ||
-        (await this.load(this.currentTrack));
+      const buffer = this.getBuffer(this.currentTrack) || (await this.load(this.currentTrack));
       if (!buffer) return;
 
       this.stopSource();
@@ -54,10 +52,7 @@ export class MusicContext extends BaseAudioContext<MusicId> {
       if (ease) {
         this.gain.gain.setValueAtTime(0, currentTime);
         this.source.start(0);
-        this.gain.gain.linearRampToValueAtTime(
-          this.volume,
-          currentTime + DEFAULT_FADE_DURATION,
-        );
+        this.gain.gain.linearRampToValueAtTime(this.volume, currentTime + DEFAULT_FADE_DURATION);
       } else {
         this.gain.gain.setValueAtTime(this.volume, currentTime);
         this.source.start(0);
@@ -91,10 +86,7 @@ export class MusicContext extends BaseAudioContext<MusicId> {
     this.gain.gain.setValueAtTime(this.gain.gain.value, currentTime);
 
     if (ease) {
-      this.gain.gain.linearRampToValueAtTime(
-        0,
-        currentTime + DEFAULT_FADE_DURATION,
-      );
+      this.gain.gain.linearRampToValueAtTime(0, currentTime + DEFAULT_FADE_DURATION);
 
       const sourceToStop = this.source;
       setTimeout(
@@ -124,9 +116,7 @@ export class MusicContext extends BaseAudioContext<MusicId> {
       if (this.playing) {
         await this.pause(ease);
         if (ease) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, DEFAULT_FADE_DURATION * 1000),
-          );
+          await new Promise((resolve) => setTimeout(resolve, DEFAULT_FADE_DURATION * 1000));
         }
       }
       this.currentTrack = id;

@@ -190,10 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const currentX = touch.clientX;
       const currentY = touch.clientY;
 
-      if (
-        Math.abs(currentX - touchStartX) > 10 ||
-        Math.abs(currentY - touchStartY) > 10
-      ) {
+      if (Math.abs(currentX - touchStartX) > 10 || Math.abs(currentY - touchStartY) > 10) {
         isSwipe = true;
       }
 

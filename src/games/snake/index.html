@@ -14,9 +14,7 @@
     <gh-header title="Snake" backBtn></gh-header>
 
     <main class="flex flex-1 size-full justify-center p-4">
-      <section
-        class="flex flex-1 max-w-lg w-full h-auto gap-4 py-4 flex-col items-center"
-      >
+      <section class="flex flex-1 max-w-lg w-full h-auto gap-4 py-4 flex-col items-center">
         <!-- TOP BAR -->
         <div class="flex items-center w-full justify-between">
           <div class="flex gap-2">
@@ -30,26 +28,24 @@
               </div>
             </button>
             <button id="stop" class="icon-btn hidden">
-              <div
-                class="bg-primary-contrast size-4"
-                aria-label="Stop icon"
-              ></div>
+              <div class="bg-primary-contrast size-4" aria-label="Stop icon"></div>
             </button>
           </div>
 
           <!-- Scores -->
           <div class="flex gap-4 text-xs sm:text-sm">
-            <p>Score: <span id="score">0</span></p>
-            <p>Best: <span id="high-score">0</span></p>
+            <p>
+              Score:
+              <span id="score">0</span>
+            </p>
+            <p>
+              Best:
+              <span id="high-score">0</span>
+            </p>
           </div>
         </div>
-        <div
-          class="relative bg-border pixel-corner-lg-4 p-1 w-full aspect-square"
-        >
-          <canvas
-            id="game"
-            class="flex size-full pixel-corner-lg-4 bg-foreground"
-          ></canvas>
+        <div class="relative bg-border pixel-corner-lg-4 p-1 w-full aspect-square">
+          <canvas id="game" class="flex size-full pixel-corner-lg-4 bg-foreground"></canvas>
 
           <!-- Start screen -->
           <div
@@ -66,7 +62,10 @@
             class="absolute inset-0 flex-col items-center justify-center gap-2 bg-foreground/80 pixel-corner-lg-4 z-20 hidden"
           >
             <h2 class="text-error">GAME OVER</h2>
-            <p class="text-2xl mb-2">Score: <span id="final-score">0</span></p>
+            <p class="text-2xl mb-2">
+              Score:
+              <span id="final-score">0</span>
+            </p>
             <button id="restart-btn" class="primary-btn">Try Again</button>
           </div>
 
@@ -77,7 +76,8 @@
           >
             <h2 class="text-success">YOU WON!</h2>
             <p class="text-2xl mb-2">
-              Final Score: <span id="win-score">0</span>
+              Final Score:
+              <span id="win-score">0</span>
             </p>
             <button id="win-restart-btn" class="primary-btn">Play Again</button>
           </div>
@@ -99,26 +99,17 @@
           <div class="flex gap-2">
             <button class="icon-btn size-14 leftBtn" aria-label="Move Left">
               <span class="flex -rotate-90">
-                <gh-icon
-                  src="/assets/icons/chevron-up.webp"
-                  width="2rem"
-                ></gh-icon>
+                <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
               </span>
             </button>
             <button class="icon-btn size-14 downBtn" aria-label="Move Down">
               <span class="flex rotate-180">
-                <gh-icon
-                  src="/assets/icons/chevron-up.webp"
-                  width="2rem"
-                ></gh-icon>
+                <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
               </span>
             </button>
             <button class="icon-btn size-14 rightBtn" aria-label="Move Right">
               <span class="flex rotate-90">
-                <gh-icon
-                  src="/assets/icons/chevron-up.webp"
-                  width="2rem"
-                ></gh-icon>
+                <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
               </span>
             </button>
           </div>

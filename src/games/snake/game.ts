@@ -134,12 +134,8 @@ export class SnakeGame {
       nextDirection: { x: 0, y: 0 },
     };
 
-    const startX =
-      Math.floor(this.canvas.width / GAME_CONFIG.tileSize / 2) *
-      GAME_CONFIG.tileSize;
-    const startY =
-      Math.floor(this.canvas.height / GAME_CONFIG.tileSize / 2) *
-      GAME_CONFIG.tileSize;
+    const startX = Math.floor(this.canvas.width / GAME_CONFIG.tileSize / 2) * GAME_CONFIG.tileSize;
+    const startY = Math.floor(this.canvas.height / GAME_CONFIG.tileSize / 2) * GAME_CONFIG.tileSize;
 
     this.state.snake = [{ x: startX, y: startY }];
 
@@ -257,22 +253,12 @@ export class SnakeGame {
 
     // Draw Food
     this.ctx.fillStyle = colors.food;
-    this.ctx.fillRect(
-      this.state.food.x,
-      this.state.food.y,
-      GAME_CONFIG.tileSize,
-      GAME_CONFIG.tileSize,
-    );
+    this.ctx.fillRect(this.state.food.x, this.state.food.y, GAME_CONFIG.tileSize, GAME_CONFIG.tileSize);
 
     // Draw Snake
     this.state.snake.forEach((segment, index) => {
       this.ctx.fillStyle = index === 0 ? colors.snakeHead : colors.snakeBody;
-      this.ctx.fillRect(
-        segment.x,
-        segment.y,
-        GAME_CONFIG.tileSize,
-        GAME_CONFIG.tileSize,
-      );
+      this.ctx.fillRect(segment.x, segment.y, GAME_CONFIG.tileSize, GAME_CONFIG.tileSize);
     });
   }
 

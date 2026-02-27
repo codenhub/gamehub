@@ -98,10 +98,8 @@ export class GeometricFallGame {
     if (!container) return;
 
     const style = getComputedStyle(container);
-    const paddingX =
-      parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-    const paddingY =
-      parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+    const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const paddingY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
     const containerWidth = container.clientWidth - paddingX;
     const containerHeight = container.clientHeight - paddingY;
 
@@ -143,10 +141,7 @@ export class GeometricFallGame {
         this.grid = newGrid;
 
         if (this.currentPiece) {
-          this.currentX = Math.min(
-            this.currentX,
-            COLS - this.currentPiece[0].length,
-          );
+          this.currentX = Math.min(this.currentX, COLS - this.currentPiece[0].length);
           this.currentX = Math.max(this.currentX, 0);
           this.currentY = Math.min(this.currentY, ROWS - 1);
         }
@@ -205,8 +200,7 @@ export class GeometricFallGame {
     this.currentPiece = this.nextPiece;
     this.nextPiece = this.getNextPieceFromBag();
 
-    this.currentX =
-      Math.floor(COLS / 2) - Math.floor(this.currentPiece[0].length / 2);
+    this.currentX = Math.floor(COLS / 2) - Math.floor(this.currentPiece[0].length / 2);
     this.currentY = 0;
 
     if (this.previewCtxs.length > 0) this.drawNextPiece();
@@ -278,18 +272,8 @@ export class GeometricFallGame {
       for (let x = 0; x < COLS; x++) {
         if (this.grid[y]?.[x]) {
           this.ctx.fillStyle = colors.piece;
-          this.ctx.fillRect(
-            x * this.blockSize,
-            y * this.blockSize,
-            this.blockSize,
-            this.blockSize,
-          );
-          this.ctx.strokeRect(
-            x * this.blockSize,
-            y * this.blockSize,
-            this.blockSize,
-            this.blockSize,
-          );
+          this.ctx.fillRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
+          this.ctx.strokeRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
         }
       }
     }
@@ -389,9 +373,7 @@ export class GeometricFallGame {
   }
 
   private gameTick = () => {
-    if (
-      !this.isValidMove(this.currentPiece, this.currentX, this.currentY + 1)
-    ) {
+    if (!this.isValidMove(this.currentPiece, this.currentX, this.currentY + 1)) {
       this.placePiece();
     } else {
       this.currentY++;
@@ -437,9 +419,7 @@ export class GeometricFallGame {
   }
 
   public dropPiece() {
-    while (
-      this.isValidMove(this.currentPiece, this.currentX, this.currentY + 1)
-    ) {
+    while (this.isValidMove(this.currentPiece, this.currentX, this.currentY + 1)) {
       this.currentY++;
     }
     AudioManager.playSFX("hit");

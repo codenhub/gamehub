@@ -31,11 +31,7 @@ interface WallCollisionParams {
   height: number;
 }
 
-export function isWallCollision({
-  point,
-  width,
-  height,
-}: WallCollisionParams): boolean {
+export function isWallCollision({ point, width, height }: WallCollisionParams): boolean {
   return point.x < 0 || point.x >= width || point.y < 0 || point.y >= height;
 }
 
@@ -43,11 +39,7 @@ export function isSelfCollision(head: Point, body: Point[]): boolean {
   return body.some((s) => s.x === head.x && s.y === head.y);
 }
 
-export function isGridFull(
-  snakeLength: number,
-  cols: number,
-  rows: number,
-): boolean {
+export function isGridFull(snakeLength: number, cols: number, rows: number): boolean {
   return snakeLength >= cols * rows;
 }
 
@@ -62,12 +54,7 @@ interface FindEmptyTileParams {
  * Finds the first available empty tile in the grid, starting from (0,0).
  * Used as a fallback for food spawning.
  */
-export function findFirstEmptyTile({
-  cols,
-  rows,
-  tileSize,
-  occupied,
-}: FindEmptyTileParams): Point | null {
+export function findFirstEmptyTile({ cols, rows, tileSize, occupied }: FindEmptyTileParams): Point | null {
   for (let x = 0; x < cols; x++) {
     for (let y = 0; y < rows; y++) {
       const px = x * tileSize;

@@ -16,14 +16,11 @@ const alertColors = {
 };
 
 function getOrCreateContainer(): HTMLDivElement {
-  let container = document.getElementById(
-    "global-alert-container",
-  ) as HTMLDivElement | null;
+  let container = document.getElementById("global-alert-container") as HTMLDivElement | null;
   if (!container) {
     container = document.createElement("div");
     container.id = "global-alert-container";
-    container.className =
-      "fixed top-4 right-4 z-50 flex flex-col-reverse gap-2 pointer-events-none";
+    container.className = "fixed top-4 right-4 z-50 flex flex-col-reverse gap-2 pointer-events-none";
 
     const target = document.body ?? document.documentElement;
     target.appendChild(container);
@@ -34,8 +31,7 @@ function getOrCreateContainer(): HTMLDivElement {
 function createAlertElement(options: AlertOptions): HTMLDivElement {
   const div = document.createElement("div");
 
-  let classes =
-    "px-4 py-2 pixel-corner-lg-4 shadow-lg text-lg font-medium font-default pointer-events-auto min-w-40 ";
+  let classes = "px-4 py-2 pixel-corner-lg-4 shadow-lg text-lg font-medium font-default pointer-events-auto min-w-40 ";
 
   classes += alertColors[options.type];
 

@@ -156,9 +156,7 @@ export function moveGrid(grid: Grid, direction: Direction): MoveResult {
 
   const newGrid = insertRows(processed, direction);
 
-  const hasMoved = grid.some((row, r) =>
-    row.some((val, c) => val !== newGrid[r][c]),
-  );
+  const hasMoved = grid.some((row, r) => row.some((val, c) => val !== newGrid[r][c]));
 
   return { grid: newGrid, score: totalScore, hasMoved };
 }

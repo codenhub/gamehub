@@ -72,14 +72,8 @@ describe("GameStoreImpl", () => {
     expect(storeB.get("level")).toBe(5);
 
     // Verify keys are namespaced
-    expect(fakeStorage.setItem).toHaveBeenCalledWith(
-      "game-a:score",
-      JSON.stringify(10),
-    );
-    expect(fakeStorage.setItem).toHaveBeenCalledWith(
-      "game-b:level",
-      JSON.stringify(5),
-    );
+    expect(fakeStorage.setItem).toHaveBeenCalledWith("game-a:score", JSON.stringify(10));
+    expect(fakeStorage.setItem).toHaveBeenCalledWith("game-b:level", JSON.stringify(5));
   });
 
   it("should isolate stores with different namespaces", () => {

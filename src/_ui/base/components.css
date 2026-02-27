@@ -7,8 +7,7 @@
     calc(100% - calc(--value(integer) * 1px)) calc(--value(integer) * 1px),
     100% calc(--value(integer) * 1px),
     100% calc(100% - calc(--value(integer) * 1px)),
-    calc(100% - calc(--value(integer) * 1px))
-      calc(100% - calc(--value(integer) * 1px)),
+    calc(100% - calc(--value(integer) * 1px)) calc(100% - calc(--value(integer) * 1px)),
     calc(100% - calc(--value(integer) * 1px)) 100%,
     calc(--value(integer) * 1px) 100%,
     calc(--value(integer) * 1px) calc(100% - calc(--value(integer) * 1px)),
@@ -29,12 +28,9 @@
     calc(100% - calc(--value(integer) * 1px)) calc(--value(integer) * 2px),
     100% calc(--value(integer) * 2px),
     100% calc(100% - calc(--value(integer) * 2px)),
-    calc(100% - calc(--value(integer) * 1px))
-      calc(100% - calc(--value(integer) * 2px)),
-    calc(100% - calc(--value(integer) * 1px))
-      calc(100% - calc(--value(integer) * 1px)),
-    calc(100% - calc(--value(integer) * 2px))
-      calc(100% - calc(--value(integer) * 1px)),
+    calc(100% - calc(--value(integer) * 1px)) calc(100% - calc(--value(integer) * 2px)),
+    calc(100% - calc(--value(integer) * 1px)) calc(100% - calc(--value(integer) * 1px)),
+    calc(100% - calc(--value(integer) * 2px)) calc(100% - calc(--value(integer) * 1px)),
     calc(100% - calc(--value(integer) * 2px)) 100%,
     calc(--value(integer) * 2px) 100%,
     calc(--value(integer) * 2px) calc(100% - calc(--value(integer) * 1px)),
@@ -61,16 +57,11 @@
     calc(100% - calc(--value(integer) * 1px)) calc(--value(integer) * 4px),
     100% calc(--value(integer) * 4px),
     100% calc(100% - calc(--value(integer) * 4px)),
-    calc(100% - calc(--value(integer) * 1px))
-      calc(100% - calc(--value(integer) * 4px)),
-    calc(100% - calc(--value(integer) * 1px))
-      calc(100% - calc(--value(integer) * 2px)),
-    calc(100% - calc(--value(integer) * 2px))
-      calc(100% - calc(--value(integer) * 2px)),
-    calc(100% - calc(--value(integer) * 2px))
-      calc(100% - calc(--value(integer) * 1px)),
-    calc(100% - calc(--value(integer) * 4px))
-      calc(100% - calc(--value(integer) * 1px)),
+    calc(100% - calc(--value(integer) * 1px)) calc(100% - calc(--value(integer) * 4px)),
+    calc(100% - calc(--value(integer) * 1px)) calc(100% - calc(--value(integer) * 2px)),
+    calc(100% - calc(--value(integer) * 2px)) calc(100% - calc(--value(integer) * 2px)),
+    calc(100% - calc(--value(integer) * 2px)) calc(100% - calc(--value(integer) * 1px)),
+    calc(100% - calc(--value(integer) * 4px)) calc(100% - calc(--value(integer) * 1px)),
     calc(100% - calc(--value(integer) * 4px)) 100%,
     calc(--value(integer) * 4px) 100%,
     calc(--value(integer) * 4px) calc(100% - calc(--value(integer) * 1px)),

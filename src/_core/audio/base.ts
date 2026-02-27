@@ -1,7 +1,6 @@
 export const DEFAULT_FADE_DURATION = 1;
 
-export const clampVolume = (volume: number): number =>
-  Math.max(0, Math.min(1, volume));
+export const clampVolume = (volume: number): number => Math.max(0, Math.min(1, volume));
 
 /**
  * Base class for managing an AudioContext with gain control and buffer caching.
@@ -39,10 +38,7 @@ export abstract class BaseAudioContext<T extends string> {
     if (ease) {
       this.gain.gain.cancelScheduledValues(currentTime);
       this.gain.gain.setValueAtTime(this.gain.gain.value, currentTime);
-      this.gain.gain.linearRampToValueAtTime(
-        this.volume,
-        currentTime + DEFAULT_FADE_DURATION,
-      );
+      this.gain.gain.linearRampToValueAtTime(this.volume, currentTime + DEFAULT_FADE_DURATION);
     } else {
       this.gain.gain.cancelScheduledValues(currentTime);
       this.gain.gain.setValueAtTime(this.volume, currentTime);
@@ -69,9 +65,7 @@ export abstract class BaseAudioContext<T extends string> {
       try {
         const res = await fetch(url);
         if (!res.ok) {
-          throw new Error(
-            `Failed to load audio "${id}": ${res.status} ${res.statusText}`,
-          );
+          throw new Error(`Failed to load audio "${id}": ${res.status} ${res.statusText}`);
         }
         const arrayBuffer = await res.arrayBuffer();
         const buffer = await this.ctx.decodeAudioData(arrayBuffer);
@@ -90,16 +84,11 @@ export abstract class BaseAudioContext<T extends string> {
   }
 
   public async loadMultiple(ids: T[], urlMap: Record<T, string>) {
-    const results = await Promise.allSettled(
-      ids.map((id) => this.load(id, urlMap[id])),
-    );
+    const results = await Promise.allSettled(ids.map((id) => this.load(id, urlMap[id])));
 
     results.forEach((result, index) => {
       if (result.status === "rejected") {
-        console.warn(
-          `[AudioContext] Failed to load "${ids[index]}":`,
-          result.reason,
-        );
+        console.warn(`[AudioContext] Failed to load "${ids[index]}":`, result.reason);
       }
     });
   }

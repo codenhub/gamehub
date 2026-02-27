@@ -13,9 +13,7 @@ class Icon extends HTMLElement {
   private handleThemeChange = () => {
     if (!this.div) return;
     const color = this.getAttribute("color");
-    const parentColor = this.parentElement
-      ? window.getComputedStyle(this.parentElement).color
-      : "currentColor";
+    const parentColor = this.parentElement ? window.getComputedStyle(this.parentElement).color : "currentColor";
     this.div.style.backgroundColor = color || parentColor;
   };
 
@@ -29,9 +27,7 @@ class Icon extends HTMLElement {
     this.div = div;
     div.classList.add(...this.classList);
 
-    const parentColor = this.parentElement
-      ? window.getComputedStyle(this.parentElement).color
-      : "currentColor";
+    const parentColor = this.parentElement ? window.getComputedStyle(this.parentElement).color : "currentColor";
 
     div.style.backgroundColor = color || parentColor;
     div.style.display = "inline-block";

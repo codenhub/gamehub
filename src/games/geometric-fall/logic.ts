@@ -47,10 +47,7 @@ export const TETROMINOES: Record<string, PieceMatrix> = {
   ],
 };
 
-export function createEmptyGrid(
-  rows: number = ROWS,
-  cols: number = COLS,
-): number[][] {
+export function createEmptyGrid(rows: number = ROWS, cols: number = COLS): number[][] {
   return Array.from({ length: rows }, () => Array(cols).fill(0));
 }
 
@@ -60,9 +57,7 @@ export function createEmptyGrid(
 export function rotatePiece(piece: PieceMatrix): PieceMatrix {
   const rows = piece.length;
   const cols = piece[0].length;
-  const rotated: PieceMatrix = Array.from({ length: cols }, () =>
-    Array(rows).fill(0),
-  );
+  const rotated: PieceMatrix = Array.from({ length: cols }, () => Array(rows).fill(0));
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       rotated[x][rows - 1 - y] = piece[y][x];
@@ -87,12 +82,7 @@ export function isValidMove({ grid, piece, x, y }: MoveValidation): boolean {
       if (piece[py][px]) {
         const newX = x + px;
         const newY = y + py;
-        if (
-          newX < 0 ||
-          newX >= cols ||
-          newY >= rows ||
-          (newY >= 0 && grid[newY][newX])
-        ) {
+        if (newX < 0 || newX >= cols || newY >= rows || (newY >= 0 && grid[newY][newX])) {
           return false;
         }
       }
@@ -110,9 +100,7 @@ export function clearLines(grid: number[][]): ClearLinesResult {
   const cols = grid[0]?.length ?? 0;
   const filteredGrid = grid.filter((row) => !row.every((cell) => cell !== 0));
   const linesCleared = grid.length - filteredGrid.length;
-  const emptyRows = Array.from({ length: linesCleared }, () =>
-    Array(cols).fill(0),
-  );
+  const emptyRows = Array.from({ length: linesCleared }, () => Array(cols).fill(0));
 
   return {
     grid: [...emptyRows, ...filteredGrid],
