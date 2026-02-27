@@ -62,22 +62,18 @@ export abstract class BaseAudioContext<T extends string> {
     }
 
     const loadPromise = (async () => {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) {
-          throw new Error(`Failed to load audio "${id}": ${res.status} ${res.statusText}`);
-        }
-        const arrayBuffer = await res.arrayBuffer();
-        const buffer = await this.ctx.decodeAudioData(arrayBuffer);
-        this.loadedBuffers.set(id, buffer);
-        return buffer;
-      } catch (error) {
-        console.error(`[AudioContext] Error loading "${id}":`, error);
-        throw error;
-      } finally {
-        this.loadingPromises.delete(id);
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`Failed to load audio "${id}": ${res.status} ${res.statusText}`);
       }
-    })();
+
+      const arrayBuffer = await res.arrayBuffer();
+      const buffer = await this.ctx.decodeAudioData(arrayBuffer);
+      this.loadedBuffers.set(id, buffer);
+      return buffer;
+    })().finally(() => {
+      this.loadingPromises.delete(id);
+    });
 
     this.loadingPromises.set(id, loadPromise);
     return loadPromise;
@@ -86,10 +82,12 @@ export abstract class BaseAudioContext<T extends string> {
   public async loadMultiple(ids: T[], urlMap: Record<T, string>) {
     const results = await Promise.allSettled(ids.map((id) => this.load(id, urlMap[id])));
 
-    results.forEach((result, index) => {
-      if (result.status === "rejected") {
-        console.warn(`[AudioContext] Failed to load "${ids[index]}":`, result.reason);
-      }
-    });
+    const failedIds = results
+      .map((result, index) => (result.status === "rejected" ? ids[index] : null))
+      .filter((id): id is T => id !== null);
+
+    if (failedIds.length > 0) {
+      throw new Error(`Failed to load audio IDs: ${failedIds.join(", ")}`);
+    }
   }
 }

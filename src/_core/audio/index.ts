@@ -2,6 +2,8 @@ import { MusicId } from "./music";
 import { SFXId } from "./sfx";
 import { MusicContext, SFXContext } from "./context";
 
+type AudioContextCtor = new () => AudioContext;
+
 /**
  * Central manager for all audio operations.
  * Handles lazy initialization of the AudioContext and coordinates music and SFX.
@@ -10,7 +12,25 @@ class AudioManager {
   private ctx?: AudioContext;
   private musicCtx?: MusicContext;
   private sfxCtx?: SFXContext;
-  private initialized: boolean = false;
+  private initialized = false;
+
+  private logError(action: string, error: unknown) {
+    console.warn(`[AudioManager] Failed to ${action}:`, error);
+  }
+
+  private async runAsync(action: string, operation: () => Promise<void>) {
+    try {
+      await operation();
+    } catch (error) {
+      this.logError(action, error);
+    }
+  }
+
+  private runDeferred(action: string, operation: Promise<unknown>) {
+    void operation.catch((error) => {
+      this.logError(action, error);
+    });
+  }
 
   /**
    * Initializes the AudioContext and specialized contexts if not already done.
@@ -20,76 +40,74 @@ class AudioManager {
     if (this.initialized && this.ctx && this.musicCtx && this.sfxCtx) return;
 
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      this.ctx = new AudioContextClass();
+      const AudioContextClass =
+        (window as unknown as { AudioContext?: AudioContextCtor; webkitAudioContext?: AudioContextCtor })
+          .AudioContext ?? (window as unknown as { webkitAudioContext?: AudioContextCtor }).webkitAudioContext;
+      if (!AudioContextClass) {
+        throw new Error("AudioContext is not supported in this browser.");
+      }
 
-      this.musicCtx = new MusicContext(this.ctx);
-      this.sfxCtx = new SFXContext(this.ctx);
+      const ctx = new AudioContextClass();
+      this.ctx = ctx;
+
+      this.musicCtx = new MusicContext(ctx);
+      this.sfxCtx = new SFXContext(ctx);
 
       this.initialized = true;
 
-      this.musicCtx.load("main-soundtrack").catch((err) => {
-        console.warn("[AudioManager] Failed to preload main soundtrack:", err);
-      });
-    } catch (err) {
-      console.error("[AudioManager] Failed to initialize AudioContext:", err);
+      this.runDeferred("preload main soundtrack", this.musicCtx.load("main-soundtrack"));
+    } catch (error) {
+      this.logError("initialize audio context", error);
     }
   }
 
   public async resumeContext() {
     this.ensureInit();
-    if (!this.ctx) return;
+    const ctx = this.ctx;
+    if (!ctx) return;
 
-    try {
-      if (this.ctx.state === "suspended") {
-        await this.ctx.resume();
+    await this.runAsync("resume audio context", async () => {
+      if (ctx.state === "suspended") {
+        await ctx.resume();
       }
-    } catch (err) {
-      console.warn("[AudioManager] Failed to resume audio context:", err);
-    }
+    });
   }
 
   public async playMusic(musicId: MusicId = "main-soundtrack") {
     await this.resumeContext();
-    if (!this.musicCtx) return;
+    const musicCtx = this.musicCtx;
+    if (!musicCtx) return;
 
-    try {
-      if (this.musicCtx.getTrack() !== musicId) {
-        await this.musicCtx.changeTrack(musicId);
+    await this.runAsync(`play music \"${musicId}\"`, async () => {
+      if (musicCtx.getTrack() !== musicId) {
+        await musicCtx.changeTrack(musicId);
       } else {
-        await this.musicCtx.play(true);
+        await musicCtx.play(true);
       }
-    } catch (err) {
-      console.warn("[AudioManager] Failed to play music:", err);
-    }
+    });
   }
 
   public pauseMusic() {
     if (!this.initialized || !this.musicCtx) return;
 
-    this.musicCtx.pause().catch((err) => {
-      console.warn("[AudioManager] Failed to pause music:", err);
-    });
+    this.runDeferred("pause music", this.musicCtx.pause());
   }
 
   public async resumeMusic() {
     await this.resumeContext();
-    if (!this.musicCtx) return;
+    const musicCtx = this.musicCtx;
+    if (!musicCtx) return;
 
-    try {
-      await this.musicCtx.resume();
-    } catch (err) {
-      console.warn("[AudioManager] Failed to resume music:", err);
-    }
+    await this.runAsync("resume music", async () => {
+      await musicCtx.resume();
+    });
   }
 
   public changeMusic(musicId: MusicId) {
     this.ensureInit();
     if (!this.musicCtx) return;
 
-    this.musicCtx.changeTrack(musicId).catch((err) => {
-      console.warn("[AudioManager] Failed to change music:", err);
-    });
+    this.runDeferred(`change music to \"${musicId}\"`, this.musicCtx.changeTrack(musicId));
   }
 
   public getMusicTrack() {
@@ -111,31 +129,26 @@ class AudioManager {
 
   public async playSFX(sfxId: SFXId) {
     await this.resumeContext();
-    if (!this.sfxCtx) return;
+    const sfxCtx = this.sfxCtx;
+    if (!sfxCtx) return;
 
-    try {
-      await this.sfxCtx.play(sfxId);
-    } catch (err) {
-      console.warn(`[AudioManager] Failed to play SFX "${sfxId}":`, err);
-    }
+    await this.runAsync(`play SFX \"${sfxId}\"`, async () => {
+      await sfxCtx.play(sfxId);
+    });
   }
 
   public loadSFX(sfxId: SFXId) {
     this.ensureInit();
     if (!this.sfxCtx) return;
 
-    this.sfxCtx.load(sfxId).catch((err) => {
-      console.warn(`[AudioManager] Failed to preload SFX "${sfxId}":`, err);
-    });
+    this.runDeferred(`preload SFX \"${sfxId}\"`, this.sfxCtx.load(sfxId));
   }
 
   public loadMultipleSFX(sfxIds: SFXId[]) {
     this.ensureInit();
     if (!this.sfxCtx) return;
 
-    this.sfxCtx.loadMultiple(sfxIds).catch((err) => {
-      console.warn("[AudioManager] Failed to preload some SFX:", err);
-    });
+    this.runDeferred("preload multiple SFX", this.sfxCtx.loadMultiple(sfxIds));
   }
 
   public getSFXVolume() {
