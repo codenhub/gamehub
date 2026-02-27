@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   root: "./src",
   publicDir: "./_public",
+  cacheDir: "../node_modules/.vite",
   build: {
     outDir: "../dist",
     emptyOutDir: true,
