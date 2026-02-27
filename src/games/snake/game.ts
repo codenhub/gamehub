@@ -1,7 +1,7 @@
-import AudioManager from "../_core/audio";
-import { createStore } from "../_core/storage";
-import { showAlert } from "../_core/utils/alerts";
-import ThemeManager from "../_core/utils/theme";
+import AudioManager from "../../_core/audio";
+import { createStore } from "../../_core/storage";
+import { showAlert } from "../../_core/utils/alerts";
+import ThemeManager from "../../_core/utils/theme";
 import {
   type Point,
   TILE_SIZE,

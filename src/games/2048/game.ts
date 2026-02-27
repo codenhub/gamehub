@@ -1,5 +1,5 @@
-import AudioManager from "../_core/audio";
-import { createStore } from "../_core/storage";
+import AudioManager from "../../_core/audio";
+import { createStore } from "../../_core/storage";
 import {
   type Grid,
   type Direction,

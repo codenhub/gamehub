@@ -9,9 +9,9 @@ import {
   createEmptyGrid,
   setGridDimensions,
 } from "./logic";
-import AudioManager from "../_core/audio";
-import { createStore } from "../_core/storage";
-import ThemeManager from "../_core/utils/theme";
+import AudioManager from "../../_core/audio";
+import { createStore } from "../../_core/storage";
+import ThemeManager from "../../_core/utils/theme";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 

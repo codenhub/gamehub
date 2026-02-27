@@ -4,42 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>2048 | GameHub</title>
-    <link rel="stylesheet" href="../_ui/main.css" />
-    <script type="module" src="../_ui/main.js"></script>
-    <script src="../_ui/components/index.js" type="module" defer></script>
+    <title>Snake | GameHub</title>
+    <link rel="stylesheet" href="../../_ui/main.css" />
+    <script type="module" src="../../_ui/main.js"></script>
+    <script src="../../_ui/components/index.js" type="module" defer></script>
     <script src="./index.ts" type="module" defer></script>
-
-    <style>
-      @reference "../_ui/main.css";
-
-      .game-grid {
-        @apply grid grid-cols-4 gap-2 p-2 aspect-square;
-      }
-
-      .game-tile {
-        @apply pixel-corner-lg-4 flex items-center justify-center aspect-square text-5xl md:text-7xl font-bold bg-background transition duration-200 select-none;
-      }
-
-      .game-tile[data-value]:not([data-value="0"]) {
-        animation: tile-pop 0.12s ease-out;
-      }
-
-      @keyframes tile-pop {
-        0% {
-          transform: scale(0.85);
-        }
-        50% {
-          transform: scale(1.05);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-    </style>
   </head>
   <body>
-    <gh-header title="2048" backBtn></gh-header>
+    <gh-header title="Snake" backBtn></gh-header>
 
     <main class="flex flex-1 size-full justify-center p-4">
       <section
@@ -47,29 +19,45 @@
       >
         <!-- TOP BAR -->
         <div class="flex items-center w-full justify-between">
+          <div class="flex gap-2">
+            <button id="play" class="icon-btn">
+              <gh-icon src="/assets/icons/play.webp" width="1rem"></gh-icon>
+            </button>
+            <button id="pause" class="icon-btn hidden">
+              <div class="flex gap-1">
+                <div class="bg-primary-contrast h-4 w-1.5"></div>
+                <div class="bg-primary-contrast h-4 w-1.5"></div>
+              </div>
+            </button>
+            <button id="stop" class="icon-btn hidden">
+              <div
+                class="bg-primary-contrast size-4"
+                aria-label="Stop icon"
+              ></div>
+            </button>
+          </div>
+
+          <!-- Scores -->
           <div class="flex gap-4 text-xs sm:text-sm">
             <p>Score: <span id="score">0</span></p>
             <p>Best: <span id="high-score">0</span></p>
           </div>
         </div>
-
-        <!-- GAME BOARD -->
         <div
           class="relative bg-border pixel-corner-lg-4 p-1 w-full aspect-square"
         >
-          <div
-            id="grid"
-            class="game-grid size-full pixel-corner-lg-4 bg-foreground"
-          ></div>
+          <canvas
+            id="game"
+            class="flex size-full pixel-corner-lg-4 bg-foreground"
+          ></canvas>
 
           <!-- Start screen -->
           <div
             id="start-screen"
             class="absolute inset-0 bg-foreground/80 flex flex-col items-center justify-center gap-4 pixel-corner-lg-4 z-20"
           >
-            <h2>2048</h2>
-            <p class="text-center">Combine tiles to reach 2048!</p>
-            <button id="start-btn" class="primary-btn">Play</button>
+            <h2>SNAKE GAME</h2>
+            <p>Press play or the "Enter" key to Start</p>
           </div>
 
           <!-- Game over screen -->
@@ -88,17 +76,19 @@
             class="absolute inset-0 flex-col items-center justify-center gap-2 bg-foreground/80 pixel-corner-lg-4 z-20 hidden"
           >
             <h2 class="text-success">YOU WON!</h2>
-            <p class="text-2xl mb-2">Score: <span id="win-score">0</span></p>
+            <p class="text-2xl mb-2">
+              Final Score: <span id="win-score">0</span>
+            </p>
             <button id="win-restart-btn" class="primary-btn">Play Again</button>
           </div>
         </div>
 
-        <!-- Hints -->
+        <!-- Desktop hints -->
         <div class="hidden sm:flex text-text-secondary">
-          <p>Use Arrow Keys or WASD to move tiles</p>
+          <p>Use Arrow Keys or WASD to move</p>
         </div>
         <div class="flex sm:hidden text-text-secondary">
-          <p>Swipe to move tiles</p>
+          <p>Swipe to move</p>
         </div>
 
         <!-- Mobile D-Pad -->
