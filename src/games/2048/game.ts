@@ -20,20 +20,20 @@ type Game2048Schema = {
 const store = createStore<Game2048Schema>("2048");
 
 const TILE_COLORS: Record<number, { bg: string; text: string }> = {
-  2: { bg: "#eee4da", text: "#776e65" },
-  4: { bg: "#ede0c8", text: "#776e65" },
-  8: { bg: "#f2b179", text: "#f9f6f2" },
-  16: { bg: "#f59563", text: "#f9f6f2" },
-  32: { bg: "#f67c5f", text: "#f9f6f2" },
-  64: { bg: "#f65e3b", text: "#f9f6f2" },
-  128: { bg: "#edcf72", text: "#f9f6f2" },
-  256: { bg: "#edcc61", text: "#f9f6f2" },
-  512: { bg: "#edc850", text: "#f9f6f2" },
-  1024: { bg: "#edc53f", text: "#f9f6f2" },
-  2048: { bg: "#edc22e", text: "#f9f6f2" },
+  2: { bg: "var(--color-foreground)", text: "var(--color-text)" },
+  4: { bg: "var(--color-border)", text: "var(--color-text)" },
+  8: { bg: "var(--color-accent)", text: "var(--color-accent-contrast)" },
+  16: { bg: "var(--color-info)", text: "var(--color-info-contrast)" },
+  32: { bg: "var(--color-success)", text: "var(--color-success-contrast)" },
+  64: { bg: "var(--color-warning)", text: "var(--color-warning-contrast)" },
+  128: { bg: "var(--color-primary)", text: "var(--color-primary-contrast)" },
+  256: { bg: "var(--color-primary-hover)", text: "var(--color-primary-contrast)" },
+  512: { bg: "var(--color-error)", text: "var(--color-error-contrast)" },
+  1024: { bg: "var(--color-error)", text: "var(--color-error-contrast)" },
+  2048: { bg: "var(--color-error)", text: "var(--color-error-contrast)" },
 };
 
-const DEFAULT_TILE = { bg: "#3c3a32", text: "#f9f6f2" };
+const DEFAULT_TILE = { bg: "var(--color-text-secondary)", text: "var(--color-background)" };
 
 export type GameCallbacks = {
   onScoreUpdate: (score: number, highScore: number) => void;
