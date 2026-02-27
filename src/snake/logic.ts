@@ -2,6 +2,10 @@ export type Point = { x: number; y: number };
 
 export const TILE_SIZE = 20;
 
+/**
+ * Checks if a requested direction is the exact opposite of the current one.
+ * Prevents the snake from reversing into itself.
+ */
 export function isReverseDirection(current: Point, next: Point): boolean {
   if (next.x !== 0 && current.x !== 0) return true;
   if (next.y !== 0 && current.y !== 0) return true;
@@ -54,6 +58,10 @@ interface FindEmptyTileParams {
   occupied: Set<string>;
 }
 
+/**
+ * Finds the first available empty tile in the grid, starting from (0,0).
+ * Used as a fallback for food spawning.
+ */
 export function findFirstEmptyTile({
   cols,
   rows,

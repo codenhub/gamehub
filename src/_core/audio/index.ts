@@ -2,12 +2,20 @@ import { MusicId } from "./music";
 import { SFXId } from "./sfx";
 import { MusicContext, SFXContext } from "./context";
 
+/**
+ * Central manager for all audio operations.
+ * Handles lazy initialization of the AudioContext and coordinates music and SFX.
+ */
 class AudioManager {
   private ctx?: AudioContext;
   private musicCtx?: MusicContext;
   private sfxCtx?: SFXContext;
   private initialized: boolean = false;
 
+  /**
+   * Initializes the AudioContext and specialized contexts if not already done.
+   * This should be triggered by a user interaction to satisfy browser policies.
+   */
   private ensureInit() {
     if (this.initialized && this.ctx && this.musicCtx && this.sfxCtx) return;
 

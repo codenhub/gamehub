@@ -5,6 +5,10 @@ import { BaseAudioContext, DEFAULT_FADE_DURATION } from "./base";
 const DEFAULT_MUSIC_VOLUME = 0.5;
 const DEFAULT_SFX_VOLUME = 0.75;
 
+/**
+ * Specialized context for managing background music.
+ * Supports track switching with cross-fading.
+ */
 export class MusicContext extends BaseAudioContext<MusicId> {
   private currentTrack: MusicId = "main-soundtrack";
   private source: AudioBufferSourceNode | null = null;
@@ -137,6 +141,10 @@ export class MusicContext extends BaseAudioContext<MusicId> {
   }
 }
 
+/**
+ * Specialized context for managing sound effects.
+ * Optimized for frequent, short audio playback.
+ */
 export class SFXContext extends BaseAudioContext<SFXId> {
   constructor(ctx: AudioContext) {
     super(ctx, DEFAULT_SFX_VOLUME);

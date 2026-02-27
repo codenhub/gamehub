@@ -1,3 +1,12 @@
+/**
+ * Custom element for displaying SVG-masked icons.
+ * The icon's color is automatically synchronized with the surrounding text color or a specific attribute.
+ *
+ * @attr src - URL of the SVG icon to use as a mask.
+ * @attr color - Override color for the icon.
+ * @attr width - Width of the icon (defaults to 1rem).
+ * @attr height - Height of the icon (defaults to 1rem).
+ */
 class Icon extends HTMLElement {
   private div: HTMLDivElement | null = null;
 

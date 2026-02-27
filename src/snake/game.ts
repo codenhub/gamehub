@@ -50,6 +50,10 @@ interface GameState {
   isRunning: boolean;
 }
 
+/**
+ * Main class for the Snake game implementation.
+ * Manages game loop, state, rendering, and logic.
+ */
 export class SnakeGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
@@ -171,7 +175,6 @@ export class SnakeGame {
     }
   }
 
-  // Input Handlers
   public queueMove(dx: number, dy: number) {
     if (!this.state.isRunning || this.state.isPaused) return;
 
@@ -194,7 +197,6 @@ export class SnakeGame {
     this.queueMove(1, 0);
   }
 
-  // Core Loop
   private gameLoop = (currentTime: number = 0) => {
     if (!this.state.isRunning) return;
 

@@ -49,6 +49,10 @@ interface GameState {
   hasReachedWin: boolean;
 }
 
+/**
+ * Main class for the 2048 game implementation.
+ * Manages grid state, user moves, score persistence, and DOM rendering.
+ */
 export class Game2048 {
   private container: HTMLElement;
   private callbacks: GameCallbacks;

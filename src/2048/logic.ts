@@ -1,8 +1,11 @@
 export type Grid = number[][];
+
 export type Direction = "up" | "down" | "left" | "right";
+
 export type Cell = { row: number; col: number };
 
 export const GRID_SIZE = 4;
+
 export const WIN_VALUE = 2048;
 
 export function createEmptyGrid(): Grid {
@@ -19,6 +22,9 @@ export function getEmptyCells(grid: Grid): Cell[] {
   return cells;
 }
 
+/**
+ * Randomly spawns a '2' (90% chance) or '4' (10% chance) in an empty cell.
+ */
 export function addRandomTile(grid: Grid): Grid {
   const empty = getEmptyCells(grid);
   if (empty.length === 0) return grid;
@@ -35,6 +41,9 @@ interface SlideAndMergeResult {
   score: number;
 }
 
+/**
+ * Slides all non-zero values to the left and merges adjacent equal values.
+ */
 export function slideAndMergeRow(row: number[]): SlideAndMergeResult {
   // Remove zeros (slide left)
   const nonZero = row.filter((v) => v !== 0);
@@ -131,6 +140,10 @@ interface MoveResult {
   hasMoved: boolean;
 }
 
+/**
+ * Performs a game move in the specified direction.
+ * Extracts rows/cols, merges them, and reconstructs the grid.
+ */
 export function moveGrid(grid: Grid, direction: Direction): MoveResult {
   const rows = extractRows(grid, direction);
   let totalScore = 0;

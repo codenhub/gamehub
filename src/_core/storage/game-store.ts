@@ -2,10 +2,6 @@ import type { GameStore } from "./storage-types";
 
 const SEPARATOR = ":";
 
-/**
- * Builds a namespaced localStorage key.
- * Format: "namespace:key" (e.g. "2048:highScore").
- */
 function buildKey(namespace: string, key: string): string {
   return `${namespace}${SEPARATOR}${key}`;
 }

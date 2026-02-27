@@ -21,6 +21,9 @@ type ThemeSchema = {
 
 const themeStore = createStore<ThemeSchema>("settings");
 
+/**
+ * Manages application themes, including persistence and applying CSS variables.
+ */
 class ThemeManager {
   private currentTheme: Theme;
   private isInitialized = false;

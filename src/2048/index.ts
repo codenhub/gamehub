@@ -1,6 +1,11 @@
 import { Game2048 } from "./game";
 import type { Direction } from "./logic";
 
+/**
+ * Helper to retrieve a typed DOM element by ID.
+ * @param id Element ID.
+ * @returns The element or null if not found.
+ */
 function getElement<T extends HTMLElement>(id: string): T | null {
   return document.getElementById(id) as T | null;
 }

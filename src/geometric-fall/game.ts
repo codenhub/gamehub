@@ -37,6 +37,10 @@ export type GameCallbacks = {
   onGameOver: (finalScore: number) => void;
 };
 
+/**
+ * Main class for the Geometric Fall game (Tetris-like).
+ * Handles the game grid, falling pieces, line clearing, and rendering.
+ */
 export class GeometricFallGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;

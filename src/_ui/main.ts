@@ -1,4 +1,9 @@
+/**
+ * Main entry point for the global UI.
+ * Handles theme initialization and global event listeners for audio activation.
+ */
 import AudioManager from "../_core/audio";
+
 import ThemeManager from "../_core/utils/theme";
 
 ThemeManager.init();

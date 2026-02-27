@@ -1,4 +1,5 @@
 export const VALID_THEMES = ["dark", "light", "cyberpunk", "forest"] as const;
+
 export type Theme = (typeof VALID_THEMES)[number];
 
 export function isValidTheme(value: string | null): value is Theme {

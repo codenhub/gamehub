@@ -1,3 +1,7 @@
+/**
+ * Custom element for the application footer.
+ * Displays copyright information and credits.
+ */
 class Footer extends HTMLElement {
   connectedCallback() {
     this.style.marginTop = "auto";

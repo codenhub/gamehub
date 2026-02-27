@@ -3,6 +3,10 @@ export const DEFAULT_FADE_DURATION = 1;
 export const clampVolume = (volume: number): number =>
   Math.max(0, Math.min(1, volume));
 
+/**
+ * Base class for managing an AudioContext with gain control and buffer caching.
+ * @template T Type of audio identifiers.
+ */
 export abstract class BaseAudioContext<T extends string> {
   protected ctx: AudioContext;
   protected gain: GainNode;

@@ -18,6 +18,13 @@ type VolumeSchema = {
 
 const volumeStore = createStore<VolumeSchema>("settings");
 
+/**
+ * Custom element for the application header.
+ * Provides navigation, volume controls for music and SFX, and theme selection.
+ *
+ * @attr title - The text to display in the header. Defaults to "GameHub".
+ * @attr backBtn - If present, displays a back arrow linking to the home page.
+ */
 export class Header extends HTMLElement {
   private abortController: AbortController | null = null;
 

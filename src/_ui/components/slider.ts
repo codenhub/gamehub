@@ -4,6 +4,15 @@ const clamp = (value: number, min: number, max: number): number =>
 const snapToStep = (value: number, step: number): number =>
   Math.round(value / step) * step;
 
+/**
+ * Custom accessible slider component for volume and other range inputs.
+ * Implements keyboard navigation and pointer interaction.
+ *
+ * @attr value - Initial value of the slider.
+ * @attr min - Minimum value.
+ * @attr max - Maximum value.
+ * @attr step - Step size for value changes.
+ */
 export class Slider extends HTMLElement {
   private fillEl!: HTMLElement;
   private thumbEl!: HTMLElement;
@@ -21,6 +30,9 @@ export class Slider extends HTMLElement {
     return this.currentValue.toString();
   }
 
+  /**
+   * Sets the current value, clamping and snapping it to the nearest step.
+   */
   set value(val: string) {
     this.currentValue = snapToStep(
       clamp(Number(val), this.min, this.max),

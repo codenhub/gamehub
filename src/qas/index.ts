@@ -1,6 +1,10 @@
 import AudioManager from "../_core/audio";
 import { showAlert } from "../_core/utils/alerts";
 
+/**
+ * Entry point for the QA/Support page.
+ * Provides manual triggers for alerts and audio to verify functionality.
+ */
 document.addEventListener("DOMContentLoaded", () => {
   const successBtn = document.getElementById("success-alert-btn");
   const errorBtn = document.getElementById("error-alert-btn");

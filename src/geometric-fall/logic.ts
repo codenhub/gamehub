@@ -1,6 +1,7 @@
 export type PieceMatrix = number[][];
 
 export let ROWS = 20;
+
 export let COLS = 10;
 
 export const setGridDimensions = (cols: number, rows: number) => {
@@ -53,6 +54,9 @@ export function createEmptyGrid(
   return Array.from({ length: rows }, () => Array(cols).fill(0));
 }
 
+/**
+ * Rotates a piece matrix 90 degrees clockwise.
+ */
 export function rotatePiece(piece: PieceMatrix): PieceMatrix {
   const rows = piece.length;
   const cols = piece[0].length;
