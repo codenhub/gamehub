@@ -4,6 +4,7 @@ import {
   COLS,
   TETROMINOES,
   rotatePiece,
+  rotatePieceLeft,
   isValidMove as checkMove,
   clearLines as computeClearedLines,
   createEmptyGrid,
@@ -403,7 +404,7 @@ export class GeometricFallGame {
   }
 
   public rotateLeft() {
-    const rotated = rotatePiece(rotatePiece(rotatePiece(this.currentPiece)));
+    const rotated = rotatePieceLeft(this.currentPiece);
     if (this.isValidMove(rotated, this.currentX, this.currentY)) {
       this.currentPiece = rotated;
       this.draw();

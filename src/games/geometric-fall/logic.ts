@@ -66,6 +66,21 @@ export function rotatePiece(piece: PieceMatrix): PieceMatrix {
   return rotated;
 }
 
+/**
+ * Rotates a piece matrix 90 degrees counterclockwise.
+ */
+export function rotatePieceLeft(piece: PieceMatrix): PieceMatrix {
+  const rows = piece.length;
+  const cols = piece[0].length;
+  const rotated: PieceMatrix = Array.from({ length: cols }, () => Array(rows).fill(0));
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      rotated[cols - 1 - x][y] = piece[y][x];
+    }
+  }
+  return rotated;
+}
+
 interface MoveValidation {
   grid: number[][];
   piece: PieceMatrix;

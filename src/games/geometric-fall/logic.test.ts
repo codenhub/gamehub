@@ -1,5 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { rotatePiece, isValidMove, clearLines, createEmptyGrid, TETROMINOES, ROWS, COLS } from "./logic";
+import {
+  rotatePiece,
+  rotatePieceLeft,
+  isValidMove,
+  clearLines,
+  createEmptyGrid,
+  TETROMINOES,
+  ROWS,
+  COLS,
+} from "./logic";
 
 describe("rotatePiece", () => {
   it("should rotate T-piece clockwise", () => {
@@ -36,6 +45,16 @@ describe("rotatePiece", () => {
     expect(rotatePiece(TETROMINOES.O)).toEqual(TETROMINOES.O);
   });
 
+  it("should rotate T-piece counterclockwise", () => {
+    const rotated = rotatePieceLeft(TETROMINOES.T);
+
+    expect(rotated).toEqual([
+      [0, 1, 0],
+      [1, 1, 0],
+      [0, 1, 0],
+    ]);
+  });
+
   it("should return to original shape after 4 rotations", () => {
     const pieces = Object.values(TETROMINOES);
 
@@ -46,6 +65,13 @@ describe("rotatePiece", () => {
       }
       expect(piece).toEqual(original);
     });
+  });
+
+  it("should match three clockwise rotations", () => {
+    const rotatedLeft = rotatePieceLeft(TETROMINOES.L);
+    const rotatedThreeTimes = rotatePiece(rotatePiece(rotatePiece(TETROMINOES.L)));
+
+    expect(rotatedLeft).toEqual(rotatedThreeTimes);
   });
 
   it("should not mutate the original piece", () => {
