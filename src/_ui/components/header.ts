@@ -1,7 +1,7 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
-import ThemeManager, { THEMES, VALID_THEMES, isValidTheme } from "../../_core/utils/theme";
-import type { Theme } from "../../_core/utils/theme";
+import ThemeManager, { THEMES, VALID_THEMES, isValidTheme } from "../scripts/theme";
+import type { Theme } from "../scripts/theme";
 import type { Slider } from "./slider";
 
 const DEFAULT_MUSIC_VOLUME = "50";

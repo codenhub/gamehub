@@ -1,7 +1,7 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
-import { showAlert } from "../../_core/utils/alerts";
-import ThemeManager from "../../_core/utils/theme";
+import { showAlert } from "../../_ui/scripts/alerts";
+import ThemeManager from "../../_ui/scripts/theme";
 import type { Point } from "../common/types";
 import { GAME_CONFIG } from "./constants";
 import {

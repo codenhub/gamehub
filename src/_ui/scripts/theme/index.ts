@@ -1,9 +1,9 @@
-export { VALID_THEMES, THEME_VARIABLES, THEMES, isValidTheme } from "./theme-data";
-export type { Theme, ThemeVariable } from "./theme-data";
+export { VALID_THEMES, THEME_VARIABLES, THEMES, isValidTheme } from "./data";
+export type { Theme, ThemeVariable } from "./data";
 
-import { VALID_THEMES, THEME_VARIABLES, THEMES, isValidTheme } from "./theme-data";
-import type { Theme, ThemeVariable } from "./theme-data";
-import { createStore } from "../storage";
+import { VALID_THEMES, THEME_VARIABLES, THEMES, isValidTheme } from "./data";
+import type { Theme, ThemeVariable } from "./data";
+import { createStore } from "../../../_core/storage";
 
 type ThemeSchema = {
   theme: string;

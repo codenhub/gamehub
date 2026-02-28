@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isValidTheme, VALID_THEMES, THEME_VARIABLES, THEMES } from "./theme-data";
+import { isValidTheme, VALID_THEMES, THEME_VARIABLES, THEMES } from "./data";
 
 describe("isValidTheme", () => {
   it("should accept all valid themes", () => {

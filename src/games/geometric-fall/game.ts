@@ -12,7 +12,7 @@ import {
 } from "./logic";
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
-import ThemeManager from "../../_core/utils/theme";
+import ThemeManager from "../../_ui/scripts/theme";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 

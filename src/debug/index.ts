@@ -1,5 +1,5 @@
 import AudioManager from "../_core/audio";
-import { showAlert } from "../_core/utils/alerts";
+import { showAlert } from "../_ui/scripts/alerts";
 
 /**
  * Entry point for the QA/Support page.
