@@ -97,7 +97,6 @@ export class Header extends HTMLElement {
       const primary = vars["--color-primary"];
       const accent = vars["--color-accent"];
       const bg = vars["--color-background"];
-      console.log(theme, bg, primary, accent);
       const isSelected = currentTheme === theme;
 
       return `
