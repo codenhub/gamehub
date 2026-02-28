@@ -8,13 +8,6 @@ interface AlertOptions {
   duration?: number;
 }
 
-const alertColors = {
-  success: "bg-success text-success-contrast",
-  error: "bg-error text-error-contrast",
-  warning: "bg-warning text-warning-contrast",
-  info: "bg-info text-info-contrast",
-};
-
 function getOrCreateContainer(): HTMLDivElement {
   let container = document.getElementById("global-alert-container") as HTMLDivElement | null;
   if (!container) {
@@ -29,16 +22,17 @@ function getOrCreateContainer(): HTMLDivElement {
 }
 
 function createAlertElement(options: AlertOptions): HTMLDivElement {
+  const { type } = options;
+  const container = document.createElement("div");
   const div = document.createElement("div");
 
-  let classes = "px-4 py-2 pixel-corner-lg-4 shadow-lg text-lg font-medium font-default pointer-events-auto min-w-40 ";
+  container.classList = `bg-${type} p-1 pixel-corner-lg-4`;
+  div.classList = `bg-${type}-light text-${type}-dark px-4 py-2 pixel-corner-lg-4 text-xl font-medium font-default pointer-events-auto min-w-40`;
 
-  classes += alertColors[options.type];
-
-  div.className = classes;
   div.textContent = options.message;
+  container.appendChild(div);
 
-  return div;
+  return container;
 }
 
 function removeAlert(alertElement: HTMLDivElement) {
