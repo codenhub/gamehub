@@ -35,38 +35,29 @@ export class MusicContext extends BaseAudioContext<MusicId> {
   public async play(ease: boolean = true) {
     if (this.playing && this.source) return;
 
-    try {
-      const buffer =
-        this.getBuffer(this.currentTrack) ||
-        (await this.load(this.currentTrack));
-      if (!buffer) return;
+    const buffer = this.getBuffer(this.currentTrack) || (await this.load(this.currentTrack));
+    if (!buffer) return;
 
-      this.stopSource();
+    this.stopSource();
 
-      this.source = this.ctx.createBufferSource();
-      this.source.buffer = buffer;
-      this.source.loop = true;
-      this.source.connect(this.gain);
+    this.source = this.ctx.createBufferSource();
+    this.source.buffer = buffer;
+    this.source.loop = true;
+    this.source.connect(this.gain);
 
-      const currentTime = this.ctx.currentTime;
-      this.gain.gain.cancelScheduledValues(currentTime);
+    const currentTime = this.ctx.currentTime;
+    this.gain.gain.cancelScheduledValues(currentTime);
 
-      if (ease) {
-        this.gain.gain.setValueAtTime(0, currentTime);
-        this.source.start(0);
-        this.gain.gain.linearRampToValueAtTime(
-          this.volume,
-          currentTime + DEFAULT_FADE_DURATION,
-        );
-      } else {
-        this.gain.gain.setValueAtTime(this.volume, currentTime);
-        this.source.start(0);
-      }
-
-      this.playing = true;
-    } catch (error) {
-      console.error("[MusicContext] Error playing music:", error);
+    if (ease) {
+      this.gain.gain.setValueAtTime(0, currentTime);
+      this.source.start(0);
+      this.gain.gain.linearRampToValueAtTime(this.volume, currentTime + DEFAULT_FADE_DURATION);
+    } else {
+      this.gain.gain.setValueAtTime(this.volume, currentTime);
+      this.source.start(0);
     }
+
+    this.playing = true;
   }
 
   private stopSource() {
@@ -91,10 +82,7 @@ export class MusicContext extends BaseAudioContext<MusicId> {
     this.gain.gain.setValueAtTime(this.gain.gain.value, currentTime);
 
     if (ease) {
-      this.gain.gain.linearRampToValueAtTime(
-        0,
-        currentTime + DEFAULT_FADE_DURATION,
-      );
+      this.gain.gain.linearRampToValueAtTime(0, currentTime + DEFAULT_FADE_DURATION);
 
       const sourceToStop = this.source;
       setTimeout(
@@ -124,9 +112,7 @@ export class MusicContext extends BaseAudioContext<MusicId> {
       if (this.playing) {
         await this.pause(ease);
         if (ease) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, DEFAULT_FADE_DURATION * 1000),
-          );
+          await new Promise((resolve) => setTimeout(resolve, DEFAULT_FADE_DURATION * 1000));
         }
       }
       this.currentTrack = id;
@@ -159,20 +145,16 @@ export class SFXContext extends BaseAudioContext<SFXId> {
   }
 
   public async play(id: SFXId) {
-    try {
-      const buffer = this.getBuffer(id) || (await this.load(id));
-      if (!buffer) return;
+    const buffer = this.getBuffer(id) || (await this.load(id));
+    if (!buffer) return;
 
-      const source = this.ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(this.gain);
-      source.start();
+    const source = this.ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(this.gain);
+    source.start();
 
-      source.onended = () => {
-        source.disconnect();
-      };
-    } catch (error) {
-      console.error(`[SFXContext] Error playing "${id}":`, error);
-    }
+    source.onended = () => {
+      source.disconnect();
+    };
   }
 }

@@ -13,8 +13,6 @@ import { GameStoreImpl } from "./game-store";
  * store.set("highScore", 100);
  * store.get("highScore"); // 100
  */
-export function createStore<T extends { [key: string]: unknown }>(
-  namespace: string,
-): GameStore<T> {
+export function createStore<T extends { [key: string]: unknown }>(namespace: string): GameStore<T> {
   return new GameStoreImpl<T>(namespace);
 }

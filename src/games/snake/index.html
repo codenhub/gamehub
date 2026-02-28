@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Snake | GameHub</title>
+    <link rel="stylesheet" href="../../_ui/styles/index.css" />
+    <script type="module" src="../../_ui/scripts/index.ts"></script>
+    <script src="../../_ui/components/index.js" type="module" defer></script>
+    <script src="./index.ts" type="module" defer></script>
+  </head>
+  <body>
+    <gh-header title="Snake" backBtn></gh-header>
+
+    <main class="flex flex-1 size-full justify-center p-4">
+      <section class="flex flex-1 max-w-lg w-full h-auto gap-4 py-4 flex-col items-center">
+        <!-- TOP BAR -->
+        <div class="flex items-center w-full justify-between">
+          <div class="flex gap-2">
+            <button id="play" class="icon-btn">
+              <gh-icon src="/assets/icons/play.webp" width="1rem"></gh-icon>
+            </button>
+            <button id="pause" class="icon-btn hidden">
+              <div class="flex gap-1">
+                <div class="bg-primary-contrast h-4 w-1.5"></div>
+                <div class="bg-primary-contrast h-4 w-1.5"></div>
+              </div>
+            </button>
+            <button id="stop" class="icon-btn hidden">
+              <div class="bg-primary-contrast size-4" aria-label="Stop icon"></div>
+            </button>
+          </div>
+
+          <!-- Scores -->
+          <div class="flex gap-4 text-xs sm:text-sm">
+            <p>
+              Score:
+              <span id="score">0</span>
+            </p>
+            <p>
+              Best:
+              <span id="high-score">0</span>
+            </p>
+          </div>
+        </div>
+        <div class="relative bg-border pixel-corner-lg-4 p-1 w-full aspect-square">
+          <canvas id="game" class="flex size-full pixel-corner-lg-4 bg-foreground"></canvas>
+
+          <!-- Start screen -->
+          <div
+            id="start-screen"
+            class="absolute inset-0 bg-foreground/80 flex flex-col items-center justify-center gap-4 pixel-corner-lg-4 z-20"
+          >
+            <h2>SNAKE GAME</h2>
+            <p>Press play or the "Enter" key to Start</p>
+          </div>
+
+          <!-- Game over screen -->
+          <div
+            id="game-over-screen"
+            class="absolute inset-0 flex-col items-center justify-center gap-2 bg-foreground/80 pixel-corner-lg-4 z-20 hidden"
+          >
+            <h2 class="text-error">GAME OVER</h2>
+            <p class="text-2xl mb-2">
+              Score:
+              <span id="final-score">0</span>
+            </p>
+            <button id="restart-btn" class="primary-btn">Try Again</button>
+          </div>
+
+          <!-- Win screen -->
+          <div
+            id="win-screen"
+            class="absolute inset-0 flex-col items-center justify-center gap-2 bg-foreground/80 pixel-corner-lg-4 z-20 hidden"
+          >
+            <h2 class="text-success">YOU WON!</h2>
+            <p class="text-2xl mb-2">
+              Final Score:
+              <span id="win-score">0</span>
+            </p>
+            <button id="win-restart-btn" class="primary-btn">Play Again</button>
+          </div>
+        </div>
+
+        <!-- Desktop hints -->
+        <div class="hidden sm:flex text-text-secondary">
+          <p>Use Arrow Keys or WASD to move</p>
+        </div>
+        <div class="flex sm:hidden text-text-secondary">
+          <p>Swipe to move</p>
+        </div>
+
+        <!-- Mobile D-Pad -->
+        <div class="flex flex-col items-center gap-2 sm:hidden">
+          <button class="icon-btn size-14 upBtn" aria-label="Move Up">
+            <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
+          </button>
+          <div class="flex gap-2">
+            <button class="icon-btn size-14 leftBtn" aria-label="Move Left">
+              <span class="flex -rotate-90">
+                <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
+              </span>
+            </button>
+            <button class="icon-btn size-14 downBtn" aria-label="Move Down">
+              <span class="flex rotate-180">
+                <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
+              </span>
+            </button>
+            <button class="icon-btn size-14 rightBtn" aria-label="Move Right">
+              <span class="flex rotate-90">
+                <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

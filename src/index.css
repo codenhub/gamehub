@@ -1,4 +1,4 @@
-@reference "./_ui/main.css";
+@reference "./_ui/styles/index.css";
 
 @layer components {
   .game-card {
@@ -23,12 +23,7 @@
       &::after {
         @apply absolute -bottom-2 -left-2 w-full h-20 z-1 blur-xs;
         content: "";
-        background: linear-gradient(
-          10deg,
-          var(--color-neutral-950) 0%,
-          transparent 80%,
-          transparent 100%
-        );
+        background: linear-gradient(10deg, var(--color-neutral-950) 0%, transparent 80%, transparent 100%);
       }
     }
 
