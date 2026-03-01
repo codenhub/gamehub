@@ -1,5 +1,6 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
+import type { Game, GameCallbacks } from "../common/game-types";
 import type { Grid } from "../common/types";
 import { DEFAULT_TILE, TILE_COLORS } from "./constants";
 import {
@@ -20,12 +21,6 @@ type Game2048Schema = {
 
 const store = createStore<Game2048Schema>("2048");
 
-export type GameCallbacks = {
-  onScoreUpdate: (score: number, highScore: number) => void;
-  onGameOver: (finalScore: number) => void;
-  onGameWin: (finalScore: number) => void;
-};
-
 interface GameState {
   grid: Grid;
   score: number;
@@ -38,7 +33,7 @@ interface GameState {
  * Main class for the 2048 game implementation.
  * Manages grid state, user moves, score persistence, and DOM rendering.
  */
-export class Game2048 {
+export class Game2048 implements Game {
   private container: HTMLElement;
   private callbacks: GameCallbacks;
   private state: GameState;
@@ -158,7 +153,7 @@ export class Game2048 {
     if (!this.state.hasReachedWin && hasWon(this.state.grid)) {
       this.state.hasReachedWin = true;
       this.state.isRunning = false;
-      this.callbacks.onGameWin(this.state.score);
+      this.callbacks.onGameWin?.(this.state.score);
 
       AudioManager.playSFX("complete");
       return;

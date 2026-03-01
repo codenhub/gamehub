@@ -13,6 +13,7 @@ import {
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
 import ThemeManager from "../../_ui/scripts/theme";
+import type { Game, GameCallbacks } from "../common/game-types";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 
@@ -33,16 +34,11 @@ const getColors = () => {
   };
 };
 
-export type GameCallbacks = {
-  onScoreUpdate: (score: number, highScore: number) => void;
-  onGameOver: (finalScore: number) => void;
-};
-
 /**
  * Main class for the Geometric Fall game (Tetris-like).
  * Handles the game grid, falling pieces, line clearing, and rendering.
  */
-export class GeometricFallGame {
+export class GeometricFallGame implements Game {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private callbacks: GameCallbacks;
