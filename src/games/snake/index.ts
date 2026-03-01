@@ -41,7 +41,6 @@ function createSnakeSwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
   };
 }
 
-/** Captures the game instance so swipe handlers can call methods on it. */
 let snakeGame: SnakeGame;
 
 createGameShell<SnakeGame>({

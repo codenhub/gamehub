@@ -1,9 +1,5 @@
 import type { GameCallbacks } from "./game-types";
 
-// ---------------------------------------------------------------------------
-// Public types
-// ---------------------------------------------------------------------------
-
 /** States the app-level state machine can be in. */
 export type GameAppState = "stopped" | "playing" | "paused" | "gameover" | "win";
 
@@ -92,10 +88,6 @@ export interface SwipeHandlers {
   touchend: (e: TouchEvent) => void;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function getElement<T extends HTMLElement>(id: string): T | null {
   return document.getElementById(id) as T | null;
 }
@@ -112,27 +104,16 @@ function hide(el: HTMLElement | null) {
   el.classList.remove("flex");
 }
 
-// ---------------------------------------------------------------------------
-// createGameShell
-// ---------------------------------------------------------------------------
-
 /**
  * Creates a fully wired game shell.
  *
- * Handles:
- * - DOM element resolution
- * - State machine (stopped → playing ⇌ paused → gameover / win)
- * - Screen visibility toggling
- * - Keyboard, mobile-button, and swipe input
- * - Game lifecycle (start / pause / resume / stop)
- *
- * Call this inside `DOMContentLoaded` with a game-specific config.
+ * Handles DOM resolution, state machine (stopped → playing ⇌ paused → gameover / win),
+ * screen visibility toggling, keyboard/mobile/swipe input, and game lifecycle.
  */
 export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
   document.addEventListener("DOMContentLoaded", () => {
     const { elements: ids, keyMatchMode = "key", canPause = true } = config;
 
-    // --- Resolve DOM nodes ---------------------------------------------------
     const gameElement = getElement(ids.gameElementId);
     if (!gameElement) {
       console.error(`[GameShell] Game element #${ids.gameElementId} not found`);
@@ -155,7 +136,6 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
     const gameOverScreen = ids.gameOverScreenId ? getElement(ids.gameOverScreenId) : null;
     const winScreen = ids.winScreenId ? getElement(ids.winScreenId) : null;
 
-    // --- Game callbacks ------------------------------------------------------
     const callbacks: GameCallbacks = {
       onScoreUpdate: (score, highScore) => {
         if (scoreEl) scoreEl.innerText = score.toString();
@@ -171,7 +151,6 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
       },
     };
 
-    // --- Create game instance ------------------------------------------------
     let game: TGame;
     try {
       game = config.createGame(gameElement, callbacks);
@@ -180,7 +159,6 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
       return;
     }
 
-    // --- State machine -------------------------------------------------------
     let appState: GameAppState = "stopped";
 
     const setPlayingState = () => {
@@ -194,11 +172,6 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
       hide(playBtn);
       show(pauseBtn);
       show(stopBtn);
-
-      // Force control buttons visible (no 'flex' needed, just un-hidden)
-      if (pauseBtn) pauseBtn.classList.remove("hidden");
-      if (stopBtn) stopBtn.classList.remove("hidden");
-      if (playBtn) playBtn.classList.add("hidden");
 
       hide(startScreen);
       hide(gameOverScreen);
@@ -247,7 +220,6 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
       show(winScreen);
     };
 
-    // --- Button listeners ----------------------------------------------------
     playBtn?.addEventListener("click", setPlayingState);
     pauseBtn?.addEventListener("click", setPausedState);
     stopBtn?.addEventListener("click", setStoppedState);
@@ -255,7 +227,6 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
     restartBtn?.addEventListener("click", setPlayingState);
     winRestartBtn?.addEventListener("click", setPlayingState);
 
-    // --- Mobile button controls ----------------------------------------------
     const controls = config.controls ?? [];
     controls.forEach(({ selector, action }) => {
       if (!selector) return;
@@ -266,7 +237,6 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
       });
     });
 
-    // --- Keyboard controls ---------------------------------------------------
     document.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         if (appState === "playing" && canPause) setPausedState();
@@ -287,7 +257,6 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
       }
     });
 
-    // --- Swipe / touch controls ----------------------------------------------
     if (config.createSwipeHandlers) {
       const handlers = config.createSwipeHandlers({
         getState: () => appState,
