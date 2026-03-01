@@ -130,9 +130,13 @@ export class GeometricFallGame implements Game {
 
       if (oldCols !== COLS || oldRows !== ROWS) {
         const newGrid = createEmptyGrid();
-        for (let y = 0; y < Math.min(oldRows, ROWS); y++) {
-          for (let x = 0; x < Math.min(oldCols, COLS); x++) {
-            if (this.grid[y]?.[x]) newGrid[y][x] = this.grid[y][x];
+        const yOffset = oldRows - ROWS;
+        for (let y = 0; y < oldRows; y++) {
+          const newY = y - yOffset;
+          if (newY >= 0 && newY < ROWS) {
+            for (let x = 0; x < Math.min(oldCols, COLS); x++) {
+              if (this.grid[y]?.[x]) newGrid[newY][x] = this.grid[y][x];
+            }
           }
         }
         this.grid = newGrid;
@@ -151,11 +155,13 @@ export class GeometricFallGame implements Game {
     this.resizeObserver.observe(container);
   }
 
+  private handleThemeChanged = () => {
+    this.draw();
+    if (this.nextPiece && this.previewCtxs.length > 0) this.drawNextPiece();
+  };
+
   private setupThemeListener() {
-    window.addEventListener("theme-changed", () => {
-      this.draw();
-      if (this.nextPiece && this.previewCtxs.length > 0) this.drawNextPiece();
-    });
+    window.addEventListener("theme-changed", this.handleThemeChanged);
   }
 
   private resetGrid() {
@@ -323,7 +329,7 @@ export class GeometricFallGame implements Game {
     return checkMove({ grid: this.grid, piece, x, y });
   }
 
-  private placePiece() {
+  private placePiece(skipSound: boolean = false) {
     for (let y = 0; y < this.currentPiece.length; y++) {
       for (let x = 0; x < this.currentPiece[y].length; x++) {
         if (this.currentPiece[y][x]) {
@@ -339,7 +345,7 @@ export class GeometricFallGame implements Game {
     this.spawnPiece();
     if (!this.isValidMove(this.currentPiece, this.currentX, this.currentY)) {
       this.handleGameOver();
-    } else {
+    } else if (!skipSound) {
       AudioManager.playSFX("place");
     }
   }
@@ -420,7 +426,7 @@ export class GeometricFallGame implements Game {
       this.currentY++;
     }
     AudioManager.playSFX("hit");
-    this.placePiece();
+    this.placePiece(true);
     this.draw();
   }
 
@@ -454,6 +460,7 @@ export class GeometricFallGame implements Game {
   }
 
   public destroy() {
+    window.removeEventListener("theme-changed", this.handleThemeChanged);
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
