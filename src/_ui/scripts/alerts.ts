@@ -44,12 +44,12 @@ function removeAlert(alertElement: HTMLDivElement) {
     opacity: 0,
     duration: 0.4,
     ease: "power1.inOut",
+    onComplete: () => {
+      if (container.contains(alertElement)) {
+        container.removeChild(alertElement);
+      }
+    },
   });
-  setTimeout(() => {
-    if (container.contains(alertElement)) {
-      container.removeChild(alertElement);
-    }
-  }, 400);
 }
 
 export function showAlert(options: AlertOptions) {
