@@ -43,15 +43,7 @@ export class Game2048 implements Game {
     this.container = container;
     this.callbacks = callbacks;
 
-    let savedHighScore = 0;
-    try {
-      const saved = store.get("highScore");
-      if (saved !== null) {
-        savedHighScore = Number.isNaN(saved) ? 0 : saved;
-      }
-    } catch (error) {
-      console.warn("[2048] Failed to load high score:", error);
-    }
+    const savedHighScore = store.get("highScore") ?? 0;
 
     this.state = {
       grid: createEmptyGrid(),

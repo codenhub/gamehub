@@ -83,15 +83,7 @@ export class SnakeGame implements Game {
     }
     this.ctx = context;
 
-    let savedHighScore = 0;
-    try {
-      const saved = store.get("highScore");
-      if (saved !== null) {
-        savedHighScore = Number.isNaN(saved) ? 0 : saved;
-      }
-    } catch (error) {
-      console.warn("[Snake] Failed to load high score:", error);
-    }
+    const savedHighScore = store.get("highScore") ?? 0;
 
     this.state = {
       snake: [],
