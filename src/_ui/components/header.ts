@@ -25,7 +25,11 @@ export class Header extends HTMLElement {
   private abortController: AbortController | null = null;
 
   connectedCallback() {
-    const title = this.getAttribute("title") || "GameHub";
+    const title = (() => {
+      let t = this.getAttribute("title");
+      if (t) this.attributes.removeNamedItem("title");
+      return t || "GameHub";
+    })();
     const backBtn = this.hasAttribute("backBtn");
 
     const musicVolume = volumeStore.get("musicVolume") || DEFAULT_MUSIC_VOLUME;
@@ -34,7 +38,7 @@ export class Header extends HTMLElement {
     const currentTheme = ThemeManager.getTheme();
 
     this.innerHTML = `
-      <header class="flex w-full justify-center p-4 border-b-2 border-border">
+      <header class="flex w-full justify-center p-4 border-b-4 border-border">
         <div class="flex max-w-7xl w-full justify-between">
           <h2 class="font-contrast">${backBtn ? `<a href="/" class="mr-6 cur-pointer">&lt;</a>` : ""}${title}</h2>
           <div class="flex gap-4 items-center">
@@ -100,7 +104,7 @@ export class Header extends HTMLElement {
       const isSelected = currentTheme === theme;
 
       return `
-        <button class="theme-option flex items-center gap-3 w-full p-2 hover:bg-primary/10 rounded-md transition-colors cur-pointer" data-theme="${theme}">
+        <button class="theme-option flex items-center gap-3 w-full p-2 hover:bg-primary/10 transition-colors cur-pointer" data-theme="${theme}">
           <div class="flex flex-col size-8 overflow-hidden ring-4 ring-border">
             <div class="w-full h-1/2" style="background: ${bg}"></div>
             <div class="flex w-full h-1/2">

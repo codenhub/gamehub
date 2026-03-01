@@ -2,6 +2,7 @@ import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
 import { showAlert } from "../../_ui/scripts/alerts";
 import ThemeManager from "../../_ui/scripts/theme";
+import type { Game, GameCallbacks } from "../common/game-types";
 import type { Point } from "../common/types";
 import { GAME_CONFIG } from "./constants";
 import {
@@ -30,12 +31,6 @@ type SnakeSchema = {
 
 const store = createStore<SnakeSchema>("snake");
 
-export type GameCallbacks = {
-  onScoreUpdate: (score: number, highScore: number) => void;
-  onGameOver: (finalScore: number) => void;
-  onGameWin: (finalScore: number) => void;
-};
-
 interface GameState {
   snake: Point[];
   food: Point;
@@ -51,7 +46,7 @@ interface GameState {
  * Main class for the Snake game implementation.
  * Manages game loop, state, rendering, and logic.
  */
-export class SnakeGame {
+export class SnakeGame implements Game {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private callbacks: GameCallbacks;
@@ -88,15 +83,7 @@ export class SnakeGame {
     }
     this.ctx = context;
 
-    let savedHighScore = 0;
-    try {
-      const saved = store.get("highScore");
-      if (saved !== null) {
-        savedHighScore = Number.isNaN(saved) ? 0 : saved;
-      }
-    } catch (error) {
-      console.warn("[Snake] Failed to load high score:", error);
-    }
+    const savedHighScore = store.get("highScore") ?? 0;
 
     this.state = {
       snake: [],
@@ -360,7 +347,7 @@ export class SnakeGame {
 
   private handleGameWin() {
     this.stop();
-    this.callbacks.onGameWin(this.state.score);
+    this.callbacks.onGameWin?.(this.state.score);
 
     AudioManager.playSFX("complete");
   }

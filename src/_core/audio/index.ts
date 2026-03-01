@@ -164,13 +164,21 @@ class AudioManager {
   }
 }
 
+/**
+ * Creates a fresh AudioManager instance.
+ * Useful in tests where you need an isolated manager without touching globalThis.
+ */
+export function createAudioManager(): AudioManager {
+  return new AudioManager();
+}
+
 const AUDIO_MANAGER_KEY = "__AUDIO_MANAGER__" as const;
 
 function getAudioManagerInstance(): AudioManager {
   const global = globalThis as Record<string, unknown>;
 
   if (!global[AUDIO_MANAGER_KEY]) {
-    global[AUDIO_MANAGER_KEY] = new AudioManager();
+    global[AUDIO_MANAGER_KEY] = createAudioManager();
   }
 
   return global[AUDIO_MANAGER_KEY] as AudioManager;
