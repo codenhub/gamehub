@@ -2,6 +2,7 @@ import { readdirSync, existsSync } from "fs";
 import path from "path";
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
+import { addLoaderPlugin, deferCssPlugin } from "./plugins";
 
 /**
  * Auto-discovers game entry points by scanning src/games/\*\/index.html.
@@ -33,5 +34,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [tailwindcss()],
+  // Loader is registered before defer-css so its <style> is in the DOM
+  // before CSS deferral runs (defer-css only targets <link> tags with href).
+  plugins: [tailwindcss(), addLoaderPlugin(), deferCssPlugin()],
 });
