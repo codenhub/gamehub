@@ -1,5 +1,7 @@
 import type { Plugin } from "vite";
 
+const STYLESHEET_RE = /<link\s+rel="stylesheet"((?=[^>]*\shref=)[^>]*?)\/?>/g;
+
 export default function deferCssPlugin(): Plugin {
   return {
     name: "vite-plugin-defer-css",
@@ -8,8 +10,8 @@ export default function deferCssPlugin(): Plugin {
       order: "post",
       handler(html: string) {
         let noscript = "";
-        const transformed = html.replace(/<link rel="stylesheet"([^>]*)>/g, (_, attrs: string) => {
-          noscript += `<link rel="stylesheet"${attrs}>\n`;
+        const transformed = html.replace(STYLESHEET_RE, (_, attrs: string) => {
+          noscript += `    <link rel="stylesheet"${attrs}>\n`;
 
           return `<link rel="preload" as="style"${attrs} onload="this.onload=null;this.rel='stylesheet'">`;
         });
@@ -18,7 +20,7 @@ export default function deferCssPlugin(): Plugin {
           return transformed;
         }
 
-        return transformed.replace("</head>", `<noscript>\n${noscript}</noscript>\n</head>`);
+        return transformed.replace("</head>", `  <noscript>\n${noscript}  </noscript>\n  </head>`);
       },
     },
   };

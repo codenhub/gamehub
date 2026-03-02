@@ -34,5 +34,7 @@ export default defineConfig({
       },
     },
   },
+  // Loader is registered before defer-css so its <style> is in the DOM
+  // before CSS deferral runs (defer-css only targets <link> tags with href).
   plugins: [tailwindcss(), addLoaderPlugin(), deferCssPlugin()],
 });

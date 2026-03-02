@@ -31,17 +31,18 @@ const LOADER_STYLES = `
   }
 `;
 
-const LOADER_HTML = `
-  <div id="page-loader">
+const LOADER_BODY = `
+  <div id="page-loader" role="status" aria-label="Loading">
     <div class="spinner"></div>
   </div>
-  <style>${LOADER_STYLES}</style>
   <script>
     window.addEventListener("load", function () {
-      var loader = document.getElementById("page-loader");
+      const loader = document.getElementById("page-loader");
       if (!loader) return;
       loader.classList.add("hidden");
+      const fallback = setTimeout(function () { loader.remove(); }, 500);
       loader.addEventListener("transitionend", function () {
+        clearTimeout(fallback);
         loader.remove();
       });
     });
@@ -55,7 +56,8 @@ export default function addLoaderPlugin(): Plugin {
     transformIndexHtml: {
       order: "post",
       handler(html: string) {
-        return html.replace("<body>", `<body>${LOADER_HTML}`);
+        const withStyle = html.replace("</head>", `<style>${LOADER_STYLES}</style>\n</head>`);
+        return withStyle.replace(/<body([^>]*)>/, `<body$1>${LOADER_BODY}`);
       },
     },
   };
