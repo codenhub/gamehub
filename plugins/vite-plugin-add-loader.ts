@@ -35,6 +35,11 @@ const LOADER_BODY = `
   <div id="page-loader" role="status" aria-label="Loading">
     <div class="spinner"></div>
   </div>
+  <noscript>
+    <style>
+      #page-loader { display: none !important; }
+    </style>
+  </noscript>
   <script>
     window.addEventListener("load", function () {
       const loader = document.getElementById("page-loader");

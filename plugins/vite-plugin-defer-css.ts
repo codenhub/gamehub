@@ -1,6 +1,9 @@
 import type { Plugin } from "vite";
 
-const STYLESHEET_RE = /<link\s+rel="stylesheet"((?=[^>]*\shref=)[^>]*?)\/?>/g;
+const STYLESHEET_RE =
+  /<link\b(?=[^>]*\brel\s*=\s*(?:"stylesheet"|'stylesheet'|stylesheet)\b)(?=[^>]*\bhref\s*=)[^>]*\/?\s*>/gi;
+const STYLESHEET_REL_ATTR_RE = /\brel\s*=\s*(?:"stylesheet"|'stylesheet'|stylesheet)\b/i;
+const LINK_TAG_END_RE = /\/?\s*>$/;
 
 export default function deferCssPlugin(): Plugin {
   return {
@@ -10,10 +13,12 @@ export default function deferCssPlugin(): Plugin {
       order: "post",
       handler(html: string) {
         let noscript = "";
-        const transformed = html.replace(STYLESHEET_RE, (_, attrs: string) => {
-          noscript += `    <link rel="stylesheet"${attrs}>\n`;
+        const transformed = html.replace(STYLESHEET_RE, (linkTag: string) => {
+          noscript += `    ${linkTag.replace(LINK_TAG_END_RE, ">")}\n`;
 
-          return `<link rel="preload" as="style"${attrs} onload="this.onload=null;this.rel='stylesheet'">`;
+          return linkTag
+            .replace(STYLESHEET_REL_ATTR_RE, 'rel="preload"')
+            .replace(LINK_TAG_END_RE, ' as="style" onload="this.onload=null;this.rel=\'stylesheet\'">');
         });
 
         if (!noscript) {
