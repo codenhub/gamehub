@@ -22,12 +22,12 @@ const volumeStore = createStore<VolumeSchema>("settings");
  * theme selection, and locale selection.
  *
  * @note On I18n Integration:
- * The `gh-header` component can optionally take a `data-i18n-title`
- * attribute linking to its native `title` attribute. As I18n translates the `title`
+ * The `gh-header` component can optionally take a `data-i18n-header-title`
+ * attribute linking to its `header-title` attribute. As I18n translates the `header-title`
  * attribute, the `attributeChangedCallback` is triggered, automatically updating
  * the internal `#header-title` text.
  *
- * @attr title - The text to display in the header. Defaults to "GameHub".
+ * @attr header-title - The text to display in the header. Defaults to "GameHub".
  * @attr backBtn - If present, displays a back arrow linking to the home page.
  */
 export class Header extends HTMLElement {
@@ -37,11 +37,11 @@ export class Header extends HTMLElement {
   private instanceId: string = Math.random().toString(36).substring(2, 9);
 
   static get observedAttributes(): string[] {
-    return ["title"];
+    return ["header-title"];
   }
 
   connectedCallback() {
-    const titleAttr = this.getAttribute("title");
+    const titleAttr = this.getAttribute("header-title");
     const title = titleAttr || "GameHub";
     const backBtn = this.hasAttribute("backBtn");
 
@@ -121,7 +121,7 @@ export class Header extends HTMLElement {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
-    if (name === "title" && oldValue !== newValue) {
+    if (name === "header-title" && oldValue !== newValue) {
       if (this.titleEl) {
         this.titleEl.textContent = newValue || "GameHub";
       }

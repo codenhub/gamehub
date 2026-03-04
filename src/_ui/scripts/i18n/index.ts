@@ -30,7 +30,7 @@ const VALID_LOCALES: Locale[] = [
 export { LOCALES_ID, VALID_LOCALES, DEFAULT_LOCALE };
 
 const DEFAULT_SELECTOR = "[data-i18n]" as const;
-const TRANSLATABLE_ATTRIBUTES = ["title", "alt", "aria-label"] as const;
+const TRANSLATABLE_ATTRIBUTES = ["title", "alt", "aria-label", "header-title"] as const;
 
 type I18nSchema = {
   locale: LocaleId;
@@ -88,7 +88,7 @@ class I18n extends EventTarget {
     this.keys = new Map<string, string>(Object.entries(localeData));
   }
 
-  private translateDOM = (nodes: Element[] = [document.body]) => {
+  private translateDOM = (nodes: Element[] = [document.documentElement]) => {
     if (this.observer) {
       this.observer.disconnect();
     }
@@ -114,21 +114,24 @@ class I18n extends EventTarget {
       });
     };
 
+    const selectors = [DEFAULT_SELECTOR, ...TRANSLATABLE_ATTRIBUTES.map((attr) => `[data-i18n-${attr}]`)].join(",");
+
     nodes.forEach((targetNode) => {
-      translateElement(targetNode);
+      const elementsToTranslate = new Set<Element>();
 
-      const elements = targetNode.querySelectorAll(DEFAULT_SELECTOR);
-      elements.forEach(translateElement);
+      if (targetNode.matches && targetNode.matches(selectors)) {
+        elementsToTranslate.add(targetNode);
+      }
 
-      TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
-        const attributeKey = `data-i18n-${attribute}`;
-        const attrNodes = targetNode.querySelectorAll(`[${attributeKey}]`);
-        attrNodes.forEach(translateElement);
+      targetNode.querySelectorAll(selectors).forEach((el) => {
+        elementsToTranslate.add(el);
       });
+
+      elementsToTranslate.forEach(translateElement);
     });
 
     if (this.observer) {
-      this.observer.observe(document.body, { childList: true, subtree: true });
+      this.observer.observe(document.documentElement, { childList: true, subtree: true });
     }
   };
 
@@ -136,7 +139,7 @@ class I18n extends EventTarget {
     if (nodes) {
       nodes.forEach((n) => this.pendingNodes.add(n));
     } else {
-      this.pendingNodes.add(document.body);
+      this.pendingNodes.add(document.documentElement);
     }
 
     if (this.translateTimeout) {
@@ -162,6 +165,7 @@ class I18n extends EventTarget {
 
     if (this.currentLocale !== locale) return;
 
+    document.documentElement.lang = locale;
     i18nStore.set("locale", locale);
     this.isReady = true;
     this.translateDOM();
@@ -179,9 +183,9 @@ class I18n extends EventTarget {
       Object.entries(params).forEach(([k, v]) => {
         translation = translation.replaceAll(`{{${k}}}`, String(v));
       });
-    } else {
-      translation = translation.replaceAll("{{year}}", new Date().getFullYear().toString());
     }
+
+    translation = translation.replaceAll("{{year}}", new Date().getFullYear().toString());
 
     return translation;
   }
@@ -209,7 +213,7 @@ class I18n extends EventTarget {
       }
     });
 
-    this.observer.observe(document.body, { childList: true, subtree: true });
+    this.observer.observe(document.documentElement, { childList: true, subtree: true });
   }
 }
 

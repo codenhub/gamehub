@@ -103,6 +103,14 @@ describe("I18n class", () => {
   beforeEach(() => {
     global.document = {
       querySelectorAll: vi.fn().mockReturnValue([]),
+      documentElement: {
+        lang: "",
+        matches: vi.fn().mockReturnValue(false),
+        querySelectorAll: vi.fn().mockReturnValue([]),
+        getAttribute: vi.fn(),
+        setAttribute: vi.fn(),
+        hasAttribute: vi.fn().mockReturnValue(false),
+      },
       body: {
         querySelectorAll: vi.fn().mockReturnValue([]),
         getAttribute: vi.fn(),
@@ -120,6 +128,7 @@ describe("I18n class", () => {
       json: async () => ({
         "test.key": "Translated {{param}}!",
         "missing.param": "Translated {{year}}.",
+        "both.params": "Translated {{param}} in {{year}}!",
       }),
     });
   });
@@ -154,5 +163,12 @@ describe("I18n class", () => {
     const instance = createI18n();
     await instance.init();
     expect(instance.t("non.existent.key")).toBe("non.existent.key");
+  });
+
+  it("should format string with both parameter and year interpolation", async () => {
+    const instance = createI18n();
+    await instance.init();
+    const currentYear = new Date().getFullYear().toString();
+    expect(instance.t("both.params", { param: "value" })).toBe(`Translated value in ${currentYear}!`);
   });
 });
