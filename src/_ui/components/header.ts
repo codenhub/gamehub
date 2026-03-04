@@ -9,6 +9,8 @@ import type { Slider } from "./slider";
 const DEFAULT_MUSIC_VOLUME = "50";
 const DEFAULT_SOUND_VOLUME = "75";
 const DEFAULT_HEADER_TITLE_TOKEN = "app.name=GameHub";
+const SOUND_MENU_ARIA_LABEL = "Toggle sound";
+const THEME_MENU_ARIA_LABEL = "Toggle theme";
 
 type VolumeSchema = {
   musicVolume: string;
@@ -54,13 +56,13 @@ export class Header extends HTMLElement {
     this.innerHTML = `
       <header class="flex w-full justify-center p-4 border-b-4 border-border">
         <div class="flex max-w-7xl w-full justify-between">
-          <h2 class="font-contrast w-fit" id="header-title-container">
+          <h2 class="font-contrast w-fit header-title-container">
             ${backBtn ? `<a href="/" class="mr-6 cur-pointer">&lt;</a>` : ""}
-            <span id="header-title"></span>
+            <span class="header-title"></span>
           </h2>
           <div class="flex gap-4 items-center">
             <label for="sound-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
-              <input type="checkbox" id="sound-menu-${this.instanceId}" class="peer sr-only">
+              <input type="checkbox" id="sound-menu-${this.instanceId}" class="peer sr-only" aria-label="${SOUND_MENU_ARIA_LABEL}">
               <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-6">
                 <div class="pointer-events-auto flex flex-col gap-4">
@@ -91,7 +93,7 @@ export class Header extends HTMLElement {
             </label>
             
             <label for="theme-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
-              <input type="checkbox" id="theme-menu-${this.instanceId}" class="peer sr-only">
+              <input type="checkbox" id="theme-menu-${this.instanceId}" class="peer sr-only" aria-label="${THEME_MENU_ARIA_LABEL}">
               <gh-icon src="/assets/icons/contrast.webp" width="1.5rem" height="1.5rem"></gh-icon>
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-4">
                 <div class="pointer-events-auto flex flex-col gap-1 min-w-48">
@@ -114,7 +116,7 @@ export class Header extends HTMLElement {
       </header>
     `;
 
-    this.titleEl = this.querySelector("#header-title") as HTMLSpanElement | null;
+    this.titleEl = this.querySelector(".header-title") as HTMLSpanElement | null;
     this.updateHeaderTitle();
 
     this.setupListeners(musicVolume, soundVolume);
@@ -144,7 +146,7 @@ export class Header extends HTMLElement {
     }
 
     const parsedTitle = parseI18nValue(rawTitle);
-    if (parsedTitle.type === "key" && parsedTitle.fallback !== null) {
+    if (parsedTitle.type === "key") {
       return I18n.resolve(rawTitle);
     }
 

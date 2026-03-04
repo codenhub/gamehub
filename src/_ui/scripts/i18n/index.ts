@@ -130,7 +130,13 @@ class I18n extends EventTarget {
 
   constructor() {
     super();
-    this.currentLocale = i18nStore.get("locale") || this.getBrowserLocale() || DEFAULT_LOCALE;
+    const persisted = i18nStore.get("locale");
+    if (isValidLocale(persisted)) {
+      this.currentLocale = persisted;
+      return;
+    }
+
+    this.currentLocale = this.getBrowserLocale() || DEFAULT_LOCALE;
   }
 
   private getBrowserLocale(): LocaleId | null {
