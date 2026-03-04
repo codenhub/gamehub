@@ -11,6 +11,7 @@ const DEFAULT_SOUND_VOLUME = "75";
 const DEFAULT_HEADER_TITLE_TOKEN = "app.name=GameHub";
 const SOUND_MENU_ARIA_LABEL = "Toggle sound";
 const THEME_MENU_ARIA_LABEL = "Toggle theme";
+const LOCALE_MENU_ARIA_LABEL = "Toggle locale";
 
 type VolumeSchema = {
   musicVolume: string;
@@ -344,13 +345,15 @@ export class Header extends HTMLElement {
   }
 
   private updateActiveLocaleUI(activeLocaleId: string) {
-    const activeLocale = findLocale(activeLocaleId as Parameters<typeof findLocale>[0]);
-    if (activeLocale) {
-      const localeLabel = this.querySelector(`#locale-menu-${this.instanceId}`)?.closest("label");
-      const icon = localeLabel?.querySelector("img") as HTMLImageElement | undefined;
-      if (icon) {
-        icon.src = activeLocale.icon;
-        icon.alt = activeLocale.name;
+    if (isValidLocale(activeLocaleId)) {
+      const activeLocale = findLocale(activeLocaleId);
+      if (activeLocale) {
+        const localeLabel = this.querySelector(`#locale-menu-${this.instanceId}`)?.closest("label");
+        const icon = localeLabel?.querySelector("img");
+        if (icon instanceof HTMLImageElement) {
+          icon.src = activeLocale.icon;
+          icon.alt = activeLocale.name;
+        }
       }
     }
 
