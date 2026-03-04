@@ -1,5 +1,13 @@
-import { describe, it, expect } from "vitest";
-import { isValidLocale, findLocale, LOCALES_ID, VALID_LOCALES, DEFAULT_LOCALE } from "./index";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+vi.mock("../../../_core/storage", () => ({
+  createStore: () => ({
+    get: vi.fn(),
+    set: vi.fn(),
+  }),
+}));
+
+import { createI18n, isValidLocale, findLocale, LOCALES_ID, VALID_LOCALES, DEFAULT_LOCALE } from "./index";
 
 describe("isValidLocale", () => {
   it("should accept all valid locale IDs", () => {
@@ -88,5 +96,58 @@ describe("DEFAULT_LOCALE", () => {
 
   it("should have a corresponding locale definition", () => {
     expect(findLocale(DEFAULT_LOCALE)).toBeDefined();
+  });
+});
+
+describe("I18n class", () => {
+  beforeEach(() => {
+    global.document = {
+      querySelectorAll: vi.fn().mockReturnValue([]),
+      body: {},
+    } as any;
+    global.MutationObserver = class {
+      observe = vi.fn();
+      disconnect = vi.fn();
+    } as any;
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        "test.key": "Translated {{param}}!",
+        "missing.param": "Translated {{year}}.",
+      }),
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("should initialize correctly", async () => {
+    const instance = createI18n();
+    expect(instance.getIsReady()).toBe(false);
+    expect(instance.getLocale()).toBe(DEFAULT_LOCALE);
+
+    await instance.init();
+    expect(instance.getIsReady()).toBe(true);
+  });
+
+  it("should format string with interpolation", async () => {
+    const instance = createI18n();
+    await instance.init();
+    expect(instance.t("test.key", { param: "value" })).toBe("Translated value!");
+  });
+
+  it("should fallback to generic year interpolation", async () => {
+    const instance = createI18n();
+    await instance.init();
+    const currentYear = new Date().getFullYear().toString();
+    expect(instance.t("missing.param")).toBe(`Translated ${currentYear}.`);
+  });
+
+  it("should return the key if translation is missing", async () => {
+    const instance = createI18n();
+    await instance.init();
+    expect(instance.t("non.existent.key")).toBe("non.existent.key");
   });
 });

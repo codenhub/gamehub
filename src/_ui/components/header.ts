@@ -21,6 +21,12 @@ const volumeStore = createStore<VolumeSchema>("settings");
  * Provides navigation, volume controls for music and SFX,
  * theme selection, and locale selection.
  *
+ * @note On I18n Integration:
+ * The `gh-header` component can optionally take a `data-i18n-title`
+ * attribute linking to its native `title` attribute. As I18n translates the `title`
+ * attribute, the `attributeChangedCallback` is triggered, automatically updating
+ * the internal `#header-title` text.
+ *
  * @attr title - The text to display in the header. Defaults to "GameHub".
  * @attr backBtn - If present, displays a back arrow linking to the home page.
  */
@@ -219,15 +225,19 @@ export class Header extends HTMLElement {
     this.querySelectorAll(".locale-option").forEach((btn) => {
       btn.addEventListener(
         "click",
-        () => {
+        async () => {
           const raw = btn.getAttribute("data-locale");
           if (!isValidLocale(raw)) return;
 
-          I18n.setLocale(raw);
-          this.updateActiveLocaleUI(raw);
+          try {
+            await I18n.setLocale(raw);
+            this.updateActiveLocaleUI(raw);
 
-          const menuToggle = this.querySelector("#locale-menu") as HTMLInputElement;
-          if (menuToggle) menuToggle.checked = false;
+            const menuToggle = this.querySelector("#locale-menu") as HTMLInputElement;
+            if (menuToggle) menuToggle.checked = false;
+          } catch (error) {
+            console.error("[Header] Failed to set locale:", error);
+          }
         },
         { signal },
       );

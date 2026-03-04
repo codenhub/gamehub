@@ -49,6 +49,7 @@ export function findLocale(id: LocaleId): Locale | undefined {
 class I18n extends EventTarget {
   private currentLocale: LocaleId;
   private keys: Map<string, string> = new Map<string, string>();
+  private fallbackKeys: Map<string, string> = new Map<string, string>();
   private isReady: boolean = false;
   private observer: MutationObserver | null = null;
   private translateTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -58,15 +59,32 @@ class I18n extends EventTarget {
     this.currentLocale = i18nStore.get("locale") || DEFAULT_LOCALE;
   }
 
-  private async loadLocale(locale: LocaleId) {
+  private async fetchLocaleData(locale: LocaleId): Promise<Record<string, string>> {
     const path = findLocale(locale)?.path;
-    if (!path) return;
-    const localeData = await fetch(path).then((res) => res.json());
-    if (!localeData) return;
+    if (!path) return {};
+
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch locale ${locale}: ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`[I18n] Error loading locale ${locale}:`, error);
+      return {};
+    }
+  }
+
+  private async loadLocale(locale: LocaleId) {
+    const localeData = await this.fetchLocaleData(locale);
     this.keys = new Map<string, string>(Object.entries(localeData));
   }
 
   private translateDOM = () => {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+
     const elements = document.querySelectorAll(DEFAULT_SELECTOR);
     elements.forEach((element) => {
       const key = element.getAttribute("data-i18n");
@@ -85,6 +103,10 @@ class I18n extends EventTarget {
         }
       });
     });
+
+    if (this.observer) {
+      this.observer.observe(document.body, { childList: true, subtree: true });
+    }
   };
 
   private scheduleTranslateDOM() {
@@ -117,12 +139,24 @@ class I18n extends EventTarget {
     return this.isReady;
   }
 
-  public t(key: string): string {
-    const translation = this.keys.get(key) || key;
-    return translation.replace("{{year}}", new Date().getFullYear().toString());
+  public t(key: string, params?: Record<string, string | number>): string {
+    let translation = this.keys.get(key) ?? this.fallbackKeys.get(key) ?? key;
+
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        translation = translation.replace(new RegExp(`{{${k}}}`, "g"), String(v));
+      });
+    } else {
+      translation = translation.replace(/{{year}}/g, new Date().getFullYear().toString());
+    }
+
+    return translation;
   }
 
   public async init() {
+    const fallbackData = await this.fetchLocaleData(DEFAULT_LOCALE);
+    this.fallbackKeys = new Map<string, string>(Object.entries(fallbackData));
+
     await this.setLocale(this.currentLocale);
 
     // Watch for dynamic DOM changes to translate newly added Light DOM WebComponents.
