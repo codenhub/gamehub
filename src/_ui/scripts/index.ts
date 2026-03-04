@@ -5,8 +5,10 @@
 import AudioManager from "../../_core/audio";
 
 import ThemeManager from "./theme";
+import I18n from "./i18n";
 
 ThemeManager.init();
+I18n.init();
 
 document.addEventListener(
   "click",
