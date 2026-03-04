@@ -34,10 +34,18 @@ const TRANSLATABLE_ATTRIBUTES = ["title", "alt", "aria-label"] as const;
 const I18N_KEY_PATTERN = /^[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)*$/;
 const KEY_FALLBACK_SEPARATOR = "=";
 
-export type ParsedI18nValue = {
+type ParsedI18nKeyValue = {
+  type: "key";
   key: string;
   fallback: string | null;
 };
+
+type ParsedRawI18nValue = {
+  type: "raw";
+  value: string;
+};
+
+export type ParsedI18nValue = ParsedI18nKeyValue | ParsedRawI18nValue;
 
 type ResolveI18nValueOptions = {
   getCurrent: (key: string) => string | undefined;
@@ -76,24 +84,32 @@ export function isValidI18nKey(value: string): boolean {
   return I18N_KEY_PATTERN.test(value);
 }
 
-export function parseI18nValue(value: string): ParsedI18nValue | null {
+export function parseI18nValue(value: string): ParsedI18nValue {
   const separatorIndex = value.indexOf(KEY_FALLBACK_SEPARATOR);
   const hasInlineFallback = separatorIndex >= 0;
 
   const key = hasInlineFallback ? value.slice(0, separatorIndex) : value;
   if (!isValidI18nKey(key)) {
-    return null;
+    return {
+      type: "raw",
+      value,
+    };
   }
 
   const fallback = hasInlineFallback ? value.slice(separatorIndex + 1) : null;
 
   return {
+    type: "key",
     key,
     fallback,
   };
 }
 
 export function resolveI18nValue(parsed: ParsedI18nValue, options: ResolveI18nValueOptions): string {
+  if (parsed.type === "raw") {
+    return parsed.value;
+  }
+
   return options.getCurrent(parsed.key) ?? options.getDefault(parsed.key) ?? parsed.fallback ?? parsed.key;
 }
 
@@ -180,11 +196,11 @@ class I18n extends EventTarget {
   }
 
   private resolveDOMValue(rawValue: string): string {
-    const parsed = parseI18nValue(rawValue);
-    if (!parsed) {
-      return rawValue;
-    }
+    return this.resolve(rawValue);
+  }
 
+  public resolve(rawValue: string): string {
+    const parsed = parseI18nValue(rawValue);
     const resolved = resolveI18nValue(parsed, {
       getCurrent: (key) => this.keys.get(key),
       getDefault: (key) => this.fallbackKeys.get(key),

@@ -1,13 +1,14 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
 import ThemeManager, { THEMES, VALID_THEMES, isValidTheme } from "../scripts/theme";
-import I18n, { findLocale, isValidLocale } from "../scripts/i18n";
+import I18n, { findLocale, isValidLocale, parseI18nValue } from "../scripts/i18n";
 import type { Theme } from "../scripts/theme";
 import type { Locale } from "../scripts/i18n";
 import type { Slider } from "./slider";
 
 const DEFAULT_MUSIC_VOLUME = "50";
 const DEFAULT_SOUND_VOLUME = "75";
+const DEFAULT_HEADER_TITLE_TOKEN = "app.name=GameHub";
 
 type VolumeSchema = {
   musicVolume: string;
@@ -21,19 +22,14 @@ const volumeStore = createStore<VolumeSchema>("settings");
  * Provides navigation, volume controls for music and SFX,
  * theme selection, and locale selection.
  *
- * @note On I18n Integration:
- * The `gh-header` component can optionally take a `data-i18n-header-title`
- * attribute linking to its `header-title` attribute. As I18n translates the `header-title`
- * attribute, the `attributeChangedCallback` is triggered, automatically updating
- * the internal `#header-title` text.
- *
  * @attr header-title - The text to display in the header. Defaults to "GameHub".
  * @attr backBtn - If present, displays a back arrow linking to the home page.
  */
 export class Header extends HTMLElement {
   private abortController: AbortController | null = null;
+  private unsubscribeLocaleChange: (() => void) | null = null;
   private locales: Locale[] = I18n.getLocales();
-  private titleEl: HTMLHeadingElement | null = null;
+  private titleEl: HTMLSpanElement | null = null;
   private instanceId: string = Math.random().toString(36).substring(2, 9);
 
   static get observedAttributes(): string[] {
@@ -41,8 +37,11 @@ export class Header extends HTMLElement {
   }
 
   connectedCallback() {
-    const titleAttr = this.getAttribute("header-title");
-    const title = titleAttr || "GameHub";
+    this.abortController?.abort();
+    this.unsubscribeLocaleChange?.();
+    this.abortController = null;
+    this.unsubscribeLocaleChange = null;
+
     const backBtn = this.hasAttribute("backBtn");
 
     const musicVolume = volumeStore.get("musicVolume") || DEFAULT_MUSIC_VOLUME;
@@ -57,7 +56,7 @@ export class Header extends HTMLElement {
         <div class="flex max-w-7xl w-full justify-between">
           <h2 class="font-contrast w-fit" id="header-title-container">
             ${backBtn ? `<a href="/" class="mr-6 cur-pointer">&lt;</a>` : ""}
-            <span id="header-title">${title}</span>
+            <span id="header-title"></span>
           </h2>
           <div class="flex gap-4 items-center">
             <label for="sound-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
@@ -115,22 +114,49 @@ export class Header extends HTMLElement {
       </header>
     `;
 
-    this.titleEl = this.querySelector("#header-title") as HTMLHeadingElement;
+    this.titleEl = this.querySelector("#header-title") as HTMLSpanElement | null;
+    this.updateHeaderTitle();
 
     this.setupListeners(musicVolume, soundVolume);
+    this.unsubscribeLocaleChange = I18n.onLocaleChange((locale) => {
+      this.updateHeaderTitle();
+      this.updateActiveLocaleUI(locale);
+    });
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (name === "header-title" && oldValue !== newValue) {
-      if (this.titleEl) {
-        this.titleEl.textContent = newValue || "GameHub";
-      }
+      this.updateHeaderTitle();
     }
   }
 
   disconnectedCallback() {
     this.abortController?.abort();
+    this.unsubscribeLocaleChange?.();
     this.abortController = null;
+    this.unsubscribeLocaleChange = null;
+  }
+
+  private resolveHeaderTitle(): string {
+    const rawTitle = this.getAttribute("header-title");
+    if (rawTitle === null) {
+      return I18n.resolve(DEFAULT_HEADER_TITLE_TOKEN);
+    }
+
+    const parsedTitle = parseI18nValue(rawTitle);
+    if (parsedTitle.type === "key" && parsedTitle.fallback !== null) {
+      return I18n.resolve(rawTitle);
+    }
+
+    return rawTitle;
+  }
+
+  private updateHeaderTitle() {
+    if (!this.titleEl) {
+      return;
+    }
+
+    this.titleEl.textContent = this.resolveHeaderTitle();
   }
 
   private buildThemeOptions(currentTheme: Theme): string {
@@ -232,7 +258,6 @@ export class Header extends HTMLElement {
 
           try {
             await I18n.setLocale(raw);
-            this.updateActiveLocaleUI(raw);
 
             const menuToggle = this.querySelector(`#locale-menu-${this.instanceId}`) as HTMLInputElement;
             if (menuToggle) menuToggle.checked = false;
