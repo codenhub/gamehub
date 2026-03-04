@@ -34,6 +34,7 @@ export class Header extends HTMLElement {
   private abortController: AbortController | null = null;
   private locales: Locale[] = I18n.getLocales();
   private titleEl: HTMLHeadingElement | null = null;
+  private instanceId: string = Math.random().toString(36).substring(2, 9);
 
   static get observedAttributes(): string[] {
     return ["title"];
@@ -59,15 +60,15 @@ export class Header extends HTMLElement {
             <span id="header-title">${title}</span>
           </h2>
           <div class="flex gap-4 items-center">
-            <label for="sound-menu" class="relative flex items-center justify-center cur-pointer">
-              <input type="checkbox" id="sound-menu" class="peer sr-only">
+            <label for="sound-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
+              <input type="checkbox" id="sound-menu-${this.instanceId}" class="peer sr-only">
               <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-6">
                 <div class="pointer-events-auto flex flex-col gap-4">
                   <div class="flex items-center gap-4 w-48">
                     <gh-icon src="/assets/icons/music.webp" width="1.5rem" height="1.5rem"></gh-icon>
                     <gh-slider
-                      id="music-volume"
+                      id="music-volume-${this.instanceId}"
                       min="0"
                       max="100"
                       step="10"
@@ -78,7 +79,7 @@ export class Header extends HTMLElement {
                   <div class="flex items-center gap-4 w-48">
                     <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
                     <gh-slider
-                      id="sound-volume"
+                      id="sound-volume-${this.instanceId}"
                       min="0"
                       max="100"
                       step="10"
@@ -90,8 +91,8 @@ export class Header extends HTMLElement {
               </div>
             </label>
             
-            <label for="theme-menu" class="relative flex items-center justify-center cur-pointer">
-              <input type="checkbox" id="theme-menu" class="peer sr-only">
+            <label for="theme-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
+              <input type="checkbox" id="theme-menu-${this.instanceId}" class="peer sr-only">
               <gh-icon src="/assets/icons/contrast.webp" width="1.5rem" height="1.5rem"></gh-icon>
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-4">
                 <div class="pointer-events-auto flex flex-col gap-1 min-w-48">
@@ -100,8 +101,8 @@ export class Header extends HTMLElement {
               </div>
             </label>
 
-            <label for="locale-menu" class="relative flex items-center justify-center cur-pointer">
-              <input type="checkbox" id="locale-menu" class="peer sr-only">
+            <label for="locale-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
+              <input type="checkbox" id="locale-menu-${this.instanceId}" class="peer sr-only">
               <img src="${currentLocale?.icon}" alt="${currentLocale?.name}" class="w-6 object-contain">
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-4">
                 <div class="pointer-events-auto flex flex-col gap-1 min-w-48">
@@ -176,8 +177,8 @@ export class Header extends HTMLElement {
     this.abortController = new AbortController();
     const { signal } = this.abortController;
 
-    const musicVolumeEl = this.querySelector("#music-volume") as Slider | null;
-    const soundVolumeEl = this.querySelector("#sound-volume") as Slider | null;
+    const musicVolumeEl = this.querySelector(`#music-volume-${this.instanceId}`) as Slider | null;
+    const soundVolumeEl = this.querySelector(`#sound-volume-${this.instanceId}`) as Slider | null;
 
     if (!musicVolumeEl || !soundVolumeEl) {
       console.warn("[Header] Volume controls not found in DOM");
@@ -215,7 +216,7 @@ export class Header extends HTMLElement {
           ThemeManager.setTheme(raw);
           this.updateActiveThemeUI(raw);
 
-          const menuToggle = this.querySelector("#theme-menu") as HTMLInputElement;
+          const menuToggle = this.querySelector(`#theme-menu-${this.instanceId}`) as HTMLInputElement;
           if (menuToggle) menuToggle.checked = false;
         },
         { signal },
@@ -233,7 +234,7 @@ export class Header extends HTMLElement {
             await I18n.setLocale(raw);
             this.updateActiveLocaleUI(raw);
 
-            const menuToggle = this.querySelector("#locale-menu") as HTMLInputElement;
+            const menuToggle = this.querySelector(`#locale-menu-${this.instanceId}`) as HTMLInputElement;
             if (menuToggle) menuToggle.checked = false;
           } catch (error) {
             console.error("[Header] Failed to set locale:", error);
@@ -243,9 +244,9 @@ export class Header extends HTMLElement {
       );
     });
 
-    const soundMenu = this.querySelector("#sound-menu") as HTMLInputElement;
-    const themeMenu = this.querySelector("#theme-menu") as HTMLInputElement;
-    const localeMenu = this.querySelector("#locale-menu") as HTMLInputElement;
+    const soundMenu = this.querySelector(`#sound-menu-${this.instanceId}`) as HTMLInputElement;
+    const themeMenu = this.querySelector(`#theme-menu-${this.instanceId}`) as HTMLInputElement;
+    const localeMenu = this.querySelector(`#locale-menu-${this.instanceId}`) as HTMLInputElement;
     const soundLabel = soundMenu?.closest("label");
     const themeLabel = themeMenu?.closest("label");
     const localeLabel = localeMenu?.closest("label");
@@ -318,7 +319,7 @@ export class Header extends HTMLElement {
   private updateActiveLocaleUI(activeLocaleId: string) {
     const activeLocale = findLocale(activeLocaleId as Parameters<typeof findLocale>[0]);
     if (activeLocale) {
-      const localeLabel = this.querySelector("#locale-menu")?.closest("label");
+      const localeLabel = this.querySelector(`#locale-menu-${this.instanceId}`)?.closest("label");
       const icon = localeLabel?.querySelector("img") as HTMLImageElement | undefined;
       if (icon) {
         icon.src = activeLocale.icon;

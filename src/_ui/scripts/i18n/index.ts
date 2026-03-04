@@ -39,7 +39,7 @@ type I18nSchema = {
 const i18nStore = createStore<I18nSchema>("settings");
 
 export function isValidLocale(value: unknown): value is LocaleId {
-  return typeof value === "string" && LOCALES_ID.includes(value as LocaleId);
+  return typeof value === "string" && (LOCALES_ID as readonly string[]).includes(value);
 }
 
 export function findLocale(id: LocaleId): Locale | undefined {
@@ -50,6 +50,8 @@ class I18n extends EventTarget {
   private currentLocale: LocaleId;
   private keys: Map<string, string> = new Map<string, string>();
   private fallbackKeys: Map<string, string> = new Map<string, string>();
+  private cache: Map<LocaleId, Record<string, string>> = new Map();
+  private pendingNodes = new Set<Element>();
   private isReady: boolean = false;
   private observer: MutationObserver | null = null;
   private translateTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -63,12 +65,18 @@ class I18n extends EventTarget {
     const path = findLocale(locale)?.path;
     if (!path) return {};
 
+    if (this.cache.has(locale)) {
+      return this.cache.get(locale)!;
+    }
+
     try {
       const response = await fetch(path);
       if (!response.ok) {
         throw new Error(`Failed to fetch locale ${locale}: ${response.statusText}`);
       }
-      return await response.json();
+      const data = await response.json();
+      this.cache.set(locale, data);
+      return data;
     } catch (error) {
       console.error(`[I18n] Error loading locale ${locale}:`, error);
       return {};
@@ -80,27 +88,42 @@ class I18n extends EventTarget {
     this.keys = new Map<string, string>(Object.entries(localeData));
   }
 
-  private translateDOM = () => {
+  private translateDOM = (nodes: Element[] = [document.body]) => {
     if (this.observer) {
       this.observer.disconnect();
     }
 
-    const elements = document.querySelectorAll(DEFAULT_SELECTOR);
-    elements.forEach((element) => {
+    const translateElement = (element: Element) => {
       const key = element.getAttribute("data-i18n");
       if (key) {
-        element.textContent = this.t(key);
-      }
-    });
-
-    TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
-      const attributeKey = `data-i18n-${attribute}`;
-      const nodes = document.querySelectorAll(`[${attributeKey}]`);
-      nodes.forEach((node) => {
-        const key = node.getAttribute(attributeKey);
-        if (key) {
-          node.setAttribute(attribute, this.t(key));
+        const translated = this.t(key);
+        if (element.textContent !== translated) {
+          element.textContent = translated;
         }
+      }
+
+      TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
+        const attributeKey = `data-i18n-${attribute}`;
+        const attrKey = element.getAttribute(attributeKey);
+        if (attrKey) {
+          const translated = this.t(attrKey);
+          if (element.getAttribute(attribute) !== translated) {
+            element.setAttribute(attribute, translated);
+          }
+        }
+      });
+    };
+
+    nodes.forEach((targetNode) => {
+      translateElement(targetNode);
+
+      const elements = targetNode.querySelectorAll(DEFAULT_SELECTOR);
+      elements.forEach(translateElement);
+
+      TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
+        const attributeKey = `data-i18n-${attribute}`;
+        const attrNodes = targetNode.querySelectorAll(`[${attributeKey}]`);
+        attrNodes.forEach(translateElement);
       });
     });
 
@@ -109,12 +132,19 @@ class I18n extends EventTarget {
     }
   };
 
-  private scheduleTranslateDOM() {
+  private scheduleTranslateDOM(nodes?: Element[]) {
+    if (nodes) {
+      nodes.forEach((n) => this.pendingNodes.add(n));
+    } else {
+      this.pendingNodes.add(document.body);
+    }
+
     if (this.translateTimeout) {
       clearTimeout(this.translateTimeout);
     }
     this.translateTimeout = setTimeout(() => {
-      this.translateDOM();
+      this.translateDOM(Array.from(this.pendingNodes));
+      this.pendingNodes.clear();
     }, 10);
   }
 
@@ -127,8 +157,11 @@ class I18n extends EventTarget {
   }
 
   public async setLocale(locale: LocaleId) {
-    await this.loadLocale(locale);
     this.currentLocale = locale;
+    await this.loadLocale(locale);
+
+    if (this.currentLocale !== locale) return;
+
     i18nStore.set("locale", locale);
     this.isReady = true;
     this.translateDOM();
@@ -144,10 +177,10 @@ class I18n extends EventTarget {
 
     if (params) {
       Object.entries(params).forEach(([k, v]) => {
-        translation = translation.replace(new RegExp(`{{${k}}}`, "g"), String(v));
+        translation = translation.replaceAll(`{{${k}}}`, String(v));
       });
     } else {
-      translation = translation.replace(/{{year}}/g, new Date().getFullYear().toString());
+      translation = translation.replaceAll("{{year}}", new Date().getFullYear().toString());
     }
 
     return translation;
@@ -161,15 +194,18 @@ class I18n extends EventTarget {
 
     // Watch for dynamic DOM changes to translate newly added Light DOM WebComponents.
     this.observer = new MutationObserver((mutations) => {
-      let shouldTranslate = false;
+      const addedNodes = new Set<Element>();
       for (const mutation of mutations) {
         if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-          shouldTranslate = true;
-          break;
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              addedNodes.add(node as Element);
+            }
+          });
         }
       }
-      if (shouldTranslate) {
-        this.scheduleTranslateDOM();
+      if (addedNodes.size > 0) {
+        this.scheduleTranslateDOM(Array.from(addedNodes));
       }
     });
 

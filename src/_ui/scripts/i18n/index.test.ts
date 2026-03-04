@@ -103,7 +103,12 @@ describe("I18n class", () => {
   beforeEach(() => {
     global.document = {
       querySelectorAll: vi.fn().mockReturnValue([]),
-      body: {},
+      body: {
+        querySelectorAll: vi.fn().mockReturnValue([]),
+        getAttribute: vi.fn(),
+        setAttribute: vi.fn(),
+        hasAttribute: vi.fn().mockReturnValue(false),
+      },
     } as any;
     global.MutationObserver = class {
       observe = vi.fn();
