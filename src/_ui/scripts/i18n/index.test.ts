@@ -7,7 +7,98 @@ vi.mock("../../../_core/storage", () => ({
   }),
 }));
 
-import { createI18n, isValidLocale, findLocale, LOCALES_ID, VALID_LOCALES, DEFAULT_LOCALE } from "./index";
+import {
+  createI18n,
+  isValidLocale,
+  findLocale,
+  LOCALES_ID,
+  VALID_LOCALES,
+  DEFAULT_LOCALE,
+  isValidI18nKey,
+  parseI18nValue,
+  resolveI18nValue,
+} from "./index";
+
+describe("isValidI18nKey", () => {
+  it("should accept valid dot-notation keys", () => {
+    expect(isValidI18nKey("main.sub.label")).toBe(true);
+    expect(isValidI18nKey("game.2048.title")).toBe(true);
+    expect(isValidI18nKey("app")).toBe(true);
+  });
+
+  it("should reject invalid i18n keys", () => {
+    expect(isValidI18nKey("Some value")).toBe(false);
+    expect(isValidI18nKey("main..label")).toBe(false);
+    expect(isValidI18nKey("main.sub.")).toBe(false);
+    expect(isValidI18nKey("main.sub-label")).toBe(false);
+  });
+});
+
+describe("parseI18nValue", () => {
+  it("should parse plain key values", () => {
+    expect(parseI18nValue("main.sub.label")).toEqual({
+      key: "main.sub.label",
+      fallback: null,
+    });
+  });
+
+  it("should parse key with inline fallback using first equals", () => {
+    expect(parseI18nValue("main.sub.label=fallback=value")).toEqual({
+      key: "main.sub.label",
+      fallback: "fallback=value",
+    });
+  });
+
+  it("should return null when value format is invalid", () => {
+    expect(parseI18nValue("Some value")).toBeNull();
+  });
+});
+
+describe("resolveI18nValue", () => {
+  it("should resolve from current locale first", () => {
+    const parsed = parseI18nValue("main.sub.label=Fallback")!;
+
+    expect(
+      resolveI18nValue(parsed, {
+        getCurrent: () => "Current",
+        getDefault: () => "Default",
+      }),
+    ).toBe("Current");
+  });
+
+  it("should fallback to default locale", () => {
+    const parsed = parseI18nValue("main.sub.label=Fallback")!;
+
+    expect(
+      resolveI18nValue(parsed, {
+        getCurrent: () => undefined,
+        getDefault: () => "Default",
+      }),
+    ).toBe("Default");
+  });
+
+  it("should fallback to inline fallback when key is missing", () => {
+    const parsed = parseI18nValue("main.sub.label=Fallback")!;
+
+    expect(
+      resolveI18nValue(parsed, {
+        getCurrent: () => undefined,
+        getDefault: () => undefined,
+      }),
+    ).toBe("Fallback");
+  });
+
+  it("should fallback to key when plain key is missing", () => {
+    const parsed = parseI18nValue("main.sub.label")!;
+
+    expect(
+      resolveI18nValue(parsed, {
+        getCurrent: () => undefined,
+        getDefault: () => undefined,
+      }),
+    ).toBe("main.sub.label");
+  });
+});
 
 describe("isValidLocale", () => {
   it("should accept all valid locale IDs", () => {
@@ -171,6 +262,22 @@ describe("I18n class", () => {
     await instance.init();
     const currentYear = new Date().getFullYear().toString();
     expect(instance.t("both.params", { param: "value" })).toBe(`Translated value in ${currentYear}!`);
+  });
+
+  it("should allow locale change subscriptions with unsubscribe", async () => {
+    const instance = createI18n();
+    await instance.init();
+
+    const callback = vi.fn();
+    const unsubscribe = instance.onLocaleChange(callback);
+
+    await instance.setLocale("pt-BR");
+    expect(callback).toHaveBeenCalledWith("pt-BR");
+
+    unsubscribe();
+    await instance.setLocale("en-US");
+
+    expect(callback).toHaveBeenCalledTimes(1);
   });
 
   describe("Browser Locale Detection", () => {

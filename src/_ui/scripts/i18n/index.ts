@@ -30,13 +30,72 @@ const VALID_LOCALES: Locale[] = [
 export { LOCALES_ID, VALID_LOCALES, DEFAULT_LOCALE };
 
 const DEFAULT_SELECTOR = "[data-i18n]" as const;
-const TRANSLATABLE_ATTRIBUTES = ["title", "alt", "aria-label", "header-title"] as const;
+const TRANSLATABLE_ATTRIBUTES = ["title", "alt", "aria-label"] as const;
+const I18N_KEY_PATTERN = /^[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)*$/;
+const KEY_FALLBACK_SEPARATOR = "=";
+
+export type ParsedI18nValue = {
+  key: string;
+  fallback: string | null;
+};
+
+type ResolveI18nValueOptions = {
+  getCurrent: (key: string) => string | undefined;
+  getDefault: (key: string) => string | undefined;
+};
+
+type LocaleChangedDetail = {
+  locale: LocaleId;
+};
 
 type I18nSchema = {
   locale: LocaleId;
 };
 
 const i18nStore = createStore<I18nSchema>("settings");
+
+function isCustomElementHost(element: Element): boolean {
+  return element.tagName.includes("-");
+}
+
+function isInsideCustomElementTree(element: Element): boolean {
+  let current: Element | null = element;
+
+  while (current) {
+    if (isCustomElementHost(current)) {
+      return true;
+    }
+
+    current = current.parentElement;
+  }
+
+  return false;
+}
+
+export function isValidI18nKey(value: string): boolean {
+  return I18N_KEY_PATTERN.test(value);
+}
+
+export function parseI18nValue(value: string): ParsedI18nValue | null {
+  const separatorIndex = value.indexOf(KEY_FALLBACK_SEPARATOR);
+  const hasInlineFallback = separatorIndex >= 0;
+
+  const key = hasInlineFallback ? value.slice(0, separatorIndex) : value;
+  if (!isValidI18nKey(key)) {
+    return null;
+  }
+
+  const fallback = hasInlineFallback ? value.slice(separatorIndex + 1) : null;
+
+  return {
+    key,
+    fallback,
+  };
+}
+
+export function resolveI18nValue(parsed: ParsedI18nValue, options: ResolveI18nValueOptions): string {
+  return options.getCurrent(parsed.key) ?? options.getDefault(parsed.key) ?? parsed.fallback ?? parsed.key;
+}
 
 export function isValidLocale(value: unknown): value is LocaleId {
   return typeof value === "string" && (LOCALES_ID as readonly string[]).includes(value);
@@ -51,10 +110,7 @@ class I18n extends EventTarget {
   private keys: Map<string, string> = new Map<string, string>();
   private fallbackKeys: Map<string, string> = new Map<string, string>();
   private cache: Map<LocaleId, Record<string, string>> = new Map();
-  private pendingNodes = new Set<Element>();
   private isReady: boolean = false;
-  private observer: MutationObserver | null = null;
-  private translateTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     super();
@@ -111,15 +167,37 @@ class I18n extends EventTarget {
     this.keys = new Map<string, string>(Object.entries(localeData));
   }
 
-  private translateDOM = (nodes: Element[] = [document.documentElement]) => {
-    if (this.observer) {
-      this.observer.disconnect();
+  private formatTranslation(translation: string, params?: Record<string, string | number>): string {
+    let formattedTranslation = translation;
+
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        formattedTranslation = formattedTranslation.replaceAll(`{{${k}}}`, String(v));
+      });
     }
 
+    return formattedTranslation.replaceAll("{{year}}", new Date().getFullYear().toString());
+  }
+
+  private resolveDOMValue(rawValue: string): string {
+    const parsed = parseI18nValue(rawValue);
+    if (!parsed) {
+      return rawValue;
+    }
+
+    const resolved = resolveI18nValue(parsed, {
+      getCurrent: (key) => this.keys.get(key),
+      getDefault: (key) => this.fallbackKeys.get(key),
+    });
+
+    return this.formatTranslation(resolved);
+  }
+
+  private translateDOM = (nodes: Element[] = [document.documentElement]) => {
     const translateElement = (element: Element) => {
       const key = element.getAttribute("data-i18n");
-      if (key) {
-        const translated = this.t(key);
+      if (key !== null) {
+        const translated = this.resolveDOMValue(key);
         if (element.textContent !== translated) {
           element.textContent = translated;
         }
@@ -128,8 +206,8 @@ class I18n extends EventTarget {
       TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
         const attributeKey = `data-i18n-${attribute}`;
         const attrKey = element.getAttribute(attributeKey);
-        if (attrKey) {
-          const translated = this.t(attrKey);
+        if (attrKey !== null) {
+          const translated = this.resolveDOMValue(attrKey);
           if (element.getAttribute(attribute) !== translated) {
             element.setAttribute(attribute, translated);
           }
@@ -142,37 +220,19 @@ class I18n extends EventTarget {
     nodes.forEach((targetNode) => {
       const elementsToTranslate = new Set<Element>();
 
-      if (targetNode.matches && targetNode.matches(selectors)) {
+      if (targetNode.matches && targetNode.matches(selectors) && !isInsideCustomElementTree(targetNode)) {
         elementsToTranslate.add(targetNode);
       }
 
       targetNode.querySelectorAll(selectors).forEach((el) => {
-        elementsToTranslate.add(el);
+        if (!isInsideCustomElementTree(el)) {
+          elementsToTranslate.add(el);
+        }
       });
 
       elementsToTranslate.forEach(translateElement);
     });
-
-    if (this.observer) {
-      this.observer.observe(document.documentElement, { childList: true, subtree: true });
-    }
   };
-
-  private scheduleTranslateDOM(nodes?: Element[]) {
-    if (nodes) {
-      nodes.forEach((n) => this.pendingNodes.add(n));
-    } else {
-      this.pendingNodes.add(document.documentElement);
-    }
-
-    if (this.translateTimeout) {
-      clearTimeout(this.translateTimeout);
-    }
-    this.translateTimeout = setTimeout(() => {
-      this.translateDOM(Array.from(this.pendingNodes));
-      this.pendingNodes.clear();
-    }, 10);
-  }
 
   public getLocales(): Locale[] {
     return VALID_LOCALES;
@@ -200,17 +260,26 @@ class I18n extends EventTarget {
   }
 
   public t(key: string, params?: Record<string, string | number>): string {
-    let translation = this.keys.get(key) ?? this.fallbackKeys.get(key) ?? key;
+    const translation = this.keys.get(key) ?? this.fallbackKeys.get(key) ?? key;
 
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        translation = translation.replaceAll(`{{${k}}}`, String(v));
-      });
-    }
+    return this.formatTranslation(translation, params);
+  }
 
-    translation = translation.replaceAll("{{year}}", new Date().getFullYear().toString());
+  public onLocaleChange(callback: (locale: LocaleId) => void): () => void {
+    const listener: EventListener = (event) => {
+      const locale = (event as CustomEvent<LocaleChangedDetail>).detail?.locale;
+      if (!locale) {
+        return;
+      }
 
-    return translation;
+      callback(locale);
+    };
+
+    this.addEventListener(EVENT_LOCALE_CHANGED, listener);
+
+    return () => {
+      this.removeEventListener(EVENT_LOCALE_CHANGED, listener);
+    };
   }
 
   public async init() {
@@ -218,25 +287,6 @@ class I18n extends EventTarget {
     this.fallbackKeys = new Map<string, string>(Object.entries(fallbackData));
 
     await this.setLocale(this.currentLocale);
-
-    // Watch for dynamic DOM changes to translate newly added Light DOM WebComponents.
-    this.observer = new MutationObserver((mutations) => {
-      const addedNodes = new Set<Element>();
-      for (const mutation of mutations) {
-        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              addedNodes.add(node as Element);
-            }
-          });
-        }
-      }
-      if (addedNodes.size > 0) {
-        this.scheduleTranslateDOM(Array.from(addedNodes));
-      }
-    });
-
-    this.observer.observe(document.documentElement, { childList: true, subtree: true });
   }
 }
 
