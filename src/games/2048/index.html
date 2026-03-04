@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>2048 | GameHub</title>
+    <title data-i18n="game.2048.pageTitle">2048 | GameHub</title>
     <link rel="stylesheet" href="../../_ui/styles/index.css" />
     <script type="module" src="../../_ui/scripts/index.ts"></script>
     <script src="../../_ui/components/index.js" type="module" defer></script>
@@ -39,7 +39,7 @@
     </style>
   </head>
   <body>
-    <gh-header title="2048" backBtn></gh-header>
+    <gh-header title="2048" data-i18n-title="game.2048.title" backBtn></gh-header>
 
     <main class="flex flex-1 size-full justify-center p-4">
       <section class="flex flex-1 max-w-lg w-full h-auto gap-4 py-4 flex-col items-center">
@@ -47,11 +47,13 @@
         <div class="flex items-center w-full justify-between">
           <div class="flex gap-4 text-xs sm:text-sm">
             <p>
-              Score:
+              <span data-i18n="common.score">Score</span>
+              :
               <span id="score">0</span>
             </p>
             <p>
-              Best:
+              <span data-i18n="common.best">Best</span>
+              :
               <span id="high-score">0</span>
             </p>
           </div>
@@ -66,9 +68,9 @@
             id="start-screen"
             class="absolute inset-0 bg-foreground/80 flex flex-col items-center justify-center gap-4 pixel-corner-lg-4 z-20"
           >
-            <h2>2048</h2>
-            <p class="text-center">Combine tiles to reach 2048!</p>
-            <button id="start-btn" class="primary-btn">Play</button>
+            <h2 data-i18n="game.2048.title">2048</h2>
+            <p class="text-center" data-i18n="game.2048.startHint">Combine tiles to reach 2048!</p>
+            <button id="start-btn" class="primary-btn" data-i18n="common.play">Play</button>
           </div>
 
           <!-- Game over screen -->
@@ -76,12 +78,13 @@
             id="game-over-screen"
             class="absolute inset-0 flex-col items-center justify-center gap-2 bg-foreground/80 pixel-corner-lg-4 z-20 hidden"
           >
-            <h2 class="text-error">GAME OVER</h2>
+            <h2 class="text-error" data-i18n="common.gameOver">GAME OVER</h2>
             <p class="text-2xl mb-2">
-              Score:
+              <span data-i18n="common.score">Score</span>
+              :
               <span id="final-score">0</span>
             </p>
-            <button id="restart-btn" class="primary-btn">Try Again</button>
+            <button id="restart-btn" class="primary-btn" data-i18n="common.tryAgain">Try Again</button>
           </div>
 
           <!-- Win screen -->
@@ -89,40 +92,41 @@
             id="win-screen"
             class="absolute inset-0 flex-col items-center justify-center gap-2 bg-foreground/80 pixel-corner-lg-4 z-20 hidden"
           >
-            <h2 class="text-success">YOU WON!</h2>
+            <h2 class="text-success" data-i18n="common.youWon">YOU WON!</h2>
             <p class="text-2xl mb-2">
-              Score:
+              <span data-i18n="common.score">Score</span>
+              :
               <span id="win-score">0</span>
             </p>
-            <button id="win-restart-btn" class="primary-btn">Play Again</button>
+            <button id="win-restart-btn" class="primary-btn" data-i18n="common.playAgain">Play Again</button>
           </div>
         </div>
 
         <!-- Hints -->
         <div class="hidden sm:flex text-text-secondary">
-          <p>Use Arrow Keys or WASD to move tiles</p>
+          <p data-i18n="game.2048.desktopHint">Use Arrow Keys or WASD to move tiles</p>
         </div>
         <div class="flex sm:hidden text-text-secondary">
-          <p>Swipe to move tiles</p>
+          <p data-i18n="game.2048.mobileHint">Swipe to move tiles</p>
         </div>
 
         <!-- Mobile D-Pad -->
         <div class="flex flex-col items-center gap-2 sm:hidden">
-          <button class="icon-btn size-14 upBtn" aria-label="Move Up">
+          <button class="icon-btn size-14 upBtn" aria-label="Move Up" data-i18n-aria-label="common.moveUp">
             <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
           </button>
           <div class="flex gap-2">
-            <button class="icon-btn size-14 leftBtn" aria-label="Move Left">
+            <button class="icon-btn size-14 leftBtn" aria-label="Move Left" data-i18n-aria-label="common.moveLeft">
               <span class="flex -rotate-90">
                 <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
               </span>
             </button>
-            <button class="icon-btn size-14 downBtn" aria-label="Move Down">
+            <button class="icon-btn size-14 downBtn" aria-label="Move Down" data-i18n-aria-label="common.moveDown">
               <span class="flex rotate-180">
                 <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
               </span>
             </button>
-            <button class="icon-btn size-14 rightBtn" aria-label="Move Right">
+            <button class="icon-btn size-14 rightBtn" aria-label="Move Right" data-i18n-aria-label="common.moveRight">
               <span class="flex rotate-90">
                 <gh-icon src="/assets/icons/chevron-up.webp" width="2rem"></gh-icon>
               </span>

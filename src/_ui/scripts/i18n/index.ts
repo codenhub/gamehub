@@ -30,6 +30,7 @@ const VALID_LOCALES: Locale[] = [
 export { LOCALES_ID, VALID_LOCALES, DEFAULT_LOCALE };
 
 const DEFAULT_SELECTOR = "[data-i18n]" as const;
+const TRANSLATABLE_ATTRIBUTES = ["title", "alt", "aria-label"] as const;
 
 type I18nSchema = {
   locale: LocaleId;
@@ -71,6 +72,17 @@ class I18n extends EventTarget {
         element.textContent = this.t(key);
       }
     });
+
+    TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
+      const attributeKey = `${DEFAULT_SELECTOR}-${attribute}`;
+      const nodes = document.querySelectorAll(`[${attributeKey}]`);
+      nodes.forEach((node) => {
+        const key = node.getAttribute(attributeKey);
+        if (key) {
+          node.setAttribute(attribute, this.t(key));
+        }
+      });
+    });
   }
 
   public getLocales(): Locale[] {
@@ -86,6 +98,7 @@ class I18n extends EventTarget {
     this.currentLocale = locale;
     i18nStore.set("locale", locale);
     this.isReady = true;
+    this.translateDOM();
     this.dispatchEvent(new CustomEvent(EVENT_LOCALE_CHANGED, { detail: { locale } }));
   }
 
@@ -99,7 +112,6 @@ class I18n extends EventTarget {
 
   public async init() {
     await this.setLocale(this.currentLocale);
-    this.translateDOM();
   }
 }
 
