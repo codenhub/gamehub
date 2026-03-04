@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>GameHub</title>
+    <title data-i18n="app.name">GameHub</title>
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="./_ui/styles/index.css" />
     <link rel="stylesheet" href="./index.css" />
@@ -19,20 +19,24 @@
       <section class="max-w-7xl w-full gap-8 grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 my-8">
         <a href="./games/geometric-fall/" class="game-card">
           <div class="card-container">
-            <img src="/assets/games/geometric-fall.webp" alt="Geometric fall game picture preview" />
-            <h4>Geometric fall</h4>
+            <img
+              src="/assets/games/geometric-fall.webp"
+              alt="Geometric fall game picture preview"
+              data-i18n-alt="home.alt.geometricFall"
+            />
+            <h4 data-i18n="home.game.geometricFall">Geometric fall</h4>
           </div>
         </a>
         <a href="./games/snake/" class="game-card">
           <div class="card-container">
-            <img src="/assets/games/snake.webp" alt="Snake game picture preview" />
-            <h4>Snake</h4>
+            <img src="/assets/games/snake.webp" alt="Snake game picture preview" data-i18n-alt="home.alt.snake" />
+            <h4 data-i18n="home.game.snake">Snake</h4>
           </div>
         </a>
         <a href="./games/2048/" class="game-card">
           <div class="card-container">
-            <img src="/assets/games/2048.webp" alt="2048 game picture preview" />
-            <h4>2048</h4>
+            <img src="/assets/games/2048.webp" alt="2048 game picture preview" data-i18n-alt="home.alt.2048" />
+            <h4 data-i18n="home.game.2048">2048</h4>
           </div>
         </a>
       </section>
