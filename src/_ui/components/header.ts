@@ -103,8 +103,8 @@ export class Header extends HTMLElement {
             </label>
 
             <label for="locale-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
-              <input type="checkbox" id="locale-menu-${this.instanceId}" class="peer sr-only">
-              <img src="${currentLocale?.icon}" alt="${currentLocale?.name}" class="w-6 object-contain">
+              <input type="checkbox" id="locale-menu-${this.instanceId}" class="peer sr-only" aria-label="${LOCALE_MENU_ARIA_LABEL}">
+              <img src="${currentLocale?.icon ?? ""}" alt="${currentLocale?.name ?? "Locale"}" class="w-6 object-contain">
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-4">
                 <div class="pointer-events-auto flex flex-col gap-1 min-w-48">
                   ${this.buildLocaleOptions(currentLocaleId)}
