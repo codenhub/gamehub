@@ -58,7 +58,30 @@ class I18n extends EventTarget {
 
   constructor() {
     super();
-    this.currentLocale = i18nStore.get("locale") || DEFAULT_LOCALE;
+    this.currentLocale = i18nStore.get("locale") || this.getBrowserLocale() || DEFAULT_LOCALE;
+  }
+
+  private getBrowserLocale(): LocaleId | null {
+    if (typeof navigator === "undefined" || !navigator.languages) {
+      return null;
+    }
+
+    for (const rawLang of navigator.languages) {
+      if (!rawLang) continue;
+
+      const lang = rawLang.toLowerCase();
+
+      // Exact match (e.g., "en-us" -> "en-US")
+      const exactMatch = LOCALES_ID.find((id) => id.toLowerCase() === lang);
+      if (exactMatch) return exactMatch;
+
+      // Partial match (e.g., "pt" -> "pt-BR")
+      const baseLang = lang.split("-")[0];
+      const partialMatch = LOCALES_ID.find((id) => id.toLowerCase().startsWith(baseLang));
+      if (partialMatch) return partialMatch as LocaleId;
+    }
+
+    return null;
   }
 
   private async fetchLocaleData(locale: LocaleId): Promise<Record<string, string>> {

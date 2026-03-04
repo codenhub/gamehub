@@ -101,6 +101,7 @@ describe("DEFAULT_LOCALE", () => {
 
 describe("I18n class", () => {
   beforeEach(() => {
+    vi.stubGlobal("navigator", undefined);
     global.document = {
       querySelectorAll: vi.fn().mockReturnValue([]),
       documentElement: {
@@ -170,5 +171,40 @@ describe("I18n class", () => {
     await instance.init();
     const currentYear = new Date().getFullYear().toString();
     expect(instance.t("both.params", { param: "value" })).toBe(`Translated value in ${currentYear}!`);
+  });
+
+  describe("Browser Locale Detection", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    });
+
+    it("should initialize with default locale if navigator is undefined", async () => {
+      vi.stubGlobal("navigator", undefined);
+      const { createI18n } = await import("./index");
+      const instance = createI18n();
+      expect(instance.getLocale()).toBe(DEFAULT_LOCALE);
+    });
+
+    it("should use browser locale if exact match is found", async () => {
+      vi.stubGlobal("navigator", { languages: ["pt-BR", "en-US"] });
+      const { createI18n } = await import("./index");
+      const instance = createI18n();
+      expect(instance.getLocale()).toBe("pt-BR");
+    });
+
+    it("should use browser locale fallback if partial match is found", async () => {
+      vi.stubGlobal("navigator", { languages: ["pt-PT", "fr"] });
+      const { createI18n } = await import("./index");
+      const instance = createI18n();
+      expect(instance.getLocale()).toBe("pt-BR");
+    });
+
+    it("should fallback to default if no matches found", async () => {
+      vi.stubGlobal("navigator", { languages: ["fr-FR", "es-ES"] });
+      const { createI18n } = await import("./index");
+      const instance = createI18n();
+      expect(instance.getLocale()).toBe(DEFAULT_LOCALE);
+    });
   });
 });
