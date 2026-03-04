@@ -257,7 +257,7 @@ class I18n extends EventTarget {
   };
 
   public getLocales(): Locale[] {
-    return VALID_LOCALES;
+    return VALID_LOCALES.map((locale) => ({ ...locale }));
   }
 
   public getLocale(): LocaleId {
@@ -265,6 +265,10 @@ class I18n extends EventTarget {
   }
 
   public async setLocale(locale: LocaleId) {
+    if (this.currentLocale === locale && this.isReady) {
+      return;
+    }
+
     this.currentLocale = locale;
     await this.loadLocale(locale);
 
