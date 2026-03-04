@@ -9,7 +9,7 @@ export type Locale = {
   icon: string;
 };
 
-const EVENT_LOCALE_CHANGED = "locale-changed";
+export const EVENT_LOCALE_CHANGED = "locale-changed";
 const DEFAULT_LOCALE: LocaleId = "en-US";
 const LOCALES_ID = ["en-US", "pt-BR"] as const;
 const VALID_LOCALES: Locale[] = [
@@ -50,6 +50,8 @@ class I18n extends EventTarget {
   private currentLocale: LocaleId;
   private keys: Map<string, string> = new Map<string, string>();
   private isReady: boolean = false;
+  private observer: MutationObserver | null = null;
+  private translateTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     super();
@@ -64,7 +66,7 @@ class I18n extends EventTarget {
     this.keys = new Map<string, string>(Object.entries(localeData));
   }
 
-  private translateDOM() {
+  private translateDOM = () => {
     const elements = document.querySelectorAll(DEFAULT_SELECTOR);
     elements.forEach((element) => {
       const key = element.getAttribute("data-i18n");
@@ -74,7 +76,7 @@ class I18n extends EventTarget {
     });
 
     TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
-      const attributeKey = `${DEFAULT_SELECTOR}-${attribute}`;
+      const attributeKey = `data-i18n-${attribute}`;
       const nodes = document.querySelectorAll(`[${attributeKey}]`);
       nodes.forEach((node) => {
         const key = node.getAttribute(attributeKey);
@@ -83,6 +85,15 @@ class I18n extends EventTarget {
         }
       });
     });
+  };
+
+  private scheduleTranslateDOM() {
+    if (this.translateTimeout) {
+      clearTimeout(this.translateTimeout);
+    }
+    this.translateTimeout = setTimeout(() => {
+      this.translateDOM();
+    }, 10);
   }
 
   public getLocales(): Locale[] {
@@ -107,11 +118,28 @@ class I18n extends EventTarget {
   }
 
   public t(key: string): string {
-    return this.keys.get(key) || key;
+    const translation = this.keys.get(key) || key;
+    return translation.replace("{{year}}", new Date().getFullYear().toString());
   }
 
   public async init() {
     await this.setLocale(this.currentLocale);
+
+    // Watch for dynamic DOM changes to translate newly added Light DOM WebComponents.
+    this.observer = new MutationObserver((mutations) => {
+      let shouldTranslate = false;
+      for (const mutation of mutations) {
+        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+          shouldTranslate = true;
+          break;
+        }
+      }
+      if (shouldTranslate) {
+        this.scheduleTranslateDOM();
+      }
+    });
+
+    this.observer.observe(document.body, { childList: true, subtree: true });
   }
 }
 

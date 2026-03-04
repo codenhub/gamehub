@@ -27,13 +27,15 @@ const volumeStore = createStore<VolumeSchema>("settings");
 export class Header extends HTMLElement {
   private abortController: AbortController | null = null;
   private locales: Locale[] = I18n.getLocales();
+  private titleEl: HTMLHeadingElement | null = null;
+
+  static get observedAttributes(): string[] {
+    return ["title"];
+  }
 
   connectedCallback() {
-    const title = (() => {
-      let t = this.getAttribute("title");
-      if (t) this.attributes.removeNamedItem("title");
-      return t || "GameHub";
-    })();
+    const titleAttr = this.getAttribute("title");
+    const title = titleAttr || "GameHub";
     const backBtn = this.hasAttribute("backBtn");
 
     const musicVolume = volumeStore.get("musicVolume") || DEFAULT_MUSIC_VOLUME;
@@ -46,7 +48,10 @@ export class Header extends HTMLElement {
     this.innerHTML = `
       <header class="flex w-full justify-center p-4 border-b-4 border-border">
         <div class="flex max-w-7xl w-full justify-between">
-          <h2 class="font-contrast">${backBtn ? `<a href="/" class="mr-6 cur-pointer">&lt;</a>` : ""}${title}</h2>
+          <h2 class="font-contrast w-fit" id="header-title-container">
+            ${backBtn ? `<a href="/" class="mr-6 cur-pointer">&lt;</a>` : ""}
+            <span id="header-title">${title}</span>
+          </h2>
           <div class="flex gap-4 items-center">
             <label for="sound-menu" class="relative flex items-center justify-center cur-pointer">
               <input type="checkbox" id="sound-menu" class="peer sr-only">
@@ -103,7 +108,17 @@ export class Header extends HTMLElement {
       </header>
     `;
 
+    this.titleEl = this.querySelector("#header-title") as HTMLHeadingElement;
+
     this.setupListeners(musicVolume, soundVolume);
+  }
+
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+    if (name === "title" && oldValue !== newValue) {
+      if (this.titleEl) {
+        this.titleEl.textContent = newValue || "GameHub";
+      }
+    }
   }
 
   disconnectedCallback() {
