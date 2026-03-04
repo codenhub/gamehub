@@ -198,7 +198,7 @@ class I18n extends EventTarget {
       });
     }
 
-    return formattedTranslation.replaceAll("{{year}}", new Date().getFullYear().toString());
+    return formattedTranslation;
   }
 
   private resolveDOMValue(rawValue: string): string {

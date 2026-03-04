@@ -3,6 +3,7 @@ import I18n from "../scripts/i18n";
 const FOOTER_RIGHTS_RESERVED_TOKEN = "footer.rightsReserved=© {{year}} GameHub. All rights reserved.";
 const FOOTER_MADE_WITH_TOKEN = "footer.madeWith=Made with";
 const FOOTER_BY_TOKEN = "footer.by=by";
+const YEAR_PLACEHOLDER = "{{year}}";
 
 /**
  * Custom element for the application footer.
@@ -53,7 +54,9 @@ class Footer extends HTMLElement {
 
   private updateTranslations() {
     if (this.rightsReservedEl) {
-      this.rightsReservedEl.textContent = I18n.resolve(FOOTER_RIGHTS_RESERVED_TOKEN);
+      const rightsReservedTemplate = I18n.resolve(FOOTER_RIGHTS_RESERVED_TOKEN);
+      const currentYear = new Date().getFullYear().toString();
+      this.rightsReservedEl.textContent = rightsReservedTemplate.replaceAll(YEAR_PLACEHOLDER, currentYear);
     }
 
     if (this.madeWithEl) {

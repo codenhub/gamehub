@@ -359,13 +359,12 @@ describe("I18n class", () => {
     expect(instance.t("test.key", { param: "value" })).toBe("Translated value!");
   });
 
-  it("should fallback to generic year interpolation", async () => {
+  it("should keep unresolved placeholders when params are missing", async () => {
     const instance = createI18n();
 
     await instance.init();
 
-    const currentYear = new Date().getFullYear().toString();
-    expect(instance.t("missing.param")).toBe(`Translated ${currentYear}.`);
+    expect(instance.t("missing.param")).toBe("Translated {{year}}.");
   });
 
   it("should return the key if translation is missing", async () => {
@@ -376,13 +375,12 @@ describe("I18n class", () => {
     expect(instance.t("non.existent.key")).toBe("non.existent.key");
   });
 
-  it("should format string with both parameter and year interpolation", async () => {
+  it("should format string with explicit parameters", async () => {
     const instance = createI18n();
 
     await instance.init();
 
-    const currentYear = new Date().getFullYear().toString();
-    expect(instance.t("both.params", { param: "value" })).toBe(`Translated value in ${currentYear}!`);
+    expect(instance.t("both.params", { param: "value", year: "2026" })).toBe("Translated value in 2026!");
   });
 
   it("should allow locale change subscriptions with unsubscribe", async () => {
@@ -445,14 +443,13 @@ describe("I18n class", () => {
 
   it("should resolve footer-like tokens after locale changes", async () => {
     const instance = createI18n();
-    const currentYear = new Date().getFullYear().toString();
 
     await instance.init();
 
     expect(instance.resolve("footer.madeWith=Made with")).toBe("Made with");
     expect(instance.resolve("footer.by=by")).toBe("by");
     expect(instance.resolve("footer.rightsReserved=© {{year}} GameHub. All rights reserved.")).toBe(
-      `© ${currentYear} GameHub. All rights reserved.`,
+      "© {{year}} GameHub. All rights reserved.",
     );
 
     await instance.setLocale("pt-BR");
@@ -460,7 +457,7 @@ describe("I18n class", () => {
     expect(instance.resolve("footer.madeWith=Made with")).toBe("Feito com");
     expect(instance.resolve("footer.by=by")).toBe("por");
     expect(instance.resolve("footer.rightsReserved=© {{year}} GameHub. All rights reserved.")).toBe(
-      `© ${currentYear} GameHub. Todos os direitos reservados.`,
+      "© {{year}} GameHub. Todos os direitos reservados.",
     );
   });
 
