@@ -1,5 +1,5 @@
 import AudioManager from "../_core/audio";
-import { showAlert } from "../_ui/scripts/alerts";
+import { showAlert } from "../_ui/scripts/alert";
 
 /**
  * Entry point for the QA/Support page.
@@ -12,19 +12,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const infoBtn = document.getElementById("info-alert-btn");
 
   successBtn?.addEventListener("click", () => {
-    showAlert({ message: "Success!", type: "success" });
+    showAlert({ message: "Success!", type: "success", hasIcon: true, isDismissable: true });
   });
 
   errorBtn?.addEventListener("click", () => {
-    showAlert({ message: "Error!", type: "error" });
+    showAlert({ message: "Error!", type: "error", hasIcon: true, isDismissable: true });
   });
 
   warningBtn?.addEventListener("click", () => {
-    showAlert({ message: "Warning!", type: "warning" });
+    showAlert({ message: "Warning!", type: "warning", hasIcon: true, isDismissable: true });
   });
 
   infoBtn?.addEventListener("click", () => {
-    showAlert({ message: "Info!", type: "info" });
+    showAlert({ message: "Info!", type: "info", hasIcon: true, isDismissable: true });
   });
 
   const playSfxBtn = document.getElementById("play-sfx-btn");

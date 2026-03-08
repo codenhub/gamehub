@@ -1,6 +1,6 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
-import { showAlert } from "../../_ui/scripts/alerts";
+import { showAlert } from "../../_ui/scripts/alert";
 import ThemeManager from "../../_ui/scripts/theme";
 import type { Game, GameCallbacks } from "../common/game-types";
 import type { Point } from "../common/types";
