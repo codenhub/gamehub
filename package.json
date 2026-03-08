@@ -13,9 +13,6 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "dependencies": {
-    "gsap": "^3.14.2"
-  },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^25.3.3",

@@ -1,10 +1,14 @@
-import { gsap } from "gsap";
-import { BASE_ANIMATION_VARS } from "./constants";
+import { BASE_ANIMATION_KEYFRAMES, BASE_ANIMATION_OPTIONS } from "./constants";
 
 export function animateIn(element: HTMLDivElement): void {
-  gsap.from(element, { ...BASE_ANIMATION_VARS });
+  element.animate(BASE_ANIMATION_KEYFRAMES, BASE_ANIMATION_OPTIONS);
 }
 
 export function animateOut(element: HTMLDivElement, onComplete: () => void): void {
-  gsap.to(element, { ...BASE_ANIMATION_VARS, onComplete });
+  const keyframes = [...BASE_ANIMATION_KEYFRAMES].reverse();
+  const animation = element.animate(keyframes, BASE_ANIMATION_OPTIONS);
+
+  animation.onfinish = () => {
+    onComplete();
+  };
 }

@@ -30,14 +30,18 @@ export const CLOSE_ICON_SRC = "/assets/icons/close.webp";
 export const INNER_BASE_CLASSES =
   "px-3 py-2 pixel-corner-lg-4 text-xl font-medium font-default pointer-events-auto min-w-40 flex items-center gap-2";
 
-export const ANIMATION_DURATION = 0.4;
-export const ANIMATION_EASE = "power1.inOut";
+export const ANIMATION_DURATION = 400;
+export const ANIMATION_EASING = "ease-in-out";
 
-export const BASE_ANIMATION_VARS = {
-  xPercent: 100,
-  opacity: 0,
+export const BASE_ANIMATION_KEYFRAMES: Keyframe[] = [
+  { transform: "translateX(100%)", opacity: 0 },
+  { transform: "translateX(0)", opacity: 1 },
+];
+
+export const BASE_ANIMATION_OPTIONS: KeyframeAnimationOptions = {
   duration: ANIMATION_DURATION,
-  ease: ANIMATION_EASE,
+  easing: ANIMATION_EASING,
+  fill: "both",
 };
 
 export const CONTAINER_ID = "global-alert-container";
