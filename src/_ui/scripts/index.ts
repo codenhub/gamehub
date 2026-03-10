@@ -5,8 +5,12 @@
 import AudioManager from "../../_core/audio";
 
 import ThemeManager from "./theme";
+import I18n from "./i18n";
 
 ThemeManager.init();
+void I18n.init().catch((error) => {
+  console.error("[UI] Failed to initialize i18n:", error);
+});
 
 document.addEventListener(
   "click",

@@ -1,11 +1,17 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
 import ThemeManager, { THEMES, VALID_THEMES, isValidTheme } from "../scripts/theme";
+import I18n, { findLocale, isValidLocale, parseI18nValue } from "../scripts/i18n";
 import type { Theme } from "../scripts/theme";
+import type { Locale } from "../scripts/i18n";
 import type { Slider } from "./slider";
 
 const DEFAULT_MUSIC_VOLUME = "50";
 const DEFAULT_SOUND_VOLUME = "75";
+const DEFAULT_HEADER_TITLE_TOKEN = "app.name=GameHub";
+const SOUND_MENU_ARIA_LABEL = "Toggle sound";
+const THEME_MENU_ARIA_LABEL = "Toggle theme";
+const LOCALE_MENU_ARIA_LABEL = "Toggle locale";
 
 type VolumeSchema = {
   musicVolume: string;
@@ -16,41 +22,55 @@ const volumeStore = createStore<VolumeSchema>("settings");
 
 /**
  * Custom element for the application header.
- * Provides navigation, volume controls for music and SFX, and theme selection.
+ * Provides navigation, volume controls for music and SFX,
+ * theme selection, and locale selection.
  *
- * @attr title - The text to display in the header. Defaults to "GameHub".
+ * @attr header-title - The text to display in the header. Defaults to "GameHub".
  * @attr backBtn - If present, displays a back arrow linking to the home page.
  */
 export class Header extends HTMLElement {
   private abortController: AbortController | null = null;
+  private unsubscribeLocaleChange: (() => void) | null = null;
+  private locales: Locale[] = I18n.getLocales();
+  private titleEl: HTMLSpanElement | null = null;
+  private instanceId: string = Math.random().toString(36).substring(2, 9);
+
+  static get observedAttributes(): string[] {
+    return ["header-title"];
+  }
 
   connectedCallback() {
-    const title = (() => {
-      let t = this.getAttribute("title");
-      if (t) this.attributes.removeNamedItem("title");
-      return t || "GameHub";
-    })();
+    this.abortController?.abort();
+    this.unsubscribeLocaleChange?.();
+    this.abortController = null;
+    this.unsubscribeLocaleChange = null;
+
     const backBtn = this.hasAttribute("backBtn");
 
     const musicVolume = volumeStore.get("musicVolume") || DEFAULT_MUSIC_VOLUME;
     const soundVolume = volumeStore.get("soundVolume") || DEFAULT_SOUND_VOLUME;
 
     const currentTheme = ThemeManager.getTheme();
+    const currentLocaleId = I18n.getLocale();
+    const currentLocale = findLocale(currentLocaleId);
 
     this.innerHTML = `
       <header class="flex w-full justify-center p-4 border-b-4 border-border">
         <div class="flex max-w-7xl w-full justify-between">
-          <h2 class="font-contrast">${backBtn ? `<a href="/" class="mr-6 cur-pointer">&lt;</a>` : ""}${title}</h2>
+          <h2 class="font-contrast w-fit header-title-container">
+            ${backBtn ? `<a href="/" class="mr-6 cur-pointer">&lt;</a>` : ""}
+            <span class="header-title"></span>
+          </h2>
           <div class="flex gap-4 items-center">
-            <label for="sound-menu" class="relative flex items-center justify-center cur-pointer">
-              <input type="checkbox" id="sound-menu" class="peer sr-only">
+            <label for="sound-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
+              <input type="checkbox" id="sound-menu-${this.instanceId}" class="peer sr-only" aria-label="${SOUND_MENU_ARIA_LABEL}">
               <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-6">
                 <div class="pointer-events-auto flex flex-col gap-4">
                   <div class="flex items-center gap-4 w-48">
                     <gh-icon src="/assets/icons/music.webp" width="1.5rem" height="1.5rem"></gh-icon>
                     <gh-slider
-                      id="music-volume"
+                      id="music-volume-${this.instanceId}"
                       min="0"
                       max="100"
                       step="10"
@@ -61,7 +81,7 @@ export class Header extends HTMLElement {
                   <div class="flex items-center gap-4 w-48">
                     <gh-icon src="/assets/icons/volume-high.webp" width="1.5rem" height="1.5rem"></gh-icon>
                     <gh-slider
-                      id="sound-volume"
+                      id="sound-volume-${this.instanceId}"
                       min="0"
                       max="100"
                       step="10"
@@ -73,12 +93,22 @@ export class Header extends HTMLElement {
               </div>
             </label>
             
-            <label for="theme-menu" class="relative flex items-center justify-center cur-pointer">
-              <input type="checkbox" id="theme-menu" class="peer sr-only">
+            <label for="theme-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
+              <input type="checkbox" id="theme-menu-${this.instanceId}" class="peer sr-only" aria-label="${THEME_MENU_ARIA_LABEL}">
               <gh-icon src="/assets/icons/contrast.webp" width="1.5rem" height="1.5rem"></gh-icon>
               <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-4">
                 <div class="pointer-events-auto flex flex-col gap-1 min-w-48">
                   ${this.buildThemeOptions(currentTheme)}
+                </div>
+              </div>
+            </label>
+
+            <label for="locale-menu-${this.instanceId}" class="relative flex items-center justify-center cur-pointer">
+              <input type="checkbox" id="locale-menu-${this.instanceId}" class="peer sr-only" aria-label="${LOCALE_MENU_ARIA_LABEL}">
+              <img src="${currentLocale?.icon ?? ""}" alt="${currentLocale?.name ?? "Locale"}" class="w-6 object-contain">
+              <div class="scale-0 peer-checked:scale-100 origin-top-right 2xl:origin-top transition-transform duration-200 flex pointer-events-none absolute z-999 -bottom-4 right-0 2xl:right-1/2 2xl:translate-x-1/2 translate-y-full card flex-col gap-4 p-4">
+                <div class="pointer-events-auto flex flex-col gap-1 min-w-48">
+                  ${this.buildLocaleOptions(currentLocaleId)}
                 </div>
               </div>
             </label>
@@ -87,12 +117,49 @@ export class Header extends HTMLElement {
       </header>
     `;
 
+    this.titleEl = this.querySelector(".header-title") as HTMLSpanElement | null;
+    this.updateHeaderTitle();
+
     this.setupListeners(musicVolume, soundVolume);
+    this.unsubscribeLocaleChange = I18n.onLocaleChange((locale) => {
+      this.updateHeaderTitle();
+      this.updateActiveLocaleUI(locale);
+    });
+  }
+
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+    if (name === "header-title" && oldValue !== newValue) {
+      this.updateHeaderTitle();
+    }
   }
 
   disconnectedCallback() {
     this.abortController?.abort();
+    this.unsubscribeLocaleChange?.();
     this.abortController = null;
+    this.unsubscribeLocaleChange = null;
+  }
+
+  private resolveHeaderTitle(): string {
+    const rawTitle = this.getAttribute("header-title");
+    if (rawTitle === null) {
+      return I18n.resolve(DEFAULT_HEADER_TITLE_TOKEN);
+    }
+
+    const parsedTitle = parseI18nValue(rawTitle);
+    if (parsedTitle.type === "key") {
+      return I18n.resolve(rawTitle);
+    }
+
+    return rawTitle;
+  }
+
+  private updateHeaderTitle() {
+    if (!this.titleEl) {
+      return;
+    }
+
+    this.titleEl.textContent = this.resolveHeaderTitle();
   }
 
   private buildThemeOptions(currentTheme: Theme): string {
@@ -119,12 +186,28 @@ export class Header extends HTMLElement {
     }).join("");
   }
 
+  private buildLocaleOptions(currentLocaleId: string): string {
+    return this.locales
+      .map((locale) => {
+        const isSelected = locale.id === currentLocaleId;
+
+        return `
+        <button class="locale-option flex items-center gap-3 w-full p-2 hover:bg-primary/10 transition-colors cur-pointer" data-locale="${locale.id}">
+          <img src="${locale.icon}" alt="${locale.name}" class="size-6 object-contain">
+          <span class="text-xl ${isSelected ? "font-bold text-primary" : "font-normal text-text"} flex-1 text-left">${locale.name}</span>
+          ${isSelected ? `<div class="size-2 bg-primary active-indicator"></div>` : ""}
+        </button>
+      `;
+      })
+      .join("");
+  }
+
   private setupListeners(musicVolume: string, soundVolume: string) {
     this.abortController = new AbortController();
     const { signal } = this.abortController;
 
-    const musicVolumeEl = this.querySelector("#music-volume") as Slider | null;
-    const soundVolumeEl = this.querySelector("#sound-volume") as Slider | null;
+    const musicVolumeEl = this.querySelector(`#music-volume-${this.instanceId}`) as Slider | null;
+    const soundVolumeEl = this.querySelector(`#sound-volume-${this.instanceId}`) as Slider | null;
 
     if (!musicVolumeEl || !soundVolumeEl) {
       console.warn("[Header] Volume controls not found in DOM");
@@ -162,36 +245,62 @@ export class Header extends HTMLElement {
           ThemeManager.setTheme(raw);
           this.updateActiveThemeUI(raw);
 
-          const menuToggle = this.querySelector("#theme-menu") as HTMLInputElement;
+          const menuToggle = this.querySelector(`#theme-menu-${this.instanceId}`) as HTMLInputElement;
           if (menuToggle) menuToggle.checked = false;
         },
         { signal },
       );
     });
 
-    const soundMenu = this.querySelector("#sound-menu") as HTMLInputElement;
-    const themeMenu = this.querySelector("#theme-menu") as HTMLInputElement;
+    this.querySelectorAll(".locale-option").forEach((btn) => {
+      btn.addEventListener(
+        "click",
+        async () => {
+          const raw = btn.getAttribute("data-locale");
+          if (!isValidLocale(raw)) return;
+
+          try {
+            await I18n.setLocale(raw);
+
+            const menuToggle = this.querySelector(`#locale-menu-${this.instanceId}`) as HTMLInputElement;
+            if (menuToggle) menuToggle.checked = false;
+          } catch (error) {
+            console.error("[Header] Failed to set locale:", error);
+          }
+        },
+        { signal },
+      );
+    });
+
+    const soundMenu = this.querySelector(`#sound-menu-${this.instanceId}`) as HTMLInputElement;
+    const themeMenu = this.querySelector(`#theme-menu-${this.instanceId}`) as HTMLInputElement;
+    const localeMenu = this.querySelector(`#locale-menu-${this.instanceId}`) as HTMLInputElement;
     const soundLabel = soundMenu?.closest("label");
     const themeLabel = themeMenu?.closest("label");
+    const localeLabel = localeMenu?.closest("label");
 
-    // Close one menu when the other opens
-    if (soundMenu && themeMenu) {
-      soundMenu.addEventListener(
+    const menus = [
+      { checkbox: soundMenu, label: soundLabel },
+      { checkbox: themeMenu, label: themeLabel },
+      { checkbox: localeMenu, label: localeLabel },
+    ];
+
+    // Close other menus when one opens
+    menus.forEach(({ checkbox }) => {
+      if (!checkbox) return;
+      checkbox.addEventListener(
         "change",
         () => {
-          if (soundMenu.checked) themeMenu.checked = false;
+          if (!checkbox.checked) return;
+          menus.forEach((other) => {
+            if (other.checkbox && other.checkbox !== checkbox) {
+              other.checkbox.checked = false;
+            }
+          });
         },
         { signal },
       );
-
-      themeMenu.addEventListener(
-        "change",
-        () => {
-          if (themeMenu.checked) soundMenu.checked = false;
-        },
-        { signal },
-      );
-    }
+    });
 
     // Close menus when clicking outside
     document.addEventListener(
@@ -199,14 +308,11 @@ export class Header extends HTMLElement {
       (e) => {
         const target = e.target as Node;
 
-        // Ensure click wasn't inside the labels/menus
-        if (soundMenu?.checked && soundLabel && !soundLabel.contains(target)) {
-          soundMenu.checked = false;
-        }
-
-        if (themeMenu?.checked && themeLabel && !themeLabel.contains(target)) {
-          themeMenu.checked = false;
-        }
+        menus.forEach(({ checkbox, label }) => {
+          if (checkbox?.checked && label && !label.contains(target)) {
+            checkbox.checked = false;
+          }
+        });
       },
       { signal },
     );
@@ -223,6 +329,45 @@ export class Header extends HTMLElement {
         text.classList.toggle("text-primary", isSelected);
         text.classList.toggle("text-text", !isSelected);
         text.classList.toggle("font-semibold", isSelected);
+        text.classList.toggle("font-normal", !isSelected);
+      }
+
+      if (isSelected) {
+        if (!indicator) {
+          const div = document.createElement("div");
+          div.className = "size-2 bg-primary active-indicator";
+          opt.appendChild(div);
+        }
+      } else if (indicator) {
+        indicator.remove();
+      }
+    });
+  }
+
+  private updateActiveLocaleUI(activeLocaleId: string) {
+    if (isValidLocale(activeLocaleId)) {
+      const activeLocale = findLocale(activeLocaleId);
+      if (activeLocale) {
+        const localeLabel = this.querySelector(`#locale-menu-${this.instanceId}`)?.closest("label");
+        const icon = localeLabel?.querySelector("img");
+        if (icon instanceof HTMLImageElement) {
+          icon.src = activeLocale.icon;
+          icon.alt = activeLocale.name;
+        }
+      }
+    }
+
+    // Update option items
+    this.querySelectorAll(".locale-option").forEach((opt) => {
+      const optLocale = opt.getAttribute("data-locale");
+      const isSelected = optLocale === activeLocaleId;
+      const text = opt.querySelector("span");
+      const indicator = opt.querySelector(".active-indicator");
+
+      if (text) {
+        text.classList.toggle("text-primary", isSelected);
+        text.classList.toggle("text-text", !isSelected);
+        text.classList.toggle("font-bold", isSelected);
         text.classList.toggle("font-normal", !isSelected);
       }
 
