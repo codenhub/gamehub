@@ -42,7 +42,7 @@
 @layer base {
   html,
   body {
-    @apply flex flex-col min-h-screen overflow-x-hidden bg-background font-default text-text cur-default;
+    @apply bg-background font-default text-text cur-default flex min-h-screen flex-col overflow-x-hidden;
   }
 
   button,

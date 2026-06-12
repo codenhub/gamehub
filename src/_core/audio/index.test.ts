@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
-import manager from "./index";
+
 import { MusicContext, SFXContext } from "./context";
+import manager from "./index";
 
 // We mock the methods of the contexts directly since they are singletons managed by index.ts
 vi.mock("./context", () => {

@@ -1,6 +1,6 @@
-import { MusicId } from "./music";
-import { SFXId } from "./sfx";
 import { MusicContext, SFXContext } from "./context";
+import type { MusicId } from "./music";
+import type { SFXId } from "./sfx";
 
 type AudioContextCtor = new () => AudioContext;
 
@@ -37,7 +37,7 @@ class AudioManager {
    * This should be triggered by a user interaction to satisfy browser policies.
    */
   private ensureInit() {
-    if (this.initialized && this.ctx && this.musicCtx && this.sfxCtx) return;
+    if (this.initialized && this.ctx && this.musicCtx && this.sfxCtx) {return;}
 
     try {
       const AudioContextClass =
@@ -64,7 +64,7 @@ class AudioManager {
   public async resumeContext() {
     this.ensureInit();
     const ctx = this.ctx;
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     await this.runAsync("resume audio context", async () => {
       if (ctx.state === "suspended") {
@@ -76,9 +76,9 @@ class AudioManager {
   public async playMusic(musicId: MusicId = "main-soundtrack") {
     await this.resumeContext();
     const musicCtx = this.musicCtx;
-    if (!musicCtx) return;
+    if (!musicCtx) {return;}
 
-    await this.runAsync(`play music \"${musicId}\"`, async () => {
+    await this.runAsync(`play music "${musicId}"`, async () => {
       if (musicCtx.getTrack() !== musicId) {
         await musicCtx.changeTrack(musicId);
       } else {
@@ -88,7 +88,7 @@ class AudioManager {
   }
 
   public pauseMusic() {
-    if (!this.initialized || !this.musicCtx) return;
+    if (!this.initialized || !this.musicCtx) {return;}
 
     this.runDeferred("pause music", this.musicCtx.pause());
   }
@@ -96,7 +96,7 @@ class AudioManager {
   public async resumeMusic() {
     await this.resumeContext();
     const musicCtx = this.musicCtx;
-    if (!musicCtx) return;
+    if (!musicCtx) {return;}
 
     await this.runAsync("resume music", async () => {
       await musicCtx.resume();
@@ -105,18 +105,18 @@ class AudioManager {
 
   public changeMusic(musicId: MusicId) {
     this.ensureInit();
-    if (!this.musicCtx) return;
+    if (!this.musicCtx) {return;}
 
-    this.runDeferred(`change music to \"${musicId}\"`, this.musicCtx.changeTrack(musicId));
+    this.runDeferred(`change music to "${musicId}"`, this.musicCtx.changeTrack(musicId));
   }
 
   public getMusicTrack() {
-    if (!this.musicCtx) return null;
+    if (!this.musicCtx) {return null;}
     return this.musicCtx.getTrack();
   }
 
   public getMusicVolume() {
-    if (!this.musicCtx) return 0;
+    if (!this.musicCtx) {return 0;}
     return this.musicCtx.getVolume();
   }
 
@@ -130,29 +130,29 @@ class AudioManager {
   public async playSFX(sfxId: SFXId) {
     await this.resumeContext();
     const sfxCtx = this.sfxCtx;
-    if (!sfxCtx) return;
+    if (!sfxCtx) {return;}
 
-    await this.runAsync(`play SFX \"${sfxId}\"`, async () => {
+    await this.runAsync(`play SFX "${sfxId}"`, async () => {
       await sfxCtx.play(sfxId);
     });
   }
 
   public loadSFX(sfxId: SFXId) {
     this.ensureInit();
-    if (!this.sfxCtx) return;
+    if (!this.sfxCtx) {return;}
 
-    this.runDeferred(`preload SFX \"${sfxId}\"`, this.sfxCtx.load(sfxId));
+    this.runDeferred(`preload SFX "${sfxId}"`, this.sfxCtx.load(sfxId));
   }
 
   public loadMultipleSFX(sfxIds: SFXId[]) {
     this.ensureInit();
-    if (!this.sfxCtx) return;
+    if (!this.sfxCtx) {return;}
 
     this.runDeferred("preload multiple SFX", this.sfxCtx.loadMultiple(sfxIds));
   }
 
   public getSFXVolume() {
-    if (!this.sfxCtx) return 0;
+    if (!this.sfxCtx) {return 0;}
     return this.sfxCtx.getVolume();
   }
 

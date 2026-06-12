@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { clampVolume, BaseAudioContext, DEFAULT_FADE_DURATION } from "./base";
 
 describe("clampVolume", () => {

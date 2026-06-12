@@ -16,7 +16,7 @@ export function getEmptyCells(grid: Grid): Cell[] {
   const cells: Cell[] = [];
   for (let row = 0; row < GRID_SIZE; row++) {
     for (let col = 0; col < GRID_SIZE; col++) {
-      if (grid[row][col] === 0) cells.push({ row, col });
+      if (grid[row][col] === 0) {cells.push({ row, col });}
     }
   }
   return cells;
@@ -27,7 +27,7 @@ export function getEmptyCells(grid: Grid): Cell[] {
  */
 export function addRandomTile(grid: Grid): Grid {
   const empty = getEmptyCells(grid);
-  if (empty.length === 0) return grid;
+  if (empty.length === 0) {return grid;}
 
   const newGrid = grid.map((row) => [...row]);
   const { row, col } = empty[Math.floor(Math.random() * empty.length)];
@@ -165,7 +165,7 @@ export function hasAvailableMoves(grid: Grid): boolean {
   // Check for any empty cell
   for (let r = 0; r < GRID_SIZE; r++) {
     for (let c = 0; c < GRID_SIZE; c++) {
-      if (grid[r][c] === 0) return true;
+      if (grid[r][c] === 0) {return true;}
     }
   }
 
@@ -173,8 +173,8 @@ export function hasAvailableMoves(grid: Grid): boolean {
   for (let r = 0; r < GRID_SIZE; r++) {
     for (let c = 0; c < GRID_SIZE; c++) {
       const val = grid[r][c];
-      if (c + 1 < GRID_SIZE && grid[r][c + 1] === val) return true;
-      if (r + 1 < GRID_SIZE && grid[r + 1][c] === val) return true;
+      if (c + 1 < GRID_SIZE && grid[r][c + 1] === val) {return true;}
+      if (r + 1 < GRID_SIZE && grid[r + 1][c] === val) {return true;}
     }
   }
 

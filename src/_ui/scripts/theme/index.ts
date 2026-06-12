@@ -1,9 +1,9 @@
 export { VALID_THEMES, THEME_VARIABLES, THEMES, isValidTheme } from "./data";
 export type { Theme, ThemeVariable } from "./data";
 
+import { createStore } from "../../../_core/storage";
 import { VALID_THEMES, THEME_VARIABLES, THEMES, isValidTheme } from "./data";
 import type { Theme, ThemeVariable } from "./data";
-import { createStore } from "../../../_core/storage";
 
 type ThemeSchema = {
   theme: string;
@@ -24,7 +24,7 @@ class ThemeManager {
 
   private getStoredTheme(): Theme {
     const stored = themeStore.get("theme");
-    if (isValidTheme(stored)) return stored;
+    if (isValidTheme(stored)) {return stored;}
 
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
@@ -57,7 +57,7 @@ class ThemeManager {
   }
 
   public init() {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {return;}
 
     this.isInitialized = true;
     this.setTheme(this.currentTheme);

@@ -21,7 +21,7 @@ export class GameStoreImpl<T extends { [key: string]: unknown }> implements Game
   get<K extends keyof T & string>(key: K): T[K] | null {
     try {
       const raw = localStorage.getItem(buildKey(this.namespace, key));
-      if (raw === null) return null;
+      if (raw === null) {return null;}
       return JSON.parse(raw) as T[K];
     } catch (error) {
       console.warn(`[Storage] Failed to read "${this.namespace}:${key}":`, error);

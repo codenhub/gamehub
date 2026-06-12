@@ -1,8 +1,8 @@
 export type { GameStore } from "./storage-types";
 export { GameStoreImpl } from "./game-store";
 
-import type { GameStore } from "./storage-types";
 import { GameStoreImpl } from "./game-store";
+import type { GameStore } from "./storage-types";
 
 /**
  * Factory for creating namespaced, typed stores.

@@ -1,9 +1,9 @@
 import AudioManager from "../../_core/audio";
 import { createStore } from "../../_core/storage";
-import ThemeManager, { THEMES, VALID_THEMES, isValidTheme } from "../scripts/theme";
 import I18n, { findLocale, isValidLocale, parseI18nValue } from "../scripts/i18n";
-import type { Theme } from "../scripts/theme";
 import type { Locale } from "../scripts/i18n";
+import ThemeManager, { THEMES, VALID_THEMES, isValidTheme } from "../scripts/theme";
+import type { Theme } from "../scripts/theme";
 import type { Slider } from "./slider";
 
 const DEFAULT_MUSIC_VOLUME = "50";
@@ -240,13 +240,13 @@ export class Header extends HTMLElement {
         "click",
         () => {
           const raw = btn.getAttribute("data-theme");
-          if (!isValidTheme(raw)) return;
+          if (!isValidTheme(raw)) {return;}
 
           ThemeManager.setTheme(raw);
           this.updateActiveThemeUI(raw);
 
           const menuToggle = this.querySelector(`#theme-menu-${this.instanceId}`) as HTMLInputElement;
-          if (menuToggle) menuToggle.checked = false;
+          if (menuToggle) {menuToggle.checked = false;}
         },
         { signal },
       );
@@ -257,13 +257,13 @@ export class Header extends HTMLElement {
         "click",
         async () => {
           const raw = btn.getAttribute("data-locale");
-          if (!isValidLocale(raw)) return;
+          if (!isValidLocale(raw)) {return;}
 
           try {
             await I18n.setLocale(raw);
 
             const menuToggle = this.querySelector(`#locale-menu-${this.instanceId}`) as HTMLInputElement;
-            if (menuToggle) menuToggle.checked = false;
+            if (menuToggle) {menuToggle.checked = false;}
           } catch (error) {
             console.error("[Header] Failed to set locale:", error);
           }
@@ -287,11 +287,11 @@ export class Header extends HTMLElement {
 
     // Close other menus when one opens
     menus.forEach(({ checkbox }) => {
-      if (!checkbox) return;
+      if (!checkbox) {return;}
       checkbox.addEventListener(
         "change",
         () => {
-          if (!checkbox.checked) return;
+          if (!checkbox.checked) {return;}
           menus.forEach((other) => {
             if (other.checkbox && other.checkbox !== checkbox) {
               other.checkbox.checked = false;

@@ -145,18 +145,18 @@ class I18n extends EventTarget {
     }
 
     for (const rawLang of navigator.languages) {
-      if (!rawLang) continue;
+      if (!rawLang) {continue;}
 
       const lang = rawLang.toLowerCase();
 
       // Exact match (e.g., "en-us" -> "en-US")
       const exactMatch = LOCALES_ID.find((id) => id.toLowerCase() === lang);
-      if (exactMatch) return exactMatch;
+      if (exactMatch) {return exactMatch;}
 
       // Partial match (e.g., "pt" -> "pt-BR")
       const baseLang = lang.split("-")[0];
       const partialMatch = LOCALES_ID.find((id) => id.toLowerCase().startsWith(baseLang));
-      if (partialMatch) return partialMatch as LocaleId;
+      if (partialMatch) {return partialMatch as LocaleId;}
     }
 
     return null;
@@ -164,7 +164,7 @@ class I18n extends EventTarget {
 
   private async fetchLocaleData(locale: LocaleId): Promise<Record<string, string>> {
     const path = findLocale(locale)?.path;
-    if (!path) return {};
+    if (!path) {return {};}
 
     if (this.cache.has(locale)) {
       return this.cache.get(locale)!;
@@ -272,7 +272,7 @@ class I18n extends EventTarget {
     this.currentLocale = locale;
     await this.loadLocale(locale);
 
-    if (this.currentLocale !== locale) return;
+    if (this.currentLocale !== locale) {return;}
 
     document.documentElement.lang = locale;
     i18nStore.set("locale", locale);

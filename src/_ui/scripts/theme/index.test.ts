@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { isValidTheme, VALID_THEMES, THEME_VARIABLES, THEMES } from "./data";
 
 describe("isValidTheme", () => {
@@ -48,7 +49,7 @@ describe("THEMES completeness", () => {
       const variables = THEMES[theme];
 
       (Object.entries(variables) as [string, string][]).forEach(([key, value]) => {
-        if (key === "--logo-filter") return;
+        if (key === "--logo-filter") {return;}
         expect(varPattern.test(value), `Theme "${theme}", variable "${key}" has invalid value: "${value}"`).toBe(true);
       });
     });

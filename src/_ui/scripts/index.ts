@@ -3,9 +3,8 @@
  * Handles theme initialization and global event listeners for audio activation.
  */
 import AudioManager from "../../_core/audio";
-
-import ThemeManager from "./theme";
 import I18n from "./i18n";
+import ThemeManager from "./theme";
 
 ThemeManager.init();
 void I18n.init().catch((error) => {

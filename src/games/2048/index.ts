@@ -11,16 +11,16 @@ function create2048SwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
 
   return {
     touchstart: (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
+      if (e.cancelable) {e.preventDefault();}
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
     },
     touchmove: (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
+      if (e.cancelable) {e.preventDefault();}
     },
     touchend: (e: TouchEvent) => {
-      if (deps.getState() !== "playing") return;
+      if (deps.getState() !== "playing") {return;}
 
       const touch = e.changedTouches[0];
       const dx = touch.clientX - touchStartX;
@@ -29,7 +29,7 @@ function create2048SwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
       const absDx = Math.abs(dx);
       const absDy = Math.abs(dy);
 
-      if (Math.max(absDx, absDy) < MIN_SWIPE_DISTANCE) return;
+      if (Math.max(absDx, absDy) < MIN_SWIPE_DISTANCE) {return;}
 
       let direction: Direction;
       if (absDx > absDy) {

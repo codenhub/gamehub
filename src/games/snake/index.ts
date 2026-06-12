@@ -10,16 +10,16 @@ function createSnakeSwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
 
   return {
     touchstart: (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
+      if (e.cancelable) {e.preventDefault();}
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
     },
     touchmove: (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
+      if (e.cancelable) {e.preventDefault();}
     },
     touchend: (e: TouchEvent) => {
-      if (deps.getState() !== "playing") return;
+      if (deps.getState() !== "playing") {return;}
 
       const touch = e.changedTouches[0];
       const dx = touch.clientX - touchStartX;
@@ -28,14 +28,14 @@ function createSnakeSwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
       const absDx = Math.abs(dx);
       const absDy = Math.abs(dy);
 
-      if (Math.max(absDx, absDy) < MIN_SWIPE_DISTANCE) return;
+      if (Math.max(absDx, absDy) < MIN_SWIPE_DISTANCE) {return;}
 
       if (absDx > absDy) {
-        if (dx > 0) snakeGame.moveRight();
-        else snakeGame.moveLeft();
+        if (dx > 0) {snakeGame.moveRight();}
+        else {snakeGame.moveLeft();}
       } else {
-        if (dy > 0) snakeGame.moveDown();
-        else snakeGame.moveUp();
+        if (dy > 0) {snakeGame.moveDown();}
+        else {snakeGame.moveUp();}
       }
     },
   };

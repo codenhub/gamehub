@@ -2,26 +2,26 @@
 
 @layer components {
   .game-card {
-    @apply bg-border pixel-corner-xl-6 p-1 rounded-lg cur-pointer;
+    @apply bg-border pixel-corner-xl-6 cur-pointer rounded-lg p-1;
 
     & .card-container {
-      @apply relative pixel-corner-xl-6 rounded-md h-48 overflow-hidden;
+      @apply pixel-corner-xl-6 relative h-48 overflow-hidden rounded-md;
 
       & img {
-        @apply rounded-md object-cover size-full transition duration-800;
+        @apply size-full rounded-md object-cover transition duration-800;
       }
 
       & h4 {
-        @apply absolute z-2 left-4 bottom-2 text-neutral-50 transition-all duration-400;
+        @apply absolute bottom-2 left-4 z-2 text-neutral-50 transition-all duration-400;
       }
 
       &::before {
-        @apply absolute z-2 left-4 bottom-4 h-1 w-0 bg-neutral-50 transition-all duration-400;
+        @apply absolute bottom-4 left-4 z-2 h-1 w-0 bg-neutral-50 transition-all duration-400;
         content: "";
       }
 
       &::after {
-        @apply absolute -bottom-2 -left-2 w-full h-20 z-1 blur-xs;
+        @apply absolute -bottom-2 -left-2 z-1 h-20 w-full blur-xs;
         content: "";
         background: linear-gradient(10deg, var(--color-neutral-950) 0%, transparent 80%, transparent 100%);
       }

@@ -1,6 +1,8 @@
-import { MusicId, MusicList } from "./music";
-import { SFXId, SFXList } from "./sfx";
 import { BaseAudioContext, DEFAULT_FADE_DURATION } from "./base";
+import type { MusicId} from "./music";
+import { MusicList } from "./music";
+import type { SFXId} from "./sfx";
+import { SFXList } from "./sfx";
 
 const DEFAULT_MUSIC_VOLUME = 0.5;
 const DEFAULT_SFX_VOLUME = 0.75;
@@ -33,10 +35,10 @@ export class MusicContext extends BaseAudioContext<MusicId> {
   }
 
   public async play(ease: boolean = true) {
-    if (this.playing && this.source) return;
+    if (this.playing && this.source) {return;}
 
     const buffer = this.getBuffer(this.currentTrack) || (await this.load(this.currentTrack));
-    if (!buffer) return;
+    if (!buffer) {return;}
 
     this.stopSource();
 
@@ -74,7 +76,7 @@ export class MusicContext extends BaseAudioContext<MusicId> {
   }
 
   public async pause(ease: boolean = true) {
-    if (!this.playing || !this.source) return;
+    if (!this.playing || !this.source) {return;}
 
     this.playing = false;
     const currentTime = this.ctx.currentTime;
@@ -100,12 +102,12 @@ export class MusicContext extends BaseAudioContext<MusicId> {
   }
 
   public async resume(ease: boolean = true) {
-    if (this.playing) return;
+    if (this.playing) {return;}
     await this.play(ease);
   }
 
   public async changeTrack(id: MusicId, ease: boolean = true) {
-    if (this.isChangingTrack) return;
+    if (this.isChangingTrack) {return;}
     this.isChangingTrack = true;
 
     try {
@@ -146,7 +148,7 @@ export class SFXContext extends BaseAudioContext<SFXId> {
 
   public async play(id: SFXId) {
     const buffer = this.getBuffer(id) || (await this.load(id));
-    if (!buffer) return;
+    if (!buffer) {return;}
 
     const source = this.ctx.createBufferSource();
     source.buffer = buffer;

@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+import { DEFAULT_FADE_DURATION } from "./base";
 import { MusicContext, SFXContext } from "./context";
 import { MusicList } from "./music";
 import { SFXList } from "./sfx";
-import { DEFAULT_FADE_DURATION } from "./base";
 
 describe("MusicContext", () => {
   let mockAudioContext: any;

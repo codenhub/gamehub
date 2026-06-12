@@ -1,5 +1,4 @@
 import type { Point } from "../common/types";
-
 import { GAME_CONFIG } from "./constants";
 
 export const TILE_SIZE = GAME_CONFIG.tileSize;
@@ -9,8 +8,8 @@ export const TILE_SIZE = GAME_CONFIG.tileSize;
  * Prevents the snake from reversing into itself.
  */
 export function isReverseDirection(current: Point, next: Point): boolean {
-  if (next.x !== 0 && current.x !== 0) return true;
-  if (next.y !== 0 && current.y !== 0) return true;
+  if (next.x !== 0 && current.x !== 0) {return true;}
+  if (next.y !== 0 && current.y !== 0) {return true;}
   return false;
 }
 

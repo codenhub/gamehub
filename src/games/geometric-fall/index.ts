@@ -13,7 +13,7 @@ function createFallSwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
 
   return {
     touchstart: (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
+      if (e.cancelable) {e.preventDefault();}
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
@@ -22,8 +22,8 @@ function createFallSwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
       isSwipe = false;
     },
     touchmove: (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-      if (deps.getState() !== "playing") return;
+      if (e.cancelable) {e.preventDefault();}
+      if (deps.getState() !== "playing") {return;}
 
       const touch = e.touches[0];
       const currentX = touch.clientX;
@@ -39,8 +39,8 @@ function createFallSwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
       if (Math.abs(dx) >= SWIPE_THRESHOLD) {
         const moves = Math.floor(Math.abs(dx) / SWIPE_THRESHOLD);
         for (let i = 0; i < moves; i++) {
-          if (dx > 0) fallGame.moveRight();
-          else fallGame.moveLeft();
+          if (dx > 0) {fallGame.moveRight();}
+          else {fallGame.moveLeft();}
         }
         lastTouchX += Math.sign(dx) * moves * SWIPE_THRESHOLD;
       }
@@ -54,8 +54,8 @@ function createFallSwipeHandlers(deps: SwipeHandlerDeps): SwipeHandlers {
       }
     },
     touchend: (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault();
-      if (deps.getState() !== "playing") return;
+      if (e.cancelable) {e.preventDefault();}
+      if (deps.getState() !== "playing") {return;}
 
       if (!isSwipe) {
         fallGame.rotateRight();

@@ -64,7 +64,7 @@ export class Slider extends HTMLElement {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    if (oldValue === newValue || !this.fillEl) return;
+    if (oldValue === newValue || !this.fillEl) {return;}
 
     switch (name) {
       case "value":
@@ -84,7 +84,7 @@ export class Slider extends HTMLElement {
   }
 
   private updateVisuals(): void {
-    if (!this.fillEl || !this.thumbEl) return;
+    if (!this.fillEl || !this.thumbEl) {return;}
     const pct = ((this.currentValue - this.min) / (this.max - this.min)) * 100;
     this.fillEl.style.width = `${pct}%`;
     this.thumbEl.style.left = `${pct}%`;
@@ -108,12 +108,12 @@ export class Slider extends HTMLElement {
   };
 
   private handlePointerMove = (event: PointerEvent): void => {
-    if (!this.isDragging) return;
+    if (!this.isDragging) {return;}
     this.updateValueFromPointer(event.clientX);
   };
 
   private handlePointerUp = (event: PointerEvent): void => {
-    if (!this.isDragging) return;
+    if (!this.isDragging) {return;}
     this.isDragging = false;
     this.releasePointerCapture(event.pointerId);
     this.dispatchEvent(new Event("change", { bubbles: true }));

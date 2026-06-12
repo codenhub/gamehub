@@ -11,7 +11,7 @@ class Icon extends HTMLElement {
   private div: HTMLDivElement | null = null;
 
   private handleThemeChange = () => {
-    if (!this.div) return;
+    if (!this.div) {return;}
     const color = this.getAttribute("color");
     const parentColor = this.parentElement ? window.getComputedStyle(this.parentElement).color : "currentColor";
     this.div.style.backgroundColor = color || parentColor;
@@ -48,8 +48,8 @@ class Icon extends HTMLElement {
       div.style.width = "1rem";
       div.style.height = "1rem";
     } else {
-      if (width) div.style.width = width;
-      if (height) div.style.height = height;
+      if (width) {div.style.width = width;}
+      if (height) {div.style.height = height;}
       if (!width || !height) {
         div.style.aspectRatio = "1 / 1";
       }

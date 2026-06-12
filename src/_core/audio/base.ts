@@ -55,7 +55,7 @@ export abstract class BaseAudioContext<T extends string> {
 
   public async load(id: T, url: string): Promise<AudioBuffer> {
     const existingBuffer = this.getBuffer(id);
-    if (existingBuffer) return existingBuffer;
+    if (existingBuffer) {return existingBuffer;}
 
     if (this.loadingPromises.has(id)) {
       return this.loadingPromises.get(id)!;

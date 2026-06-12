@@ -1,7 +1,9 @@
 import { readdirSync, existsSync } from "fs";
 import path from "path";
-import { defineConfig } from "vite";
+
 import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+
 import { addLoaderPlugin, deferCssPlugin } from "./plugins";
 
 /**
@@ -10,7 +12,7 @@ import { addLoaderPlugin, deferCssPlugin } from "./plugins";
  */
 function discoverGameEntries(): Record<string, string> {
   const gamesDir = path.resolve(__dirname, "src/games");
-  if (!existsSync(gamesDir)) return {};
+  if (!existsSync(gamesDir)) {return {};}
 
   return Object.fromEntries(
     readdirSync(gamesDir, { withFileTypes: true })

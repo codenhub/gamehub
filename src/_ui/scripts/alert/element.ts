@@ -1,4 +1,3 @@
-import type { AlertOptions } from "./index";
 import {
   ALERT_COLORS,
   ALERT_CONTAINER_COLORS,
@@ -7,6 +6,7 @@ import {
   DEFAULT_TYPE,
   INNER_BASE_CLASSES,
 } from "./constants";
+import type { AlertOptions } from "./index";
 
 function createIconElement(src: string): HTMLImageElement {
   const img = document.createElement("img");

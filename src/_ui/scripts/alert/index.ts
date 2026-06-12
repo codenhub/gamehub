@@ -1,7 +1,7 @@
+import { animateIn, animateOut } from "./animations";
 import { ALERT_ICONS, CLOSE_ICON_SRC, DEFAULT_DURATION, MAX_ALERTS } from "./constants";
 import { getOrCreateContainer } from "./container";
 import { createAlertElement } from "./element";
-import { animateIn, animateOut } from "./animations";
 
 type AlertType = "success" | "error" | "warning" | "info";
 interface AlertOptions {
@@ -19,7 +19,7 @@ interface AlertOptions {
 const dismissing = new WeakSet<HTMLDivElement>();
 
 function preloadIcons(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {return;}
 
   const loadImages = () => {
     Object.values(ALERT_ICONS).forEach((src) => {
@@ -43,7 +43,7 @@ preloadIcons();
 function removeAlert(alertElement: HTMLDivElement): void {
   const container = getOrCreateContainer();
 
-  if (!container.contains(alertElement) || dismissing.has(alertElement)) return;
+  if (!container.contains(alertElement) || dismissing.has(alertElement)) {return;}
 
   dismissing.add(alertElement);
 

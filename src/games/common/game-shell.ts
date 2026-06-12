@@ -93,13 +93,13 @@ function getElement<T extends HTMLElement>(id: string): T | null {
 }
 
 function show(el: HTMLElement | null) {
-  if (!el) return;
+  if (!el) {return;}
   el.classList.remove("hidden");
   el.classList.add("flex");
 }
 
 function hide(el: HTMLElement | null) {
-  if (!el) return;
+  if (!el) {return;}
   el.classList.add("hidden");
   el.classList.remove("flex");
 }
@@ -138,15 +138,15 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
 
     const callbacks: GameCallbacks = {
       onScoreUpdate: (score, highScore) => {
-        if (scoreEl) scoreEl.innerText = score.toString();
-        if (highScoreEl) highScoreEl.innerText = highScore.toString();
+        if (scoreEl) {scoreEl.innerText = score.toString();}
+        if (highScoreEl) {highScoreEl.innerText = highScore.toString();}
       },
       onGameOver: (finalScore) => {
-        if (finalScoreEl) finalScoreEl.innerText = finalScore.toString();
+        if (finalScoreEl) {finalScoreEl.innerText = finalScore.toString();}
         setGameOverState();
       },
       onGameWin: (finalScore) => {
-        if (winScoreEl) winScoreEl.innerText = finalScore.toString();
+        if (winScoreEl) {winScoreEl.innerText = finalScore.toString();}
         setWinState();
       },
     };
@@ -179,21 +179,21 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
     };
 
     const setPausedState = () => {
-      if (!canPause) return;
+      if (!canPause) {return;}
       appState = "paused";
       (game as unknown as { pause?: () => void }).pause?.();
 
-      if (playBtn) playBtn.classList.remove("hidden");
-      if (pauseBtn) pauseBtn.classList.add("hidden");
+      if (playBtn) {playBtn.classList.remove("hidden");}
+      if (pauseBtn) {pauseBtn.classList.add("hidden");}
     };
 
     const setStoppedState = () => {
       appState = "stopped";
       (game as unknown as { stop: () => void }).stop();
 
-      if (playBtn) playBtn.classList.remove("hidden");
-      if (pauseBtn) pauseBtn.classList.add("hidden");
-      if (stopBtn) stopBtn.classList.add("hidden");
+      if (playBtn) {playBtn.classList.remove("hidden");}
+      if (pauseBtn) {pauseBtn.classList.add("hidden");}
+      if (stopBtn) {stopBtn.classList.add("hidden");}
 
       show(startScreen);
       hide(gameOverScreen);
@@ -203,9 +203,9 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
     const setGameOverState = () => {
       appState = "gameover";
 
-      if (playBtn) playBtn.classList.remove("hidden");
-      if (pauseBtn) pauseBtn.classList.add("hidden");
-      if (stopBtn) stopBtn.classList.add("hidden");
+      if (playBtn) {playBtn.classList.remove("hidden");}
+      if (pauseBtn) {pauseBtn.classList.add("hidden");}
+      if (stopBtn) {stopBtn.classList.add("hidden");}
 
       show(gameOverScreen);
     };
@@ -213,9 +213,9 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
     const setWinState = () => {
       appState = "win";
 
-      if (playBtn) playBtn.classList.remove("hidden");
-      if (pauseBtn) pauseBtn.classList.add("hidden");
-      if (stopBtn) stopBtn.classList.add("hidden");
+      if (playBtn) {playBtn.classList.remove("hidden");}
+      if (pauseBtn) {pauseBtn.classList.add("hidden");}
+      if (stopBtn) {stopBtn.classList.add("hidden");}
 
       show(winScreen);
     };
@@ -229,22 +229,22 @@ export function createGameShell<TGame>(config: GameShellConfig<TGame>): void {
 
     const controls = config.controls ?? [];
     controls.forEach(({ selector, action }) => {
-      if (!selector) return;
+      if (!selector) {return;}
       document.querySelectorAll(selector).forEach((btn) => {
         btn.addEventListener("click", () => {
-          if (appState === "playing") action();
+          if (appState === "playing") {action();}
         });
       });
     });
 
     document.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        if (appState === "playing" && canPause) setPausedState();
-        else setPlayingState();
+        if (appState === "playing" && canPause) {setPausedState();}
+        else {setPlayingState();}
         return;
       }
 
-      if (appState !== "playing") return;
+      if (appState !== "playing") {return;}
 
       const matchValue = keyMatchMode === "code" ? e.code : e.key;
 

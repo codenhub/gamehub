@@ -63,7 +63,7 @@ export class SnakeGame implements Game {
 
   private readonly handleResize = () => {
     const hasCanvasResized = this.resizeCanvas();
-    if (!hasCanvasResized) return;
+    if (!hasCanvasResized) {return;}
 
     this.syncStateWithCanvasBounds();
     this.draw();
@@ -168,7 +168,7 @@ export class SnakeGame implements Game {
   }
 
   public start() {
-    if (this.animationId) cancelAnimationFrame(this.animationId);
+    if (this.animationId) {cancelAnimationFrame(this.animationId);}
 
     // Reset State (keep high score)
     const currentHighScore = this.state.highScore;
@@ -233,10 +233,10 @@ export class SnakeGame implements Game {
   }
 
   public queueMove(dx: number, dy: number) {
-    if (!this.state.isRunning || this.state.isPaused) return;
+    if (!this.state.isRunning || this.state.isPaused) {return;}
 
     const next = { x: dx, y: dy };
-    if (isReverseDirection(this.state.direction, next)) return;
+    if (isReverseDirection(this.state.direction, next)) {return;}
 
     this.state.nextDirection = next;
   }
@@ -255,12 +255,12 @@ export class SnakeGame implements Game {
   }
 
   private gameLoop = (currentTime: number = 0) => {
-    if (!this.state.isRunning) return;
+    if (!this.state.isRunning) {return;}
 
     this.animationId = requestAnimationFrame(this.gameLoop);
 
     const secondsSinceLastRender = (currentTime - this.lastRenderTime) / 1000;
-    if (secondsSinceLastRender < 1 / GAME_CONFIG.defaultFps) return;
+    if (secondsSinceLastRender < 1 / GAME_CONFIG.defaultFps) {return;}
 
     this.lastRenderTime = currentTime;
 
@@ -273,7 +273,7 @@ export class SnakeGame implements Game {
   private update() {
     this.state.direction = this.state.nextDirection;
 
-    if (this.state.direction.x === 0 && this.state.direction.y === 0) return;
+    if (this.state.direction.x === 0 && this.state.direction.y === 0) {return;}
 
     const head = moveHead({
       head: this.state.snake[0],

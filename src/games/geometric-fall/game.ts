@@ -1,3 +1,7 @@
+import AudioManager from "../../_core/audio";
+import { createStore } from "../../_core/storage";
+import ThemeManager from "../../_ui/scripts/theme";
+import type { Game, GameCallbacks } from "../common/game-types";
 import {
   type PieceMatrix,
   ROWS,
@@ -10,10 +14,6 @@ import {
   createEmptyGrid,
   setGridDimensions,
 } from "./logic";
-import AudioManager from "../../_core/audio";
-import { createStore } from "../../_core/storage";
-import ThemeManager from "../../_ui/scripts/theme";
-import type { Game, GameCallbacks } from "../common/game-types";
 
 AudioManager.loadMultipleSFX(["collect", "hit", "place", "fail"]);
 
@@ -66,7 +66,7 @@ export class GeometricFallGame implements Game {
     this.callbacks = callbacks;
 
     const context = this.canvas.getContext("2d");
-    if (!context) throw new Error("Failed to get 2D context");
+    if (!context) {throw new Error("Failed to get 2D context");}
     this.ctx = context;
 
     this.highScore = store.get("highScore") ?? 0;
@@ -92,7 +92,7 @@ export class GeometricFallGame implements Game {
 
   private calculateDimensions() {
     const container = this.canvas.parentElement;
-    if (!container) return;
+    if (!container) {return;}
 
     const style = getComputedStyle(container);
     const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
@@ -101,7 +101,7 @@ export class GeometricFallGame implements Game {
     const containerHeight = container.clientHeight - paddingY;
 
     this.blockSize = Math.floor(containerWidth / TARGET_COLS);
-    if (this.blockSize < 1) this.blockSize = 1;
+    if (this.blockSize < 1) {this.blockSize = 1;}
 
     const cols = TARGET_COLS;
     const rows = Math.floor(containerHeight / this.blockSize);
@@ -120,7 +120,7 @@ export class GeometricFallGame implements Game {
 
   private setupResizeObserver() {
     const container = this.canvas.parentElement;
-    if (!container) return;
+    if (!container) {return;}
 
     this.resizeObserver = new ResizeObserver(() => {
       const oldCols = COLS;
@@ -135,7 +135,7 @@ export class GeometricFallGame implements Game {
           const newY = y - yOffset;
           if (newY >= 0 && newY < ROWS) {
             for (let x = 0; x < Math.min(oldCols, COLS); x++) {
-              if (this.grid[y]?.[x]) newGrid[newY][x] = this.grid[y][x];
+              if (this.grid[y]?.[x]) {newGrid[newY][x] = this.grid[y][x];}
             }
           }
         }
@@ -149,7 +149,7 @@ export class GeometricFallGame implements Game {
       }
 
       this.draw();
-      if (this.nextPiece && this.previewCtxs.length > 0) this.drawNextPiece();
+      if (this.nextPiece && this.previewCtxs.length > 0) {this.drawNextPiece();}
     });
 
     this.resizeObserver.observe(container);
@@ -157,7 +157,7 @@ export class GeometricFallGame implements Game {
 
   private handleThemeChanged = () => {
     this.draw();
-    if (this.nextPiece && this.previewCtxs.length > 0) this.drawNextPiece();
+    if (this.nextPiece && this.previewCtxs.length > 0) {this.drawNextPiece();}
   };
 
   private setupThemeListener() {
@@ -191,7 +191,7 @@ export class GeometricFallGame implements Game {
   }
 
   private getNextPieceFromBag(): PieceMatrix {
-    if (this.bag.length === 0) this.refillBag();
+    if (this.bag.length === 0) {this.refillBag();}
     const key = this.bag.pop()!;
     return TETROMINOES[key];
   }
@@ -206,7 +206,7 @@ export class GeometricFallGame implements Game {
     this.currentX = Math.floor(COLS / 2) - Math.floor(this.currentPiece[0].length / 2);
     this.currentY = 0;
 
-    if (this.previewCtxs.length > 0) this.drawNextPiece();
+    if (this.previewCtxs.length > 0) {this.drawNextPiece();}
   }
 
   private drawNextPiece() {
@@ -445,14 +445,14 @@ export class GeometricFallGame implements Game {
 
   public pause() {
     if (this.isPlaying) {
-      if (this.gameLoop) clearInterval(this.gameLoop);
+      if (this.gameLoop) {clearInterval(this.gameLoop);}
       this.gameLoop = null;
       this.isPlaying = false;
     }
   }
 
   public stop() {
-    if (this.gameLoop) clearInterval(this.gameLoop);
+    if (this.gameLoop) {clearInterval(this.gameLoop);}
     this.gameLoop = null;
     this.isPlaying = false;
     this.resetGame();
@@ -464,6 +464,6 @@ export class GeometricFallGame implements Game {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
-    if (this.gameLoop) clearInterval(this.gameLoop);
+    if (this.gameLoop) {clearInterval(this.gameLoop);}
   }
 }

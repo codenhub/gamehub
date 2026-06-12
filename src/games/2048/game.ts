@@ -115,10 +115,10 @@ export class Game2048 implements Game {
   }
 
   public move(direction: Direction) {
-    if (!this.state.isRunning) return;
+    if (!this.state.isRunning) {return;}
 
     const result = moveGrid(this.state.grid, direction);
-    if (!result.hasMoved) return;
+    if (!result.hasMoved) {return;}
 
     this.state.grid = result.grid;
     this.state.score += result.score;
