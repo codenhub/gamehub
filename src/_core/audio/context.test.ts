@@ -5,10 +5,50 @@ import { MusicContext, SFXContext } from "./context";
 import { MusicList } from "./music";
 import { SFXList } from "./sfx";
 
+interface MockGainNode {
+  connect: ReturnType<typeof vi.fn>;
+  gain: {
+    value: number;
+    cancelScheduledValues: ReturnType<typeof vi.fn>;
+    setValueAtTime: ReturnType<typeof vi.fn>;
+    linearRampToValueAtTime: ReturnType<typeof vi.fn>;
+  };
+}
+
+interface MockSFXGainNode {
+  connect: ReturnType<typeof vi.fn>;
+  gain: { value: number };
+}
+
+interface MockSourceNode {
+  buffer: AudioBuffer | null;
+  loop: boolean;
+  connect: ReturnType<typeof vi.fn>;
+  start: ReturnType<typeof vi.fn>;
+  stop: ReturnType<typeof vi.fn>;
+  disconnect: ReturnType<typeof vi.fn>;
+}
+
+interface MockSFXSourceNode {
+  buffer: AudioBuffer | null;
+  connect: ReturnType<typeof vi.fn>;
+  start: ReturnType<typeof vi.fn>;
+  disconnect: ReturnType<typeof vi.fn>;
+  onended: (() => void) | null;
+}
+
+interface MockAudioContext {
+  currentTime?: number;
+  destination: object;
+  createGain: ReturnType<typeof vi.fn>;
+  createBufferSource: ReturnType<typeof vi.fn>;
+  decodeAudioData: ReturnType<typeof vi.fn>;
+}
+
 describe("MusicContext", () => {
-  let mockAudioContext: any;
-  let mockGainNode: any;
-  let mockSourceNode: any;
+  let mockAudioContext: MockAudioContext & { currentTime: number };
+  let mockGainNode: MockGainNode;
+  let mockSourceNode: MockSourceNode;
   let musicContext: MusicContext;
 
   beforeEach(() => {
@@ -36,9 +76,9 @@ describe("MusicContext", () => {
     mockAudioContext = {
       currentTime: 10,
       destination: {},
-      createGain: vi.fn(() => mockGainNode),
-      createBufferSource: vi.fn(() => mockSourceNode),
-      decodeAudioData: vi.fn((buffer) => Promise.resolve({ mockedBuffer: true, buffer })),
+      createGain: vi.fn(() => mockGainNode as unknown as GainNode),
+      createBufferSource: vi.fn(() => mockSourceNode as unknown as AudioBufferSourceNode),
+      decodeAudioData: vi.fn((buffer: ArrayBuffer) => Promise.resolve({ mockedBuffer: true, buffer })),
     };
 
     globalThis.fetch = vi.fn(() =>
@@ -48,7 +88,7 @@ describe("MusicContext", () => {
       } as Response),
     );
 
-    musicContext = new MusicContext(mockAudioContext);
+    musicContext = new MusicContext(mockAudioContext as unknown as AudioContext);
   });
 
   afterEach(() => {
@@ -145,15 +185,15 @@ describe("MusicContext", () => {
   });
 
   it("should re-initialize safely without throwing", () => {
-    musicContext.init(mockAudioContext);
+    musicContext.init(mockAudioContext as unknown as AudioContext);
     expect(mockAudioContext.createGain).toHaveBeenCalledTimes(2);
   });
 });
 
 describe("SFXContext", () => {
-  let mockAudioContext: any;
-  let mockGainNode: any;
-  let mockSourceNode: any;
+  let mockAudioContext: MockAudioContext;
+  let mockGainNode: MockSFXGainNode;
+  let mockSourceNode: MockSFXSourceNode;
   let sfxContext: SFXContext;
 
   beforeEach(() => {
@@ -172,9 +212,9 @@ describe("SFXContext", () => {
 
     mockAudioContext = {
       destination: {},
-      createGain: vi.fn(() => mockGainNode),
-      createBufferSource: vi.fn(() => mockSourceNode),
-      decodeAudioData: vi.fn((buffer) => Promise.resolve({ mockedBuffer: true, buffer })),
+      createGain: vi.fn(() => mockGainNode as unknown as GainNode),
+      createBufferSource: vi.fn(() => mockSourceNode as unknown as AudioBufferSourceNode),
+      decodeAudioData: vi.fn((buffer: ArrayBuffer) => Promise.resolve({ mockedBuffer: true, buffer })),
     };
 
     globalThis.fetch = vi.fn(() =>
@@ -184,7 +224,7 @@ describe("SFXContext", () => {
       } as Response),
     );
 
-    sfxContext = new SFXContext(mockAudioContext);
+    sfxContext = new SFXContext(mockAudioContext as unknown as AudioContext);
   });
 
   it("should initialize with default sfx volume", () => {
@@ -212,6 +252,9 @@ describe("SFXContext", () => {
     expect(typeof mockSourceNode.onended).toBe("function");
 
     // Simulate playback end
+    if (!mockSourceNode.onended) {
+      throw new Error("Expected onended handler to be set");
+    }
     mockSourceNode.onended();
     expect(mockSourceNode.disconnect).toHaveBeenCalled();
   });

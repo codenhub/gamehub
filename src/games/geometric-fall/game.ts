@@ -51,7 +51,7 @@ export class GeometricFallGame implements Game {
   private gameLoop: ReturnType<typeof setInterval> | null = null;
   private isPlaying: boolean = false;
 
-  private nextPiece!: PieceMatrix;
+  private nextPiece: PieceMatrix | null = null;
   private previewCanvases: HTMLCanvasElement[] = [];
   private previewCtxs: CanvasRenderingContext2D[] = [];
   private readonly PREVIEW_COLS = 6;
@@ -172,7 +172,7 @@ export class GeometricFallGame implements Game {
     this.resetGrid();
     this.bag = [];
     this.score = 0;
-    this.nextPiece = null as any;
+    this.nextPiece = null;
     this.spawnPiece();
     this.updateScore();
   }
@@ -210,22 +210,25 @@ export class GeometricFallGame implements Game {
   }
 
   private drawNextPiece() {
+    const nextPiece = this.nextPiece;
+    if (!nextPiece) {return;}
+
     const colors = getColors();
     this.previewCtxs.forEach((pCtx, i) => {
       const pCanvas = this.previewCanvases[i];
       pCtx.fillStyle = colors.background;
       pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
 
-      const pieceWidth = this.nextPiece[0].length * this.previewBlockSize;
-      const pieceHeight = this.nextPiece.length * this.previewBlockSize;
+      const pieceWidth = nextPiece[0].length * this.previewBlockSize;
+      const pieceHeight = nextPiece.length * this.previewBlockSize;
       const updateX = (pCanvas.width - pieceWidth) / 2;
       const updateY = (pCanvas.height - pieceHeight) / 2;
 
       pCtx.fillStyle = colors.piece;
       pCtx.strokeStyle = colors.grid;
-      for (let y = 0; y < this.nextPiece.length; y++) {
-        for (let x = 0; x < this.nextPiece[y].length; x++) {
-          if (this.nextPiece[y][x]) {
+      for (let y = 0; y < nextPiece.length; y++) {
+        for (let x = 0; x < nextPiece[y].length; x++) {
+          if (nextPiece[y][x]) {
             pCtx.fillRect(
               updateX + x * this.previewBlockSize,
               updateY + y * this.previewBlockSize,

@@ -3,6 +3,30 @@ import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
 import { MusicContext, SFXContext } from "./context";
 import manager from "./index";
 
+interface MockAudioContext {
+  state: string;
+  resume: ReturnType<typeof vi.fn>;
+}
+
+interface MusicContextMock {
+  load: ReturnType<typeof vi.fn>;
+  play: ReturnType<typeof vi.fn>;
+  pause: ReturnType<typeof vi.fn>;
+  resume: ReturnType<typeof vi.fn>;
+  changeTrack: ReturnType<typeof vi.fn>;
+  getTrack: ReturnType<typeof vi.fn>;
+  getVolume: ReturnType<typeof vi.fn>;
+  setVolume: ReturnType<typeof vi.fn>;
+}
+
+interface SFXContextMock {
+  load: ReturnType<typeof vi.fn>;
+  loadMultiple: ReturnType<typeof vi.fn>;
+  play: ReturnType<typeof vi.fn>;
+  getVolume: ReturnType<typeof vi.fn>;
+  setVolume: ReturnType<typeof vi.fn>;
+}
+
 // We mock the methods of the contexts directly since they are singletons managed by index.ts
 vi.mock("./context", () => {
   return {
@@ -31,9 +55,9 @@ vi.mock("./context", () => {
 });
 
 describe("AudioManager", () => {
-  let mockAudioContextInstance: any;
-  let musicCtxMock: any;
-  let sfxCtxMock: any;
+  let mockAudioContextInstance: MockAudioContext;
+  let musicCtxMock: MusicContextMock;
+  let sfxCtxMock: SFXContextMock;
 
   beforeAll(async () => {
     mockAudioContextInstance = {
@@ -41,11 +65,14 @@ describe("AudioManager", () => {
       resume: vi.fn().mockResolvedValue(undefined),
     };
 
-    (globalThis as any).window = {
-      AudioContext: vi.fn().mockImplementation(function () {
-        return mockAudioContextInstance;
-      }),
-    };
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        AudioContext: vi.fn().mockImplementation(function () {
+          return mockAudioContextInstance;
+        }),
+      },
+    });
 
     // Suppress console.warn for error tests globally
     vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -53,8 +80,8 @@ describe("AudioManager", () => {
     // Force initialization so we can capture the mock instances
     await manager.resumeContext();
 
-    musicCtxMock = vi.mocked(MusicContext).mock.results[0]?.value;
-    sfxCtxMock = vi.mocked(SFXContext).mock.results[0]?.value;
+    musicCtxMock = vi.mocked(MusicContext).mock.results[0]?.value as MusicContextMock;
+    sfxCtxMock = vi.mocked(SFXContext).mock.results[0]?.value as SFXContextMock;
 
     if (!musicCtxMock) {
       throw new Error("MusicContext was not instantiated");

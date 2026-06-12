@@ -2,6 +2,23 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { clampVolume, BaseAudioContext, DEFAULT_FADE_DURATION } from "./base";
 
+interface MockGainNode {
+  connect: ReturnType<typeof vi.fn>;
+  gain: {
+    value: number;
+    cancelScheduledValues: ReturnType<typeof vi.fn>;
+    setValueAtTime: ReturnType<typeof vi.fn>;
+    linearRampToValueAtTime: ReturnType<typeof vi.fn>;
+  };
+}
+
+interface MockAudioContext {
+  currentTime: number;
+  destination: object;
+  createGain: ReturnType<typeof vi.fn>;
+  decodeAudioData?: ReturnType<typeof vi.fn>;
+}
+
 describe("clampVolume", () => {
   it("should return value within range unchanged", () => {
     expect(clampVolume(0.5)).toBe(0.5);
@@ -27,8 +44,8 @@ class TestAudioContext extends BaseAudioContext<string> {
 }
 
 describe("BaseAudioContext", () => {
-  let mockAudioContext: any;
-  let mockGainNode: any;
+  let mockAudioContext: MockAudioContext;
+  let mockGainNode: MockGainNode;
   let testContext: TestAudioContext;
 
   beforeEach(() => {
@@ -45,11 +62,11 @@ describe("BaseAudioContext", () => {
     mockAudioContext = {
       currentTime: 10,
       destination: {},
-      createGain: vi.fn(() => mockGainNode),
-      decodeAudioData: vi.fn((buffer) => Promise.resolve({ mockedBuffer: true, buffer })),
+      createGain: vi.fn(() => mockGainNode as unknown as GainNode),
+      decodeAudioData: vi.fn((buffer: ArrayBuffer) => Promise.resolve({ mockedBuffer: true, buffer })),
     };
 
-    testContext = new TestAudioContext(mockAudioContext, 0.5);
+    testContext = new TestAudioContext(mockAudioContext as unknown as AudioContext, 0.5);
 
     // Mock fetch globally for load tests
     globalThis.fetch = vi.fn(() =>
@@ -74,10 +91,10 @@ describe("BaseAudioContext", () => {
     };
     const newMockAudioContext = {
       destination: {},
-      createGain: vi.fn(() => newMockGainNode),
-    } as any;
+      createGain: vi.fn(() => newMockGainNode as unknown as GainNode),
+    };
 
-    testContext.init(newMockAudioContext);
+    testContext.init(newMockAudioContext as unknown as AudioContext);
     expect(newMockAudioContext.createGain).toHaveBeenCalled();
     expect(newMockGainNode.connect).toHaveBeenCalledWith(newMockAudioContext.destination);
     expect(newMockGainNode.gain.value).toBe(0.5); // should preserve volume
